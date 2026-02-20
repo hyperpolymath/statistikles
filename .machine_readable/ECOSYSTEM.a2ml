@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+#
+# ECOSYSTEM.a2ml — Project ecosystem position
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-02-20"
+
+[project]
+name = "StatistEase"
+purpose = "Neurosymbolic statistical analysis — LLMs route, Julia computes, nothing is fabricated"
+role = "application"
+
+[position-in-ecosystem]
+tier = "1"
+domain = "neurosymbolic-computing"
+classification = "Kautz Type 1 — Neural | Symbolic"
+
+[related-projects]
+projects = [
+  { name = "echidna", relationship = "integration", note = "Proof verification via GraphQL — explain_that/prove_that functions" },
+  { name = "hypatia", relationship = "integration", note = "Neurosymbolic CI/CD scanning" },
+  { name = "verisimdb", relationship = "data-source", note = "Vulnerability and verification data" },
+  { name = "panic-attacker", relationship = "tooling", note = "Security scanning of statistease itself" },
+  { name = "gitbot-fleet", relationship = "automation", note = "Bot orchestration for CI/CD" },
+  { name = "eclexia", relationship = "sibling", note = "Programming language with shadow pricing — parallel neurosymbolic approach" },
+]
+
+[integration-points]
+integrations = [
+  { system = "LM Studio", direction = "outbound", protocol = "OpenAI-compatible HTTP API", port = 1234 },
+  { system = "echidna", direction = "outbound", protocol = "GraphQL", note = "For explain_that/prove_that verification" },
+  { system = "gitbot-fleet", direction = "outbound", protocol = "repository_dispatch" },
+  { system = "hypatia", direction = "inbound", protocol = "CI workflow" },
+]
+
+[technology-stack]
+primary-language = "Julia"
+computation-engine = "Julia Statistics/LinearAlgebra/Distributions"
+neural-interface = "LM Studio (OpenAI-compatible function calling)"
+output-formats = ["ASCII tables", "ASCII graphs", "CSV", "JSON", "text reports"]

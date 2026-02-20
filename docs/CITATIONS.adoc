@@ -1,0 +1,36 @@
+= StatistEase - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{StatistEase_2026,
+  author = {Jewell, Jonathan},
+  title = {StatistEase},
+  year = {2026},
+  url = {https://github.com/hyperpolymath/StatistEase},
+  license = {PMPL-1.0-or-later}
+}
+----
+
+== Harvard Style
+
+Jewell, JDAJ (2026) _StatistEase_ [Computer software]. Available at: https://github.com/hyperpolymath/StatistEase
+
+== OSCOLA
+
+Jonathan D.A. Jewell, 'StatistEase' (2026) <https://github.com/hyperpolymath/StatistEase>
+
+== MLA
+
+Jewell, Jonathan "StatistEase." 2026, github.com/hyperpolymath/StatistEase.
+
+== APA 7
+
+Jewell, JDAJ (2026). _StatistEase_ [Computer software]. GitHub. https://github.com/hyperpolymath/StatistEase
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

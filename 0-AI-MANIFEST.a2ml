@@ -1,0 +1,116 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# ⚠️ STOP - CRITICAL READING REQUIRED
+
+**THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
+
+## WHAT IS THIS?
+
+This is the AI manifest for **StatistEase** — a neurosymbolic statistical
+analysis assistant. Julia performs ALL computation. LLMs perform ONLY natural
+language routing and interpretation.
+
+## ⚠️ CRITICAL INVARIANT: THE MOLLOCK RULE
+
+**NO STATISTICAL VALUE MAY EVER BE PRODUCED BY NEURAL INFERENCE.**
+
+Every number returned to the user MUST originate from a verified Julia function.
+If an LLM produces a number, it is a **mollock** — a plausible-sounding
+fabrication. This project exists to prevent mollocks.
+
+The architecture is Kautz Type 1 neurosymbolic:
+- Neural (LLM): Natural language understanding and generation ONLY
+- Symbolic (Julia): ALL mathematical and statistical computation
+
+## CANONICAL LOCATIONS (UNIVERSAL RULE)
+
+### Machine-Readable Metadata: `.machine_readable/` ONLY
+
+These 6 a2ml files MUST exist in `.machine_readable/` directory ONLY:
+1. **STATE.a2ml** - Project state, progress, blockers
+2. **META.a2ml** - Architecture decisions, governance
+3. **ECOSYSTEM.a2ml** - Position in ecosystem, relationships
+4. **AGENTIC.a2ml** - AI agent interaction patterns
+5. **NEUROSYM.a2ml** - Neurosymbolic integration config
+6. **PLAYBOOK.a2ml** - Operational runbook
+
+**CRITICAL:** If ANY of these files exist in the root directory, this is an ERROR.
+
+### Source Code: `src/` structure
+
+```
+src/
+├── StatistEase.jl          # Main module (entry point)
+├── stats/                  # Statistical functions (17 modules)
+│   ├── descriptive.jl      # Mean, median, SD, quartiles, etc.
+│   ├── inferential.jl      # t-tests, ANOVA, chi-square
+│   ├── correlation_regression.jl  # Pearson, Spearman, OLS, multiple regression
+│   ├── nonparametric.jl    # Mann-Whitney, Wilcoxon, Kruskal-Wallis
+│   ├── effect_sizes.jl     # Cohen's d, r, eta², Hedges' g, NNT
+│   ├── power_analysis.jl   # Power analysis, sample size calculation
+│   ├── bayesian.jl         # Bayes factor, credible intervals, prior updating
+│   ├── fuzzy_logic.jl      # Fuzzy membership, inference
+│   ├── dempster_shafer.jl  # Evidence combination
+│   ├── causality.jl        # Granger causality (regression-based)
+│   ├── estimation.jl       # James-Stein shrinkage
+│   ├── reliability.jl      # Cronbach's alpha, McDonald's omega
+│   ├── validity.jl         # Content, convergent, criterion validity
+│   ├── measurement.jl      # ICC, SEM, item analysis, diagnostics
+│   ├── qualitative.jl      # Cohen's/Fleiss' kappa, thematic saturation
+│   ├── assumptions.jl      # Normality, Levene's test
+│   └── sampling.jl         # Design effect, margin of error, missing data
+├── pipeline/               # Data Quality Pathway
+│   ├── detection.jl        # Data type and format detection
+│   ├── validation.jl       # Range, variance, integrity checks
+│   ├── cleansing.jl        # Outliers, missing values, deduplication
+│   └── normalization.jl    # Z-score, min-max, log, tabular NF checks
+├── output/                 # Output formatting
+│   ├── tables.jl           # Unicode box-drawing tables
+│   ├── graphs.jl           # ASCII histogram, boxplot, scatter, bar
+│   └── export.jl           # CSV, JSON, text reports
+└── tools/                  # LM Studio integration
+    ├── definitions.jl      # 25+ tool definitions (OpenAI format)
+    ├── executor.jl         # Tool dispatch (neural→symbolic boundary)
+    ├── lmstudio.jl         # HTTP client for LM Studio API
+    └── chat.jl             # REPL interface with MOLLOCK warnings
+```
+
+### Bot Directives: `.machine_readable/bot_directives/` ONLY
+### Contractiles: `.machine_readable/contractiles/` ONLY
+
+## CORE INVARIANTS
+
+1. **MOLLOCK RULE** - No statistical value from neural inference. Ever.
+2. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
+3. **Single source of truth** - `.machine_readable/` is authoritative
+4. **License consistency** - All code PMPL-1.0-or-later
+5. **Author attribution** - Always "Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"
+6. **Julia for computation** - All maths in Julia, no Chapel/Python/R
+
+## SESSION STARTUP CHECKLIST
+
+✅ Read THIS file (0-AI-MANIFEST.a2ml) first
+✅ Understand the MOLLOCK RULE (no neural numbers)
+✅ Know canonical location: `.machine_readable/`
+✅ Read `.machine_readable/STATE.a2ml` for current status
+✅ Read `.machine_readable/NEUROSYM.a2ml` for architecture
+
+## LIFECYCLE HOOKS
+
+### on-enter (Session Start)
+1. Read and acknowledge this manifest
+2. Read `.machine_readable/STATE.a2ml`
+3. Check for blockers
+4. State understanding of MOLLOCK RULE and canonical locations
+
+### on-exit (Session End)
+1. Update `.machine_readable/STATE.a2ml` if changes made
+2. Document new blockers
+3. Summarize outcomes
+
+## META
+
+- **Format Version:** 1.0.0
+- **Created:** 2026-02-20
+- **Maintained By:** hyperpolymath
+- **License:** PMPL-1.0-or-later
+- **Protocol:** https://github.com/hyperpolymath/0-ai-gatekeeper-protocol

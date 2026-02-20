@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+#
+# STATE.a2ml — Project state checkpoint
+
+[metadata]
+project = "StatistEase"
+version = "0.1.0"
+last-updated = "2026-02-20"
+status = "active"
+
+[project-context]
+name = "StatistEase"
+purpose = "Neurosymbolic statistical analysis assistant — Julia symbolic computation + LLM natural language interface"
+completion-percentage = 70
+
+[position]
+phase = "implementation"
+maturity = "alpha"
+
+[route-to-mvp]
+milestones = [
+  { name = "Project structure and RSR template", completion = 100 },
+  { name = "Statistical functions (17 modules)", completion = 100 },
+  { name = "Data Quality Pathway (4 stages)", completion = 100 },
+  { name = "LM Studio tool integration (25+ tools)", completion = 100 },
+  { name = "Output module (tables, graphs, export)", completion = 100 },
+  { name = "RSR template customization", completion = 100 },
+  { name = "Tests and CI", completion = 0 },
+  { name = "Explain/Prove/Demonstrate/Annotate functions", completion = 0 },
+  { name = "Adversarial verification SLM", completion = 0 },
+  { name = "Echidna GraphQL integration", completion = 0 },
+]
+
+[blockers-and-issues]
+# - "Need to decide on OpenCyc vs DeepProbLog for deeper neurosymbolic grounding"
+# - "Adversarial SLM architecture needs design"
+
+[critical-next-actions]
+actions = [
+  "Add Julia tests for all statistical functions",
+  "Design explain_that / prove_that / demonstrate_that / annotate_that API",
+  "Design adversarial verification SLM with Socratic governance model",
+  "Evaluate OpenCyc/DeepProbLog integration for true neurosymbolic grounding",
+  "Push to GitHub and GitLab",
+]
+
+[ecosystem]
+part-of = ["RSR Framework", "hyperpolymath neurosymbolic stack"]
+depends-on = ["LM Studio (local LLM server)"]
+integrates-with = ["echidna (proof verification)", "hypatia (CI scanning)", "verisimdb (vulnerability data)"]
