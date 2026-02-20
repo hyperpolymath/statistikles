@@ -25,8 +25,8 @@
 # ║  └─────────────────────────────────────────────────────────────────────┘     ║
 # ║                                                                              ║
 # ║  Data Quality Pathway:                                                       ║
-# ║  Raw Input → Detection → Validation → Cleansing → Normalization →           ║
-# ║  Analysis → Result Validation → Output → Interpretation                      ║
+# ║  Raw Input → CANONICALIZATION → Detection → Validation → Cleansing →        ║
+# ║  Normalization → Analysis → Result Validation → Output → Interpretation     ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 
 module StatistEase
@@ -63,7 +63,9 @@ include("stats/qualitative.jl")
 include("stats/assumptions.jl")
 include("stats/sampling.jl")
 
-# Data pipeline
+# Data pipeline (order matters — canonicalization FIRST)
+include("pipeline/canonicalization.jl")       # ZEROTH: dates, decimals, constants, precedence
+include("pipeline/dimensional_analysis.jl")   # FIRST: physical dimension consistency
 include("pipeline/detection.jl")
 include("pipeline/validation.jl")
 include("pipeline/cleansing.jl")
