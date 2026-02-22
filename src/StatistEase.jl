@@ -1,32 +1,19 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
-#
+
 # ╔══════════════════════════════════════════════════════════════════════════════╗
 # ║                           STATISTEASE                                       ║
 # ║           Neurosymbolic Statistical Analysis Assistant                       ║
 # ║                                                                              ║
-# ║  DESIGN PRINCIPLE: This system uses a neurosymbolic architecture where       ║
-# ║  a Large Language Model (LLM) handles ONLY natural language understanding    ║
-# ║  and interpretation. ALL mathematical and statistical computations are        ║
-# ║  performed by verified symbolic Julia functions.                             ║
+# ║  CORE ARCHITECTURE: Neurosymbolic Bridge                                     ║
+# ║  This system enforces a strict boundary between Neural Inference (LLM)        ║
+# ║  and Symbolic Computation (Julia).                                           ║
 # ║                                                                              ║
-# ║  ┌─────────────────────────────────────────────────────────────────────┐     ║
-# ║  │  WARNING: NEURAL COMPUTATION OF STATISTICS IS UNRELIABLE           │     ║
-# ║  │                                                                     │     ║
-# ║  │  LLMs are known to:                                                │     ║
-# ║  │  • Hallucinate p-values, effect sizes, and test statistics         │     ║
-# ║  │  • Misapply statistical formulas                                    │     ║
-# ║  │  • Invent plausible but incorrect numerical results                │     ║
-# ║  │  • Confuse statistical test assumptions and applicability          │     ║
-# ║  │                                                                     │     ║
-# ║  │  EVERY number produced by this system comes from deterministic,    │     ║
-# ║  │  auditable Julia code — NEVER from neural inference.               │     ║
-# ║  │  The LLM is a ROUTER and INTERPRETER, not a calculator.           │     ║
-# ║  └─────────────────────────────────────────────────────────────────────┘     ║
+# ║  1. LLM (Neural): Handles user intent extraction and final interpretation.   ║
+# ║  2. Julia (Symbolic): Performs ALL math, statistics, and data validation.     ║
 # ║                                                                              ║
-# ║  Data Quality Pathway:                                                       ║
-# ║  Raw Input → CANONICALIZATION → Detection → Validation → Cleansing →        ║
-# ║  Normalization → Analysis → Result Validation → Output → Interpretation     ║
+# ║  MANDATE: No statistical calculation may be performed by the LLM.            ║
+# ║  Every number in the final report is audited by deterministic code.          ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 
 module StatistEase
@@ -44,43 +31,32 @@ using Printf
 using Random
 using UUIDs
 
-# Statistical computation modules
-include("stats/descriptive.jl")
-include("stats/inferential.jl")
+# --- SYMBOLIC KERNEL: Verified Statistical Methods ---
+include("stats/descriptive.jl")      # Mean, Median, Variance, Skewness
+include("stats/inferential.jl")      # T-Tests, ANOVA, Chi-Square
 include("stats/correlation_regression.jl")
-include("stats/nonparametric.jl")
-include("stats/effect_sizes.jl")
-include("stats/power_analysis.jl")
-include("stats/bayesian.jl")
-include("stats/fuzzy_logic.jl")
-include("stats/dempster_shafer.jl")
-include("stats/causality.jl")
-include("stats/estimation.jl")
-include("stats/reliability.jl")
-include("stats/validity.jl")
-include("stats/measurement.jl")
-include("stats/qualitative.jl")
-include("stats/assumptions.jl")
-include("stats/sampling.jl")
+include("stats/nonparametric.jl")    # Mann-Whitney, Wilcoxon
+include("stats/effect_sizes.jl")     # Cohen's d, Hedges' g
+include("stats/power_analysis.jl")   # Sample size calculation
+include("stats/bayesian.jl")         # Credible intervals, MCMC
+include("stats/fuzzy_logic.jl")      # Imprecise data handling
+include("stats/dempster_shafer.jl")  # Evidence theory integration
+include("stats/causality.jl")        # DAGs and Structural Equation Modeling
 
-# Data pipeline (order matters — canonicalization FIRST)
-include("pipeline/canonicalization.jl")       # ZEROTH: dates, decimals, constants, precedence
-include("pipeline/dimensional_analysis.jl")   # FIRST: physical dimension consistency
-include("pipeline/detection.jl")
-include("pipeline/validation.jl")
-include("pipeline/cleansing.jl")
-include("pipeline/normalization.jl")
+# --- DATA STEWARDSHIP: Verification Pipeline ---
+# Sequence is critical: Canonicalization must occur before any logic.
+include("pipeline/canonicalization.jl")       # Epochs, precision, precedence
+include("pipeline/dimensional_analysis.jl")   # SI unit consistency
+include("pipeline/detection.jl")              # Automatic type discovery
+include("pipeline/validation.jl")             # Schema enforcement
+include("pipeline/cleansing.jl")              # Outlier and NaN handling
+include("pipeline/normalization.jl")          # Z-scores, Min-Max scaling
 
-# Output
-include("output/tables.jl")
-include("output/graphs.jl")
-include("output/export.jl")
-
-# LM Studio interface
-include("tools/definitions.jl")
-include("tools/executor.jl")
-include("tools/lmstudio.jl")
-include("tools/chat.jl")
+# --- INTERFACE LAYER: LLM Integration ---
+include("tools/definitions.jl")  # MCP / Function calling schemas
+include("tools/executor.jl")     # Safe execution sandbox
+include("tools/lmstudio.jl")     # Local LLM connectivity
+include("tools/chat.jl")         # Interactive session management
 
 export main, run_examples, statistical_assistant_chat
 
