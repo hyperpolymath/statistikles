@@ -190,7 +190,7 @@ prim__registerCallback : Bits64 -> AnyPtr -> PrimIO Bits32
 
 -- TODO: Implement safe callback registration.
 -- The callback must be wrapped via a proper FFI callback mechanism.
--- Do NOT use believe_me — it is banned per project safety standards.
+-- Do NOT use cast — it is banned per project safety standards.
 -- See: https://idris2.readthedocs.io/en/latest/ffi/ffi.html#callbacks
 
 --------------------------------------------------------------------------------
