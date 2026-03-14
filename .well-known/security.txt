@@ -2,7 +2,7 @@
 # RFC 9116 - security.txt
 # https://securitytxt.org/
 
-Contact: mailto:jonathan.jewell@open.ac.uk
+Contact: mailto:j.d.a.jewell@open.ac.uk
 Expires: 2026-12-31T23:59:59.000Z
 Encryption: TBD
 Preferred-Languages: en

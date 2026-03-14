@@ -83,7 +83,7 @@ src/
 2. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
 3. **Single source of truth** - `.machine_readable/` is authoritative
 4. **License consistency** - All code PMPL-1.0-or-later
-5. **Author attribution** - Always "Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"
+5. **Author attribution** - Always "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
 6. **Julia for computation** - All maths in Julia, no Chapel/Python/R
 
 ## SESSION STARTUP CHECKLIST

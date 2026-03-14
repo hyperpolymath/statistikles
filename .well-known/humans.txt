@@ -3,7 +3,7 @@
 
 /* TEAM */
 Maintainer: Jonathan D.A. Jewell (hyperpolymath)
-Contact: jonathan.jewell@open.ac.uk
+Contact: j.d.a.jewell@open.ac.uk
 From: United Kingdom
 
 /* SITE */

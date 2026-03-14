@@ -6,7 +6,7 @@
 [source,bibtex]
 ----
 @software{StatistEase_2026,
-  author = {Jewell, Jonathan},
+  author = {Jewell, Jonathan D.A.},
   title = {StatistEase},
   year = {2026},
   url = {https://github.com/hyperpolymath/StatistEase},
@@ -16,7 +16,7 @@
 
 == Harvard Style
 
-Jewell, JDAJ (2026) _StatistEase_ [Computer software]. Available at: https://github.com/hyperpolymath/StatistEase
+Jewell, J.D.A. (2026) _StatistEase_ [Computer software]. Available at: https://github.com/hyperpolymath/StatistEase
 
 == OSCOLA
 
@@ -28,7 +28,7 @@ Jewell, Jonathan "StatistEase." 2026, github.com/hyperpolymath/StatistEase.
 
 == APA 7
 
-Jewell, JDAJ (2026). _StatistEase_ [Computer software]. GitHub. https://github.com/hyperpolymath/StatistEase
+Jewell, J.D.A. (2026). _StatistEase_ [Computer software]. GitHub. https://github.com/hyperpolymath/StatistEase
 
 == See Also
 
