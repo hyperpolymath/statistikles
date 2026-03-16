@@ -91,19 +91,19 @@ src/
 ✅ Read THIS file (0-AI-MANIFEST.a2ml) first
 ✅ Understand the MOLLOCK RULE (no neural numbers)
 ✅ Know canonical location: `.machine_readable/`
-✅ Read `.machine_readable/STATE.a2ml` for current status
-✅ Read `.machine_readable/NEUROSYM.a2ml` for architecture
+✅ Read `.machine_readable/6a2/STATE.a2ml` for current status
+✅ Read `.machine_readable/6a2/NEUROSYM.a2ml` for architecture
 
 ## LIFECYCLE HOOKS
 
 ### on-enter (Session Start)
 1. Read and acknowledge this manifest
-2. Read `.machine_readable/STATE.a2ml`
+2. Read `.machine_readable/6a2/STATE.a2ml`
 3. Check for blockers
 4. State understanding of MOLLOCK RULE and canonical locations
 
 ### on-exit (Session End)
-1. Update `.machine_readable/STATE.a2ml` if changes made
+1. Update `.machine_readable/6a2/STATE.a2ml` if changes made
 2. Document new blockers
 3. Summarize outcomes
 
