@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "a4cd8055-f92e-511b-9c0c-84a8214da79c"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "statistease"
+prefixed-name = "db-statistease"
+
+[clade]
+primary = "db"
+secondary = []
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/statistease"
+gitlab = "hyperpolymath/statistease"
+bitbucket = "hyperpolymath/statistease"
+
+[lineage]
+type = "standalone"
+parent = "Statistical analysis tool"
+born = "2026-03-16"
