@@ -35,7 +35,7 @@ using UUIDs
 include("stats/descriptive.jl")      # Mean, Median, Variance, Skewness
 include("stats/inferential.jl")      # T-Tests, ANOVA, Chi-Square
 include("stats/correlation_regression.jl")
-include("stats/nonparametric.jl")    # Mann-Whitney, Wilcoxon
+include("stats/nonparametric.jl")    # Mann-Whitney, Wilcoxon, PERMANOVA
 include("stats/effect_sizes.jl")     # Cohen's d, Hedges' g
 include("stats/power_analysis.jl")   # Sample size calculation
 include("stats/bayesian.jl")         # Credible intervals, MCMC

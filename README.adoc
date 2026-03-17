@@ -58,7 +58,7 @@ hard architectural invariant.
 |Descriptive |Mean, median, mode, SD, skewness, kurtosis, quartiles, CI
 |Inferential |t-tests (independent, paired, one-sample), ANOVA, chi-square
 |Correlation & Regression |Pearson, Spearman, simple/multiple regression with VIF
-|Non-parametric |Mann-Whitney U, Wilcoxon signed-rank, Kruskal-Wallis
+|Non-parametric |Mann-Whitney U, Wilcoxon signed-rank, Kruskal-Wallis, PERMANOVA
 |Effect Sizes |Cohen's d, r, eta², Hedges' g, OR, NNT, CL effect size
 |Power Analysis |Power for t-tests, sample size for means/proportions/regression
 |Bayesian |Prior updating, Bayes factor (BIC), credible intervals (ETI + HDI)

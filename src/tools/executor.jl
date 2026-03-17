@@ -72,6 +72,14 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return kruskal_wallis([convert(Vector{Float64}, g) for g in arguments["groups"]])
             end
 
+        elseif tool_name == "permanova"
+            raw_dm = arguments["distance_matrix"]
+            dm = Matrix{Float64}(hcat([convert(Vector{Float64}, row) for row in raw_dm]...)')
+            labels = arguments["group_labels"]
+            n_perm = Int(get(arguments, "n_permutations", 999))
+            alpha = Float64(get(arguments, "alpha", 0.05))
+            return permanova(dm, labels; n_permutations=n_perm, alpha=alpha)
+
         elseif tool_name == "effect_size_calculator"
             kwargs = Dict{Symbol,Any}()
             for (k, v) in arguments

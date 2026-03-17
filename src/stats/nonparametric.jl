@@ -72,3 +72,134 @@ function kruskal_wallis(groups::Vector{Vector{Float64}}; alpha::Float64=0.05)
         "test_type" => "Kruskal-Wallis H test"
     )
 end
+
+"""
+    permanova(distance_matrix, group_labels; n_permutations=999, alpha=0.05) -> Dict
+
+PERMANOVA (Permutational Multivariate Analysis of Variance).
+Tests whether the centroids of groups differ in multivariate space
+using a distance matrix and permutation-based significance testing.
+
+- INPUT: A symmetric distance matrix (e.g. Euclidean, Bray-Curtis) and
+  a vector of group labels indicating which group each observation belongs to.
+- METHOD: Partitions total sum-of-squares of the distance matrix into
+  within-group and between-group components, computes a pseudo-F statistic,
+  then estimates p-value by permuting group labels.
+- ASSUMPTIONS: Does NOT assume multivariate normality. Sensitive to
+  differences in multivariate dispersion between groups (consider
+  a test of homogeneity of dispersions as a companion check).
+- EFFECT SIZE: Reports partial R² (proportion of variance explained by grouping).
+- OUTPUT: Pseudo-F statistic, permutation p-value, partial R², group sizes.
+
+Reference: Anderson, M.J. (2001). "A new method for non-parametric
+multivariate analysis of variance." Austral Ecology, 26, 32–46.
+"""
+function permanova(distance_matrix::Matrix{Float64},
+                   group_labels::Vector;
+                   n_permutations::Int=999,
+                   alpha::Float64=0.05)
+    N = size(distance_matrix, 1)
+    @assert size(distance_matrix) == (N, N) "Distance matrix must be square"
+    @assert length(group_labels) == N "Group labels must match matrix dimension"
+
+    unique_groups = unique(group_labels)
+    k = length(unique_groups)
+    @assert k >= 2 "At least two groups are required"
+
+    # --- Compute sums-of-squares from the distance matrix ---
+    # Following Anderson (2001): SS = (1/n) * sum of squared distances
+    # We use the squared distance matrix throughout.
+    D2 = distance_matrix .^ 2
+
+    # Total sum-of-squares: (1/N) * sum of all squared distances / 2
+    # (dividing by 2 because the matrix is symmetric and we'd double-count)
+    SS_T = sum(D2) / (2 * N)
+
+    # Within-group sum-of-squares
+    SS_W = 0.0
+    group_sizes = Dict{eltype(group_labels), Int}()
+    for g in unique_groups
+        idx = findall(==(g), group_labels)
+        n_g = length(idx)
+        group_sizes[g] = n_g
+        # Sum of squared distances within group g, divided by group size
+        for i in idx
+            for j in idx
+                SS_W += D2[i, j]
+            end
+        end
+    end
+    SS_W /= 2  # Symmetric matrix correction
+    # Normalize: divide each group's contribution by its size
+    SS_W_normalized = 0.0
+    for g in unique_groups
+        idx = findall(==(g), group_labels)
+        n_g = length(idx)
+        group_sum = 0.0
+        for i in idx
+            for j in idx
+                group_sum += D2[i, j]
+            end
+        end
+        SS_W_normalized += group_sum / (2 * n_g)
+    end
+
+    SS_A = SS_T - SS_W_normalized  # Between-group (among) SS
+
+    # Degrees of freedom
+    df_A = k - 1
+    df_W = N - k
+
+    # Pseudo-F statistic
+    MS_A = SS_A / df_A
+    MS_W = SS_W_normalized / df_W
+    F_observed = MS_A / MS_W
+
+    # Partial R² (proportion of variance explained)
+    R2 = SS_A / SS_T
+
+    # --- Permutation test ---
+    # Count how many permuted F-statistics are >= the observed F.
+    n_extreme = 0
+    for _ in 1:n_permutations
+        perm_labels = shuffle(group_labels)
+        perm_SS_W = 0.0
+        for g in unique_groups
+            idx = findall(==(g), perm_labels)
+            n_g = length(idx)
+            group_sum = 0.0
+            for i in idx
+                for j in idx
+                    group_sum += D2[i, j]
+                end
+            end
+            perm_SS_W += group_sum / (2 * n_g)
+        end
+        perm_SS_A = SS_T - perm_SS_W
+        perm_F = (perm_SS_A / df_A) / (perm_SS_W / df_W)
+        if perm_F >= F_observed
+            n_extreme += 1
+        end
+    end
+
+    # P-value: proportion of permutations with F >= observed F
+    # +1 in numerator and denominator accounts for the observed statistic itself
+    p_value = (n_extreme + 1) / (n_permutations + 1)
+
+    return Dict{String,Any}(
+        "pseudo_F" => F_observed,
+        "df_between" => df_A,
+        "df_within" => df_W,
+        "SS_between" => SS_A,
+        "SS_within" => SS_W_normalized,
+        "SS_total" => SS_T,
+        "partial_R2" => R2,
+        "p_value" => p_value,
+        "significant" => p_value < alpha,
+        "n_permutations" => n_permutations,
+        "n_groups" => k,
+        "N_total" => N,
+        "group_sizes" => Dict{String,Int}(string(g) => group_sizes[g] for g in unique_groups),
+        "test_type" => "PERMANOVA (Permutational Multivariate Analysis of Variance)"
+    )
+end
