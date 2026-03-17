@@ -493,7 +493,7 @@ function detect_unit_mixing(values::Vector{String})
             "MIXED UNIT SYSTEMS DETECTED. Imperial and metric values found in the same dataset. " *
             "This WILL produce incorrect results if not resolved. " *
             "Convert all values to one system before analysis. " *
-            "(Reference: Mars Climate Orbiter, 1999 — $327M loss from unit confusion)" :
+            "(Reference: Mars Climate Orbiter, 1999 — \$327M loss from unit confusion)" :
             "No mixed units detected"
     )
 end

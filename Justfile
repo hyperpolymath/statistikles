@@ -285,12 +285,7 @@ clean-all: clean
 # Run all tests
 test *args:
     @echo "Running tests..."
-    # TODO: Replace with your test command
-    # Examples:
-    #   cargo test {{args}}
-    #   mix test {{args}}
-    #   zig build test {{args}}
-    #   deno test {{args}}
+    julia --project=. test/runtests.jl {{args}}
     @echo "Tests passed!"
 
 # Run tests with verbose output

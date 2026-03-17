@@ -60,6 +60,210 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return simple_linear_regression(convert(Vector{Float64}, raw_x), y)
             end
 
+        elseif tool_name == "logistic_regression"
+            y = convert(Vector{Float64}, arguments["y"])
+            raw_x = arguments["x"]
+            X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_x]...))
+            return logistic_regression(X, y)
+
+        elseif tool_name == "mle_fit"
+            data = convert(Vector{Float64}, arguments["data"])
+            dist = get(arguments, "distribution", "normal")
+            return mle_fit(data, dist)
+
+        elseif tool_name == "complexity_analysis"
+            # This is a meta-tool. For now, we only allow profiling StatistEase's own sort.
+            return estimate_complexity(sort, n -> rand(n))
+
+        elseif tool_name == "p_value_adjustment"
+            pv = convert(Vector{Float64}, arguments["p_values"])
+            m = get(arguments, "method", "bonferroni")
+            return adjust_p_values(pv; method=m)
+
+        elseif tool_name == "path_analysis"
+            # Data expected as a Dict of column names to vectors
+            data_dict = arguments["data"]
+            df = DataFrame(data_dict)
+            # Spec expected as a list of pairs: ["Y", ["X1", "X2"]]
+            raw_spec = arguments["model_spec"]
+            spec = [Symbol(item[1]) => Symbol.(item[2]) for item in raw_spec]
+            return path_analysis(df, spec)
+
+        elseif tool_name == "pca"
+            raw_x = arguments["x"]
+            X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_x]...))
+            nc = haskey(arguments, "n_components") ? Int(arguments["n_components"]) : nothing
+            return pca(X; n_components=nc)
+
+        elseif tool_name == "bootstrap"
+            data = convert(Vector{Float64}, arguments["data"])
+            stat_name = get(arguments, "statistic", "mean")
+            stat_fn = stat_name == "mean" ? mean : stat_name == "median" ? median : var
+            reps = Int(get(arguments, "n_reps", 1000))
+            return bootstrap_ci(data, stat_fn; n_reps=reps)
+
+        elseif tool_name == "time_series"
+            data = convert(Vector{Float64}, arguments["data"])
+            if arguments["type"] == "moving_average"
+                w = Int(arguments["window"])
+                mt = get(arguments, "ma_type", "simple")
+                return Dict("moving_average" => moving_average(data, w; type=mt))
+            elseif arguments["type"] == "acf"
+                lag = Int(arguments["max_lag"])
+                return Dict("acf" => autocorrelation(data, lag))
+            elseif arguments["type"] == "dtw"
+                return Dict("dtw_distance" => dynamic_time_warping(data, convert(Vector{Float64}, arguments["target"])))
+            end
+
+        elseif tool_name == "information_theory"
+            if arguments["type"] == "entropy"
+                return Dict("entropy" => shannon_entropy(arguments["data"]))
+            elseif arguments["type"] == "kl_divergence"
+                p = convert(Vector{Float64}, arguments["p"])
+                q = convert(Vector{Float64}, arguments["q"])
+                return Dict("kl_divergence" => kl_divergence(p, q))
+            end
+
+        elseif tool_name == "survival_analysis"
+            if arguments["type"] == "kaplan_meier"
+                return kaplan_meier(convert(Vector{Float64}, arguments["times"]),
+                                  convert(Vector{Bool}, arguments["events"]))
+            elseif arguments["type"] == "log_rank"
+                return log_rank_test(convert(Vector{Float64}, arguments["times"]),
+                                   convert(Vector{Bool}, arguments["events"]),
+                                   arguments["groups"])
+            end
+
+        elseif tool_name == "meta_analysis"
+            es = convert(Vector{Float64}, arguments["effect_sizes"])
+            vars = convert(Vector{Float64}, arguments["variances"])
+            m = get(arguments, "model", "random")
+            return meta_analysis(es, vars; model=m)
+
+        elseif tool_name == "robust_stats"
+            if arguments["type"] == "mahalanobis"
+                raw_x = arguments["x"]
+                X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_x]...))
+                return Dict("distances" => mahalanobis_distance(X))
+            elseif arguments["type"] == "huber"
+                return Dict("estimate" => huber_m_estimator(convert(Vector{Float64}, arguments["data"])))
+            end
+
+        elseif tool_name == "causal_inference"
+            if arguments["type"] == "iv"
+                return instrumental_variables(convert(Vector{Float64}, arguments["y"]), 
+                                            convert(Vector{Float64}, arguments["x"]), 
+                                            convert(Vector{Float64}, arguments["z"]))
+            elseif arguments["type"] == "did"
+                return difference_in_differences(convert(Vector{Float64}, arguments["y"]), 
+                                               convert(Vector{Int}, arguments["treat"]), 
+                                               convert(Vector{Int}, arguments["post"]))
+            elseif arguments["type"] == "rdd"
+                return regression_discontinuity(convert(Vector{Float64}, arguments["y"]), 
+                                              convert(Vector{Float64}, arguments["x"]), 
+                                              Float64(arguments["threshold"]))
+            end
+
+        elseif tool_name == "spatial_stats"
+            if arguments["type"] == "morans_i"
+                x = convert(Vector{Float64}, arguments["x"])
+                raw_w = arguments["w"]
+                W = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_w]...))
+                return morans_i(x, W)
+            end
+
+        elseif tool_name == "machine_learning"
+            if arguments["type"] == "spline"
+                return spline_regression(convert(Vector{Float64}, arguments["x"]), 
+                                       convert(Vector{Float64}, arguments["y"]))
+            elseif arguments["type"] == "rf_proxy"
+                raw_x = arguments["x"]
+                X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_x]...))
+                return random_forest_proxy(X, convert(Vector{Float64}, arguments["y"]))
+            end
+
+        elseif tool_name == "nlp_symbolic"
+            if arguments["type"] == "sentiment"
+                lex = Dict{String, Float64}(arguments["lexicon"])
+                return Dict("score" => lexicon_sentiment(arguments["text"], lex))
+            elseif arguments["type"] == "topic_modeling"
+                raw_x = arguments["x"]
+                X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_x]...))
+                return topic_modeling_nmf(X; k=Int(get(arguments, "k", 3)))
+            end
+
+        elseif tool_name == "advanced_modeling"
+            if arguments["type"] == "mixed_effects"
+                X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in arguments["x"]]...))
+                return mixed_effects_intercept(convert(Vector{Float64}, arguments["y"]), X, convert(Vector{Int}, arguments["group_ids"]))
+            elseif arguments["type"] == "ordinal_logistic"
+                X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in arguments["x"]]...))
+                return ordinal_logistic_regression(X, convert(Vector{Int}, arguments["y"]))
+            end
+
+        elseif tool_name == "signal_processing"
+            if arguments["type"] == "ica"
+                X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in arguments["x"]]...))
+                return independent_component_analysis(X; k=Int(get(arguments, "k", 2)))
+            end
+
+        elseif tool_name == "bayesian_em"
+            return expectation_maximization_normal(convert(Vector{Float64}, arguments["data"]), Int(arguments["k"]))
+
+        elseif tool_name == "functional_data"
+            X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in arguments["x"]]...))
+            return functional_pca(X)
+
+        elseif tool_name == "algebraic_stats"
+            if arguments["type"] == "mcnemar"
+                return mcnemar_test(Int(arguments["b"]), Int(arguments["c"]))
+            elseif arguments["type"] == "padic"
+                return Dict("valuation" => padic_valuation(Int(arguments["n"]), Int(arguments["p"])))
+            end
+
+        elseif tool_name == "representation_stats"
+            if arguments["type"] == "clr"
+                return Dict("transformed" => centered_log_ratio(convert(Vector{Float64}, arguments["data"])))
+            elseif arguments["type"] == "interval_overlap"
+                a = Tuple{Float64, Float64}(arguments["interval_a"])
+                b = Tuple{Float64, Float64}(arguments["interval_b"])
+                return interval_overlap_test(a, b)
+            end
+
+        elseif tool_name == "non_classical_prob"
+            if arguments["type"] == "tropical_dot"
+                v1 = convert(Vector{Float64}, arguments["v1"])
+                v2 = convert(Vector{Float64}, arguments["v2"])
+                return Dict("result" => tropical_dot_product(v1, v2))
+            elseif arguments["type"] == "bell_test"
+                return Dict("chsh_s" => bell_test_chsh(convert(Vector{Float64}, arguments["correlations"])))
+            end
+
+        elseif tool_name == "structured_dynamic"
+            if arguments["type"] == "centrality"
+                raw = arguments["adj"]
+                adj = Matrix{Int}(hcat([convert(Vector{Int}, [Int(x) for x in row]) for row in raw]...)')
+                return Dict("centrality" => degree_centrality(adj))
+            elseif arguments["type"] == "fractal"
+                raw = arguments["img"]
+                img = Matrix{Int}(hcat([convert(Vector{Int}, [Int(x) for x in row]) for row in raw]...)')
+                return Dict("dimension" => box_counting_dimension(img))
+            elseif arguments["type"] == "hurst"
+                return Dict("hurst" => hurst_exponent(convert(Vector{Float64}, arguments["data"])))
+            end
+
+        elseif tool_name == "unconventional_frameworks"
+            if arguments["type"] == "rough_set"
+                return rough_set_approximations(convert(Vector{Int}, arguments["features"]), 
+                                              convert(Vector{Int}, arguments["target"]))
+            end
+
+        elseif tool_name == "pre_suite"
+            raw_data = arguments["contingency_matrix"]
+            # Convert list of lists to Matrix{Int}
+            matrix = Matrix{Int}(hcat([convert(Vector{Int}, [Int(x) for x in row]) for row in raw_data]...)')
+            return calculate_PRE_suite(matrix)
+
         elseif tool_name == "nonparametric_test"
             tt = arguments["type"]
             if tt == "mann_whitney"
@@ -70,6 +274,14 @@ function execute_tool(tool_name::String, arguments::Dict)
                                            convert(Vector{Float64}, arguments["group2"]))
             elseif tt == "kruskal_wallis"
                 return kruskal_wallis([convert(Vector{Float64}, g) for g in arguments["groups"]])
+            elseif tt == "friedman"
+                raw_d = arguments["data"]
+                d = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_d]...))
+                return friedman_test(d)
+            elseif tt == "cochrans_q"
+                raw_d = arguments["data"]
+                d = Matrix{Int}(hcat([convert(Vector{Int}, col) for col in raw_d]...))
+                return cochrans_q(d)
             end
 
         elseif tool_name == "permanova"

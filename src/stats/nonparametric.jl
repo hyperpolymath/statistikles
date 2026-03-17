@@ -74,6 +74,101 @@ function kruskal_wallis(groups::Vector{Vector{Float64}}; alpha::Float64=0.05)
 end
 
 """
+    friedman_test(data::Matrix{Float64}; alpha=0.05) -> Dict
+
+FRIEDMAN TEST: Non-parametric version of repeated-measures ANOVA.
+- `data`: Rows are blocks (subjects), columns are treatments.
+"""
+function friedman_test(data::Matrix{Float64}; alpha::Float64=0.05)
+    n, k = size(data)
+    n < 2 && return Dict("error" => "At least 2 blocks required")
+    
+    # Rank within each block
+    ranks = zeros(n, k)
+    for i in 1:n
+        ranks[i, :] = ordinalrank(data[i, :])
+    end
+    
+    # Sum of ranks for each treatment
+    R = sum(ranks, dims=1)
+    
+    # Chi-squared statistic
+    Q = (12 / (n * k * (k + 1))) * sum(R .^ 2) - 3 * n * (k + 1)
+    df = k - 1
+    p_val = 1 - cdf(Chisq(df), Q)
+    
+    return Dict{String, Any}(
+        "Q_statistic" => Q, "df" => df, "p_value" => p_val,
+        "significant" => p_val < alpha,
+        "test_type" => "Friedman Test"
+    )
+end
+
+"""
+    cochrans_q(data::Matrix{Int}; alpha=0.05) -> Dict
+
+COCHRAN'S Q TEST: Extends McNemar test to k groups (binary outcomes).
+- `data`: Rows are subjects, columns are treatments (0 or 1).
+"""
+function cochrans_q(data::Matrix{Int}; alpha::Float64=0.05)
+    n, k = size(data)
+    
+    C = sum(data, dims=1)  # Successes per treatment
+    R = sum(data, dims=2)  # Successes per subject
+    
+    num = (k - 1) * (k * sum(C .^ 2) - sum(C)^2)
+    den = k * sum(R) - sum(R .^ 2)
+    
+    Q = num / den
+    df = k - 1
+    p_val = 1 - cdf(Chisq(df), Q)
+    
+    return Dict{String, Any}(
+        "Q_statistic" => Q, "df" => df, "p_value" => p_val,
+        "significant" => p_val < alpha,
+        "test_type" => "Cochran's Q Test"
+    )
+end
+
+"""
+    stuart_maxwell_test(contingency_matrix::Matrix{Int}; alpha=0.05) -> Dict
+
+STUART-MAXWELL TEST: Extension of McNemar's test for k x k tables.
+Tests marginal homogeneity in matched-pair data.
+"""
+function stuart_maxwell_test(matrix::Matrix{Int}; alpha::Float64=0.05)
+    k = size(matrix, 1)
+    @assert size(matrix, 1) == size(matrix, 2) "Matrix must be square"
+    
+    # Differences in marginal sums
+    d = sum(matrix, dims=2)[:] .- sum(matrix, dims=1)[:]
+    
+    # Variance-covariance matrix of d
+    V = zeros(k, k)
+    for i in 1:k, j in 1:k
+        if i == j
+            V[i, i] = sum(matrix[i, :]) + sum(matrix[:, i]) - 2 * matrix[i, i]
+        else
+            V[i, j] = -(matrix[i, j] + matrix[j, i])
+        end
+    end
+    
+    # Use first k-1 rows/cols to avoid singularity
+    V_sub = V[1:k-1, 1:k-1]
+    d_sub = d[1:k-1]
+    
+    chi2 = d_sub' * inv(V_sub) * d_sub
+    df = k - 1
+    p_val = 1 - cdf(Chisq(df), chi2)
+    
+    return Dict{String, Any}(
+        "chi_squared" => chi2, "df" => df, "p_value" => p_val,
+        "significant" => p_val < alpha,
+        "test_type" => "Stuart-Maxwell Test"
+    )
+end
+
+"""
     permanova(distance_matrix, group_labels; n_permutations=999, alpha=0.05) -> Dict
 
 PERMANOVA (Permutational Multivariate Analysis of Variance).

@@ -36,7 +36,3 @@ function t_test_independent(group1::Vector{Float64}, group2::Vector{Float64};
         "significant" => p_two < alpha
     )
 end
-
-export t_test_independent
-
-end # module

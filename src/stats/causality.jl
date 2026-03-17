@@ -40,3 +40,75 @@ function granger_causality_test(x::Vector{Float64}, y::Vector{Float64}, lag::Int
         "RSS_restricted" => RSS_r, "RSS_unrestricted" => RSS_u
     )
 end
+
+"""
+    instrumental_variables(y, x, z) -> Dict
+
+2SLS (Two-Stage Least Squares): Estimates causal effects when regressors 
+are correlated with error terms.
+- `y`: Dependent variable.
+- `x`: Endogenous regressor.
+- `z`: Instrument (correlated with x but not with y's error).
+"""
+function instrumental_variables(y::Vector{Float64}, x::Vector{Float64}, z::Vector{Float64})
+    n = length(y)
+    Z = hcat(ones(n), z)
+    X = hcat(ones(n), x)
+    
+    # Stage 1: Regress x on z to get x_hat
+    beta1 = (Z' * Z) \ (Z' * x)
+    x_hat = Z * beta1
+    
+    # Stage 2: Regress y on x_hat
+    X_hat = hcat(ones(n), x_hat)
+    beta2 = (X_hat' * X_hat) \ (X_hat' * y)
+    
+    return Dict{String, Any}(
+        "coefficients" => beta2,
+        "test_type" => "2SLS Instrumental Variables"
+    )
+end
+
+"""
+    difference_in_differences(y, treat, post) -> Dict
+
+DiD: Estimates causal effect by comparing changes over time between groups.
+- `y`: Outcome.
+- `treat`: Boolean (1 if treatment group).
+-Post`: Boolean (1 if after treatment).
+"""
+function difference_in_differences(y::Vector{Float64}, treat::Vector{Int}, post::Vector{Int})
+    n = length(y)
+    # Interaction term
+    inter = treat .* post
+    
+    X = hcat(ones(n), treat, post, inter)
+    beta = X \ y
+    
+    return Dict{String, Any}(
+        "did_estimate" => beta[4],
+        "coefficients" => beta,
+        "test_type" => "Difference-in-Differences"
+    )
+end
+
+"""
+    regression_discontinuity(y, x, threshold) -> Dict
+
+RDD: Estimates causal effect at a sharp cutoff.
+"""
+function regression_discontinuity(y::Vector{Float64}, x::Vector{Float64}, threshold::Float64)
+    # D = 1 if x >= threshold
+    D = [xi >= threshold ? 1.0 : 0.0 for xi in x]
+    # Center x at threshold
+    x_centered = x .- threshold
+    
+    X = hcat(ones(length(y)), x_centered, D, x_centered .* D)
+    beta = X \ y
+    
+    return Dict{String, Any}(
+        "treatment_effect" => beta[3],
+        "coefficients" => beta,
+        "test_type" => "Sharp Regression Discontinuity"
+    )
+end
