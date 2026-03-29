@@ -159,3 +159,71 @@ function logistic_regression(X::Matrix{Float64}, y::Vector{Float64}; max_iter::I
         "test_type" => "Logistic Regression (Binary)"
     )
 end
+
+"""
+    partial_correlation(x, y, z; alpha=0.05) -> Dict
+
+PARTIAL CORRELATION: Correlation between x and y controlling for z.
+Removes the effect of confounding variable(s) z.
+"""
+function partial_correlation(x::Vector{Float64}, y::Vector{Float64}, z::Vector{Float64}; alpha::Float64=0.05)
+    n = length(x)
+    @assert length(y) == n && length(z) == n
+
+    r_xy = cor(x, y)
+    r_xz = cor(x, z)
+    r_yz = cor(y, z)
+
+    # Partial r formula: r_xy.z = (r_xy - r_xz * r_yz) / sqrt((1 - r_xz²)(1 - r_yz²))
+    denom = sqrt((1 - r_xz^2) * (1 - r_yz^2))
+    r_partial = denom > 0 ? (r_xy - r_xz * r_yz) / denom : 0.0
+
+    # Significance test
+    df = n - 3
+    t_stat = r_partial * sqrt(df / (1 - r_partial^2))
+    p_val = df > 0 ? 2 * (1 - cdf(TDist(df), abs(t_stat))) : 1.0
+
+    return Dict{String,Any}(
+        "r_partial" => r_partial,
+        "r_xy" => r_xy,
+        "r_xz" => r_xz,
+        "r_yz" => r_yz,
+        "t_stat" => t_stat,
+        "df" => df,
+        "p_value" => p_val,
+        "significant" => p_val < alpha,
+        "test_type" => "Partial correlation (controlling for z)"
+    )
+end
+
+"""
+    grubbs_test(data; alpha=0.05) -> Dict
+
+GRUBBS' TEST for a single outlier. Tests whether the most extreme value
+is an outlier under the assumption of normality.
+"""
+function grubbs_test(data::Vector{Float64}; alpha::Float64=0.05)
+    n = length(data)
+    m = mean(data)
+    s = std(data)
+
+    # Find most extreme value
+    max_dev_idx = argmax(abs.(data .- m))
+    suspect = data[max_dev_idx]
+    G = abs(suspect - m) / s
+
+    # Critical value: t²(α/(2n), n-2) based threshold
+    t_crit = quantile(TDist(n - 2), 1 - alpha / (2 * n))
+    G_crit = (n - 1) / sqrt(n) * sqrt(t_crit^2 / (n - 2 + t_crit^2))
+
+    return Dict{String,Any}(
+        "G_statistic" => G,
+        "G_critical" => G_crit,
+        "suspect_value" => suspect,
+        "suspect_index" => max_dev_idx,
+        "is_outlier" => G > G_crit,
+        "p_approx" => G > G_crit ? alpha : 1.0,  # Simplified
+        "n" => n,
+        "test_type" => "Grubbs' test for outliers"
+    )
+end

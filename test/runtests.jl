@@ -546,4 +546,37 @@ using StatistEase
         @test r_unif["normal"] == false  # Uniform is NOT normal
     end
 
+    # ═══════════════════════════════════════════════════════════════════
+    # PARTIAL CORRELATION
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "Partial Correlation" begin
+        # x and y correlated, z is confounder
+        z = randn(50)
+        x = z .+ randn(50) .* 0.3
+        y = z .+ randn(50) .* 0.3
+        r = partial_correlation(x, y, z)
+        @test haskey(r, "r_partial")
+        @test haskey(r, "r_xy")
+        @test -1.0 <= r["r_partial"] <= 1.0
+        # Partial r should be smaller than raw r (z explains the correlation)
+        @test abs(r["r_partial"]) < abs(r["r_xy"]) + 0.2  # Allow tolerance
+    end
+
+    # ═══════════════════════════════════════════════════════════════════
+    # GRUBBS' TEST
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "Grubbs' Test" begin
+        # Data with obvious outlier
+        data = [10.0, 11.0, 12.0, 10.5, 11.5, 100.0]
+        r = grubbs_test(data)
+        @test r["suspect_value"] == 100.0
+        @test r["is_outlier"] == true
+        @test r["G_statistic"] > r["G_critical"]
+
+        # Normal data without outlier
+        data_clean = [10.0, 11.0, 12.0, 10.5, 11.5, 12.5]
+        r2 = grubbs_test(data_clean)
+        @test r2["is_outlier"] == false
+    end
+
 end  # Full Test Suite

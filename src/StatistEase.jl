@@ -94,6 +94,7 @@ export main, run_examples, statistical_assistant_chat,
        # Inferential
        t_test_independent, pearson_correlation,
        simple_linear_regression, multiple_regression, logistic_regression,
+       partial_correlation, grubbs_test,
        # Nonparametric
        mann_whitney_u, wilcoxon_signed_rank, kruskal_wallis,
        friedman_test, cochrans_q, stuart_maxwell_test,
