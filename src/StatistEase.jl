@@ -86,6 +86,7 @@ include("pipeline/normalization.jl")          # Z-scores, Min-Max scaling
 include("bridge/aspasia_bridge.jl")    # Aspasia (Octave) cross-verification bridge
 include("bridge/verisimdb_schema.jl")  # VeriSimDB persistence (port 8096)
 include("bridge/echidna_adapter.jl")   # ECHIDNA formal proof dispatch
+include("bridge/betlang_bridge.jl")   # BetLang probabilistic programming integration
 include("bridge/typell_levels.jl")     # TypeLL levels 1-12 statistical types
 
 # --- INTERFACE LAYER: LLM Integration ---
@@ -168,6 +169,13 @@ export main, run_examples, statistical_assistant_chat,
        TestResult, ConfidenceInterval,
        TropicalValue, PadicValue, ModularInt,
        VerifiedResult, ProvenResult, KnowledgeState,
-       AuditSession, new_audit_session, advance
+       AuditSession, new_audit_session, advance,
+       # BetLang integration
+       bet, bet_weighted, bet_chain, bet_monte_carlo,
+       DistnumberNormal, AffineInterval, ImpreciseProbability,
+       width, midpoint, complement,
+       latin_hypercube, sobol_sequence, importance_sample,
+       simulated_annealing, particle_swarm,
+       value_at_risk, conditional_var, dutch_book_check, risk_of_ruin
 
 end # module

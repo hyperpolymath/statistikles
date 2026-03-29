@@ -3,7 +3,7 @@
 # Every exported function tested. Zero tolerance for errors/warnings.
 
 using Test
-using Statistics: mean, var
+using Statistics
 using StatistEase
 
 @testset "StatistEase Full Test Suite" begin
@@ -1115,6 +1115,128 @@ using StatistEase
     @testset "Bench: Bootstrap CI < 2s (1K reps)" begin
         data = randn(100)
         t = @elapsed bootstrap_ci(data, mean; n_reps=1000)
+        @test t < 2.0
+    end
+
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  BETLANG INTEGRATION TESTS                                     ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "BetLang: Ternary primitives" begin
+        # bet returns one of three values
+        results = Set([bet(1, 2, 3) for _ in 1:100])
+        @test results ⊆ Set([1, 2, 3])
+        @test length(results) >= 2  # Should hit at least 2 of 3
+
+        # bet_weighted respects weights
+        heavy_results = [bet_weighted([(10, 0.98), (20, 0.01), (30, 0.01)]) for _ in 1:100]
+        @test count(==(10), heavy_results) > 80  # 10 should dominate
+
+        # bet_chain threads state
+        result = bet_chain(10, x -> x + bet(0, 1, -1), 0)
+        @test -10 <= result <= 10
+
+        # bet_monte_carlo collects stats
+        mc = bet_monte_carlo(1000, () -> bet(1.0, 2.0, 3.0))
+        @test mc["n"] == 1000
+        @test 1.5 < mc["mean"] < 2.5  # E[X] = (1+2+3)/3 = 2
+    end
+
+    @testset "BetLang: Uncertainty number systems" begin
+        # DistnumberNormal propagation
+        a = DistnumberNormal(10.0, 2.0)
+        b = DistnumberNormal(5.0, 1.0)
+        s = a + b
+        @test s.mu == 15.0
+        @test isapprox(s.sigma, sqrt(5.0), atol=1e-10)
+
+        d = a - b
+        @test d.mu == 5.0
+        @test isapprox(d.sigma, sqrt(5.0), atol=1e-10)
+
+        # AffineInterval
+        i1 = AffineInterval(1.0, 3.0)
+        i2 = AffineInterval(2.0, 4.0)
+        i3 = i1 + i2
+        @test i3.lo == 3.0
+        @test i3.hi == 7.0
+        @test width(i1) == 2.0
+        @test midpoint(i1) == 2.0
+
+        # ImpreciseProbability
+        p = ImpreciseProbability(0.3, 0.7)
+        c = complement(p)
+        @test isapprox(c.lower, 0.3, atol=1e-10)
+        @test isapprox(c.upper, 0.7, atol=1e-10)
+        @test_throws AssertionError ImpreciseProbability(-0.1, 0.5)
+        @test_throws AssertionError ImpreciseProbability(0.5, 1.5)
+    end
+
+    @testset "BetLang: Sampling methods" begin
+        # Latin Hypercube
+        lhs = latin_hypercube(50, 3)
+        @test size(lhs) == (50, 3)
+        @test all(0.0 .<= lhs .<= 1.0)
+
+        # Sobol sequence
+        sob = sobol_sequence(100, 2)
+        @test size(sob) == (100, 2)
+        @test all(0.0 .<= sob .<= 1.0)
+
+        # Importance sampling
+        target(x) = exp(-x^2 / 2)
+        proposal(x) = exp(-abs(x))
+        propose() = randn()
+        samples, weights = importance_sample(target, proposal, propose, 500)
+        @test length(samples) == 500
+        @test isapprox(sum(weights), 1.0, atol=1e-10)
+    end
+
+    @testset "BetLang: Optimization" begin
+        # Simulated annealing on Rosenbrock
+        rosenbrock(x) = (1 - x[1])^2 + 100 * (x[2] - x[1]^2)^2
+        r = simulated_annealing(rosenbrock, [0.0, 0.0]; steps=5000)
+        @test r["best_score"] < 10.0  # Should get close to minimum
+
+        # Particle swarm on sphere function
+        sphere(x) = sum(x .^ 2)
+        r2 = particle_swarm(sphere, 20, 3; steps=500, bounds=(-5.0, 5.0))
+        @test r2["best_score"] < 1.0  # Should find near-zero
+    end
+
+    @testset "BetLang: Financial risk" begin
+        returns = randn(1000) .* 0.02  # Daily returns ~2% vol
+        var = value_at_risk(returns)
+        cvar = conditional_var(returns)
+        @test var > 0  # VaR should be positive (loss)
+        @test cvar >= var  # CVaR ≥ VaR always
+
+        # Dutch book check
+        coherent = dutch_book_check([0.3, 0.5, 0.2])
+        @test coherent["coherent"] == true
+        @test isapprox(coherent["total"], 1.0, atol=1e-10)
+
+        incoherent = dutch_book_check([0.3, 0.5, 0.3])
+        @test incoherent["coherent"] == false
+        @test incoherent["overround"] > 0
+
+        # Risk of ruin
+        ruin = risk_of_ruin(0.55, 1.0, 1.0, 100.0)
+        @test 0.0 < ruin < 1.0
+    end
+
+    @testset "Bench: BetLang Monte Carlo < 1s (10K)" begin
+        t = @elapsed bet_monte_carlo(10_000, () -> bet(1.0, 2.0, 3.0))
+        @test t < 1.0
+    end
+
+    @testset "Bench: Latin Hypercube 1000×10 < 100ms" begin
+        t = @elapsed latin_hypercube(1000, 10)
+        @test t < 0.1
+    end
+
+    @testset "Bench: Simulated Annealing 10K steps < 2s" begin
+        t = @elapsed simulated_annealing(x -> sum(x .^ 2), zeros(5); steps=10_000)
         @test t < 2.0
     end
 
