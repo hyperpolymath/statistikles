@@ -7,6 +7,41 @@
 # deterministic linear algebra, ensuring reproducible results.
 
 """
+    spearman_correlation(x, y; alpha=0.05) -> Dict
+
+SPEARMAN RANK CORRELATION: Non-parametric measure of monotonic association.
+Uses midranks for tied values. Equivalent to Pearson on ranks.
+"""
+function spearman_correlation(x::Vector{Float64}, y::Vector{Float64}; alpha::Float64=0.05)
+    n = length(x)
+    @assert length(y) == n "Vectors must be of the same length"
+
+    rx = midranks(x)
+    ry = midranks(y)
+
+    # Pearson on the ranks
+    mx, my = mean(rx), mean(ry)
+    num = sum((rx .- mx) .* (ry .- my))
+    den = sqrt(sum((rx .- mx).^2) * sum((ry .- my).^2))
+    rho = den > 0 ? num / den : 0.0
+
+    # Significance via t-distribution
+    t_stat = rho * sqrt((n - 2) / (1 - rho^2 + 1e-15))
+    df = n - 2
+    p_val = df > 0 ? 2 * (1 - cdf(TDist(df), abs(t_stat))) : 1.0
+
+    return Dict{String,Any}(
+        "rho" => rho,
+        "t_stat" => t_stat,
+        "df" => df,
+        "p_value" => p_val,
+        "significant" => p_val < alpha,
+        "interpretation" => abs(rho) > 0.7 ? "Strong" : abs(rho) > 0.3 ? "Moderate" : "Weak",
+        "test_type" => "Spearman rank correlation (midranks)"
+    )
+end
+
+"""
     pearson_correlation(x, y; alpha=0.05) -> Dict
 
 LINEAR ASSOCIATION: Computes the Pearson product-moment coefficient.
