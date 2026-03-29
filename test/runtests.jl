@@ -1240,4 +1240,91 @@ using StatistEase
         @test t < 2.0
     end
 
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  JULIA ECOSYSTEM INTEGRATIONS                                  ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "Axiom: Property Audit" begin
+        result = Dict{String,Any}("p_value" => 0.03, "df" => 14.0, "n" => 30)
+        audit = statistical_property_audit(result)
+        @test audit["p_value_bounded"] == true
+        @test audit["df_nonneg"] == true
+        @test audit["n_positive"] == true
+        @test audit["all_passed"] == true
+
+        bad = Dict{String,Any}("p_value" => -0.5)
+        @test statistical_property_audit(bad)["p_value_bounded"] == false
+    end
+
+    @testset "SMTLib: Dutch Book Verification" begin
+        r = smt_verify_dutch_book([0.3, 0.5, 0.2])
+        @test r["coherent"] == true
+
+        r2 = smt_verify_dutch_book([0.3, 0.5, 0.3])
+        @test r2["coherent"] == false
+    end
+
+    @testset "SMTLib: Mean Inequality Chain" begin
+        r = smt_verify_mean_inequality([2.0, 4.0, 4.0, 5.0, 7.0, 9.0])
+        @test r["chain_holds"] == true
+    end
+
+    @testset "SMTLib: Correction Monotonicity" begin
+        raw = [0.01, 0.04, 0.03]
+        adj = adjust_p_values(raw; method="bonferroni")["adjusted"]
+        @test smt_verify_correction_monotone(raw, adj)["monotone"] == true
+    end
+
+    @testset "Causals: Bet Chain DAG" begin
+        dag = bet_chain_to_dag(5, ["win", "draw", "lose"])
+        @test length(dag["nodes"]) == 5
+        @test dag["is_dag"] == true
+    end
+
+    @testset "Causals: Bradford Hill" begin
+        assoc = Dict{String,Any}("effect_size" => 0.8, "temporal_order" => true,
+                                 "mechanism_known" => true, "rct_available" => true)
+        @test bradford_hill_checklist(assoc)["strength"] == "strong"
+    end
+
+    @testset "Causals: Confounding" begin
+        z = randn(50); x = z .+ randn(50) .* 0.2; y = z .+ randn(50) .* 0.2
+        @test haskey(confounding_check(x, y, z), "is_confounder")
+    end
+
+    @testset "Bowtie: Risk Model" begin
+        r = bowtie_from_bets(0.1, [0.9, 0.95, 0.8], [("loss", 100.0)])
+        @test r["top_event_prob"] < r["threat_prob"]
+        @test r["most_critical_barrier"] isa Int
+    end
+
+    @testset "Bowtie: Monte Carlo" begin
+        r = monte_carlo_bowtie(0.1, [0.9, 0.95]; n_sims=5000)
+        @test 0.0 <= r["top_event_rate"] <= 1.0
+    end
+
+    @testset "ZeroProb: Zero-Inflated" begin
+        data = vcat(zeros(30), randn(70) .+ 5.0)
+        r = zero_inflated_model(data)
+        @test r["n_zeros"] == 30
+        @test r["recommend_zi"] == true
+    end
+
+    @testset "ZeroProb: Rare Event" begin
+        r = rare_event_probability(10000, 5)
+        @test r["is_rare"] == true
+        @test r["ci_lower"] < r["ci_upper"]
+    end
+
+    @testset "Quantum: Bell Experiment" begin
+        r = simulate_bell_experiment(10000)
+        @test abs(r["S_value"]) > 2.0
+        @test r["violates_classical"] == true
+    end
+
+    @testset "Quantum: Random Walk" begin
+        r = quantum_random_walk(100)
+        @test r["speedup_ratio"] > 1.0
+    end
+
 end  # Full Test Suite

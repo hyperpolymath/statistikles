@@ -89,6 +89,14 @@ include("bridge/echidna_adapter.jl")   # ECHIDNA formal proof dispatch
 include("bridge/betlang_bridge.jl")   # BetLang probabilistic programming integration
 include("bridge/typell_levels.jl")     # TypeLL levels 1-12 statistical types
 
+# --- JULIA ECOSYSTEM INTEGRATIONS ---
+include("integrations/axiom_integration.jl")    # Axiom.jl property verification
+include("integrations/smtlib_integration.jl")   # SMTLib.jl exact arithmetic
+include("integrations/causals_integration.jl")  # Causals.jl causal DAGs + Bradford Hill
+include("integrations/bowtie_integration.jl")   # BowtieRisk.jl barrier modeling
+include("integrations/zeroprob_integration.jl") # ZeroProb.jl zero-inflated models
+include("integrations/quantum_integration.jl")  # QuantumCircuit.jl Bell tests
+
 # --- INTERFACE LAYER: LLM Integration ---
 include("tools/definitions.jl")  # MCP / Function calling schemas
 include("tools/executor.jl")     # Safe execution sandbox
@@ -176,6 +184,18 @@ export main, run_examples, statistical_assistant_chat,
        width, midpoint, complement,
        latin_hypercube, sobol_sequence, importance_sample,
        simulated_annealing, particle_swarm,
-       value_at_risk, conditional_var, dutch_book_check, risk_of_ruin
+       value_at_risk, conditional_var, dutch_book_check, risk_of_ruin,
+       # Axiom.jl integration
+       statistical_property_audit, verify_pvalue_bounds, verify_effect_size_label,
+       # SMTLib.jl integration
+       smt_verify_dutch_book, smt_verify_mean_inequality, smt_verify_correction_monotone,
+       # Causals.jl integration
+       bet_chain_to_dag, bradford_hill_checklist, confounding_check,
+       # BowtieRisk.jl integration
+       bowtie_from_bets, monte_carlo_bowtie,
+       # ZeroProb.jl integration
+       zero_inflated_bet, zero_inflated_model, rare_event_probability,
+       # QuantumCircuit.jl integration
+       simulate_bell_experiment, quantum_random_walk
 
 end # module
