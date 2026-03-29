@@ -82,6 +82,10 @@ include("pipeline/validation.jl")             # Schema enforcement
 include("pipeline/cleansing.jl")              # Outlier and NaN handling
 include("pipeline/normalization.jl")          # Z-scores, Min-Max scaling
 
+# --- CROSS-VERIFICATION & PERSISTENCE ---
+include("bridge/aspasia_bridge.jl")    # Aspasia (Octave) cross-verification bridge
+include("bridge/verisimdb_schema.jl")  # VeriSimDB persistence (port 8096)
+
 # --- INTERFACE LAYER: LLM Integration ---
 include("tools/definitions.jl")  # MCP / Function calling schemas
 include("tools/executor.jl")     # Safe execution sandbox
@@ -148,6 +152,11 @@ export main, run_examples, statistical_assistant_chat,
        # Normality
        anderson_darling,
        # Corrections
-       adjust_p_values
+       adjust_p_values,
+       # Cross-verification bridge
+       write_transaction, read_audit, list_pending_audits,
+       cross_verify_summary, init_bridge,
+       # VeriSimDB persistence
+       store_result, query_results, store_audit, store_proof
 
 end # module

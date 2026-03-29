@@ -636,4 +636,35 @@ using StatistEase
         @test true  # Placeholder — levenes_test depends on one_way_anova internal
     end
 
+    # ═══════════════════════════════════════════════════════════════════
+    # ASPASIA BRIDGE
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "Aspasia Bridge" begin
+        # Init creates directories
+        dir = init_bridge()
+        @test isdir(dir)
+
+        # Write a transaction
+        txn_id = write_transaction(
+            "t_test_independent",
+            Dict("group1" => [1.0, 2.0, 3.0], "group2" => [4.0, 5.0, 6.0]),
+            Dict("t_stat" => -3.67, "p_value" => 0.01),
+            "Groups differ significantly"
+        )
+        @test length(txn_id) == 36  # UUID format
+
+        # Pending audits should include our transaction
+        pending = list_pending_audits()
+        @test txn_id in pending
+
+        # No audit yet
+        audit = read_audit(txn_id)
+        @test audit === nothing
+
+        # Summary
+        summary = cross_verify_summary()
+        @test summary["pending"] >= 1
+        @test haskey(summary, "bridge_dir")
+    end
+
 end  # Full Test Suite
