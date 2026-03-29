@@ -140,6 +140,10 @@ export main, run_examples, statistical_assistant_chat,
        rough_set_approximations, rough_membership,
        # PRE framework
        calculate_PRE_suite,
+       # Reliability & agreement
+       icc, bland_altman,
+       # Normality
+       anderson_darling,
        # Corrections
        adjust_p_values
 

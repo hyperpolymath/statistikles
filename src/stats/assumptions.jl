@@ -49,3 +49,52 @@ function levenes_test(groups::Vector{Vector{Float64}}; alpha::Float64=0.05)
             "Variance ratio >= 4:1 — consider Welch's correction or transformation"
     )
 end
+
+"""
+    anderson_darling(data::Vector{Float64}) -> Dict
+
+ANDERSON-DARLING TEST for normality. More powerful than KS test, especially
+in the tails. Uses Stephens' (1986) modified statistic with approximate p-value.
+"""
+function anderson_darling(data::Vector{Float64})
+    n = length(data)
+    sorted = sort(data)
+    m = mean(data)
+    s = std(data)
+
+    # Standardize
+    z = (sorted .- m) ./ s
+
+    # Compute CDF values
+    Φ = cdf.(Normal(), z)
+
+    # A² statistic: -n - (1/n) Σᵢ (2i-1)[ln Φᵢ + ln(1-Φₙ₊₁₋ᵢ)]
+    S = sum((2i - 1) * (log(max(Φ[i], 1e-15)) + log(max(1 - Φ[n + 1 - i], 1e-15))) for i in 1:n)
+    A2 = -n - S / n
+
+    # Stephens modification for estimated parameters
+    A2_star = A2 * (1 + 0.75 / n + 2.25 / n^2)
+
+    # Approximate p-value (D'Agostino & Stephens, 1986)
+    p_value = if A2_star < 0.2
+        1.0 - exp(-13.436 + 101.14 * A2_star - 223.73 * A2_star^2)
+    elseif A2_star < 0.34
+        1.0 - exp(-8.318 + 42.796 * A2_star - 59.938 * A2_star^2)
+    elseif A2_star < 0.6
+        exp(0.9177 - 4.279 * A2_star - 1.38 * A2_star^2)
+    elseif A2_star < 10.0
+        exp(1.2937 - 5.709 * A2_star + 0.0186 * A2_star^2)
+    else
+        0.0  # Extremely non-normal
+    end
+    p_value = clamp(p_value, 0.0, 1.0)
+
+    return Dict{String,Any}(
+        "A2" => A2,
+        "A2_star" => A2_star,
+        "p_value" => p_value,
+        "normal" => p_value > 0.05,
+        "n" => n,
+        "test_type" => "Anderson-Darling normality test (Stephens modification)"
+    )
+end

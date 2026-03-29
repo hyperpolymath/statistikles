@@ -488,4 +488,62 @@ using StatistEase
         @test r2["D_statistic"] > 0.5
     end
 
+    # ═══════════════════════════════════════════════════════════════════
+    # INTRACLASS CORRELATION COEFFICIENT
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "ICC" begin
+        # 5 subjects, 3 raters with good agreement
+        data = [1.0 1.1 0.9; 2.0 2.1 1.9; 3.0 3.2 2.8; 4.0 3.9 4.1; 5.0 5.1 4.9]
+        r = icc(data)
+        @test haskey(r, "icc")
+        @test r["icc"] > 0.9  # Very high agreement
+        @test r["n_subjects"] == 5
+        @test r["n_raters"] == 3
+
+        # One-way model
+        r_ow = icc(data; model="oneway")
+        @test r_ow["model"] == "oneway"
+        @test r_ow["icc"] > 0.8
+
+        # Consistency vs agreement
+        r_con = icc(data; type="consistency")
+        @test r_con["type"] == "consistency"
+    end
+
+    # ═══════════════════════════════════════════════════════════════════
+    # BLAND-ALTMAN AGREEMENT
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "Bland-Altman" begin
+        m1 = [10.0, 20.0, 30.0, 40.0, 50.0]
+        m2 = [11.0, 19.0, 31.0, 39.0, 51.0]
+        r = bland_altman(m1, m2)
+        @test haskey(r, "bias")
+        @test haskey(r, "loa_lower")
+        @test haskey(r, "loa_upper")
+        @test r["loa_lower"] < r["bias"] < r["loa_upper"]
+        @test r["n"] == 5
+
+        # Perfect agreement: bias = 0
+        r_perf = bland_altman([1.0, 2.0, 3.0], [1.0, 2.0, 3.0])
+        @test isapprox(r_perf["bias"], 0.0, atol=1e-10)
+    end
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ANDERSON-DARLING NORMALITY TEST
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "Anderson-Darling" begin
+        # Normal data should pass
+        normal_data = randn(100)
+        r = anderson_darling(normal_data)
+        @test haskey(r, "A2")
+        @test haskey(r, "A2_star")
+        @test haskey(r, "p_value")
+        @test 0.0 <= r["p_value"] <= 1.0
+
+        # Uniform data should fail normality
+        uniform_data = collect(range(0, 1, length=100))
+        r_unif = anderson_darling(uniform_data)
+        @test r_unif["normal"] == false  # Uniform is NOT normal
+    end
+
 end  # Full Test Suite
