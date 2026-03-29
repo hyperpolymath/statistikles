@@ -667,4 +667,67 @@ using StatistEase
         @test haskey(summary, "bridge_dir")
     end
 
+    # ═══════════════════════════════════════════════════════════════════
+    # TYPELL LEVELS 1-12
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "TypeLL Level 4: Probability" begin
+        p = Probability(0.05)
+        @test p.value == 0.05
+        @test_throws AssertionError Probability(-0.1)
+        @test_throws AssertionError Probability(1.5)
+    end
+
+    @testset "TypeLL Level 4: EffectSize" begin
+        es = EffectSize(0.35, "cohens_d")
+        @test es.label == "small"  # 0.2 ≤ 0.35 < 0.5
+        es_large = EffectSize(1.2, "cohens_d")
+        @test es_large.label == "large"
+        es_r = EffectSize(0.45, "r")
+        @test es_r.label == "medium"  # 0.3 ≤ 0.45 < 0.5
+    end
+
+    @testset "TypeLL Level 7: Tropical" begin
+        a = TropicalValue(3.0, "min_plus")
+        b = TropicalValue(5.0, "min_plus")
+        @test (a + b).value == 3.0   # min(3, 5) = 3
+        @test (a * b).value == 8.0   # 3 + 5 = 8
+    end
+
+    @testset "TypeLL Level 8: ModularInt" begin
+        a = ModularInt(7, 5)
+        b = ModularInt(3, 5)
+        @test a.value == 2  # 7 mod 5
+        @test (a + b).value == 0  # (2 + 3) mod 5
+        @test (a * b).value == 1  # (2 * 3) mod 5
+    end
+
+    @testset "TypeLL Level 12: AuditSession" begin
+        result = Dict{String,Any}("p_value" => 0.03)
+        session = new_audit_session("txn-001", result)
+        @test session.state == :compute
+
+        # Valid transition: compute → verify
+        s2 = advance(session, :verify, Dict("passed" => true))
+        @test s2.state == :verify
+
+        # Invalid transition: verify → persist (should be verify → prove)
+        @test_throws ErrorException advance(s2, :persist, "id-123")
+
+        # Valid: verify → prove → persist
+        s3 = advance(s2, :prove, Dict("trust" => 4))
+        @test s3.state == :prove
+        s4 = advance(s3, :persist, "verisim-id-001")
+        @test s4.state == :persist
+    end
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ECHIDNA ADAPTER
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "ECHIDNA Adapter" begin
+        report = proof_coverage_report()
+        @test report["total_obligations"] == 7
+        @test length(report["pending"]) == 7
+        @test typeof(report["echidna_available"]) == Bool
+    end
+
 end  # Full Test Suite

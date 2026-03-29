@@ -85,6 +85,8 @@ include("pipeline/normalization.jl")          # Z-scores, Min-Max scaling
 # --- CROSS-VERIFICATION & PERSISTENCE ---
 include("bridge/aspasia_bridge.jl")    # Aspasia (Octave) cross-verification bridge
 include("bridge/verisimdb_schema.jl")  # VeriSimDB persistence (port 8096)
+include("bridge/echidna_adapter.jl")   # ECHIDNA formal proof dispatch
+include("bridge/typell_levels.jl")     # TypeLL levels 1-12 statistical types
 
 # --- INTERFACE LAYER: LLM Integration ---
 include("tools/definitions.jl")  # MCP / Function calling schemas
@@ -157,6 +159,15 @@ export main, run_examples, statistical_assistant_chat,
        write_transaction, read_audit, list_pending_audits,
        cross_verify_summary, init_bridge,
        # VeriSimDB persistence
-       store_result, query_results, store_audit, store_proof
+       store_result, query_results, store_audit, store_proof,
+       # ECHIDNA proofs
+       check_echidna_health, proof_coverage_report,
+       verify_all_statistical_identities, StatProofObligation,
+       # TypeLL levels 1-12
+       Probability, EffectSize, DistributionType, HypothesisSpec,
+       TestResult, ConfidenceInterval,
+       TropicalValue, PadicValue, ModularInt,
+       VerifiedResult, ProvenResult, KnowledgeState,
+       AuditSession, new_audit_session, advance
 
 end # module
