@@ -8,6 +8,7 @@
 using StatsBase: competerank, ordinalrank
 using Distributions: Normal, Chisq, cdf
 using Random: shuffle
+using Statistics
 using LinearAlgebra: inv
 
 # ===========================================================================
@@ -461,5 +462,183 @@ function permanova_multi(distance_matrix::Matrix{Float64},
         "N_total" => N,
         "n_permutations" => n_permutations,
         "test_type" => "Sequential PERMANOVA (Type I, multi-factor)"
+    )
+end
+
+# ===========================================================================
+# Fisher's Exact Test (2×2)
+# ===========================================================================
+
+"""
+    fisher_exact_test(a, b, c, d; alpha=0.05) -> Dict
+
+FISHER'S EXACT TEST for 2×2 contingency tables.
+Uses hypergeometric distribution — valid for ALL sample sizes including small n.
+
+    |       | Col1 | Col2 |
+    |-------|------|------|
+    | Row1  |  a   |  b   |
+    | Row2  |  c   |  d   |
+"""
+function fisher_exact_test(a::Int, b::Int, c::Int, d::Int; alpha::Float64=0.05)
+    n = a + b + c + d
+    r1 = a + b  # Row 1 total
+    c1 = a + c  # Col 1 total
+
+    # P(X = k) under hypergeometric distribution
+    function hyper_prob(k)
+        # Binomial coefficients via log-factorial for numerical stability
+        function log_fact(n)
+            n <= 1 && return 0.0
+            return sum(log(i) for i in 2:n)
+        end
+        function log_binom(n, k)
+            (k < 0 || k > n) && return -Inf
+            return log_fact(n) - log_fact(k) - log_fact(n - k)
+        end
+        return exp(log_binom(c1, k) + log_binom(n - c1, r1 - k) - log_binom(n, r1))
+    end
+
+    p_observed = hyper_prob(a)
+
+    # Two-sided: sum probabilities of all tables as extreme or more extreme
+    k_min = max(0, r1 - (n - c1))
+    k_max = min(r1, c1)
+
+    p_value = 0.0
+    for k in k_min:k_max
+        p_k = hyper_prob(k)
+        if p_k <= p_observed + 1e-12  # As extreme or more
+            p_value += p_k
+        end
+    end
+    p_value = min(1.0, p_value)
+
+    # Odds ratio
+    odds_ratio = (b == 0 || c == 0) ? Inf : (a * d) / (b * c)
+
+    return Dict{String,Any}(
+        "p_value" => p_value,
+        "odds_ratio" => odds_ratio,
+        "significant" => p_value < alpha,
+        "table" => [a b; c d],
+        "test_type" => "Fisher's exact test (two-sided)"
+    )
+end
+
+# ===========================================================================
+# Dunn's Test (post-hoc for Kruskal-Wallis)
+# ===========================================================================
+
+"""
+    dunn_test(groups; alpha=0.05, correction="bonferroni") -> Dict
+
+DUNN'S TEST: Pairwise post-hoc comparisons following a significant Kruskal-Wallis.
+Uses midranks and applies multiple comparison correction.
+"""
+function dunn_test(groups::Vector{Vector{Float64}}; alpha::Float64=0.05, correction::String="bonferroni")
+    k = length(groups)
+    ns = length.(groups)
+    N = sum(ns)
+    combined = vcat(groups...)
+    ranks = midranks(combined)
+
+    # Mean rank per group
+    idx = 1
+    mean_ranks = Float64[]
+    for g in groups
+        n_g = length(g)
+        push!(mean_ranks, Statistics.mean(ranks[idx:idx+n_g-1]))
+        idx += n_g
+    end
+
+    # Tie correction for variance
+    T = tie_correction(combined)
+    sigma2 = (N * (N + 1) / 12.0 - T / (12.0 * (N - 1)))
+
+    # Pairwise comparisons
+    n_comparisons = k * (k - 1) ÷ 2
+    comparisons = Dict{String,Any}[]
+    raw_p_values = Float64[]
+
+    for i in 1:k, j in (i+1):k
+        z = (mean_ranks[i] - mean_ranks[j]) / sqrt(sigma2 * (1.0 / ns[i] + 1.0 / ns[j]))
+        p_raw = 2 * (1 - cdf(Normal(), abs(z)))
+        push!(raw_p_values, p_raw)
+        push!(comparisons, Dict{String,Any}(
+            "group_i" => i, "group_j" => j,
+            "mean_rank_i" => mean_ranks[i], "mean_rank_j" => mean_ranks[j],
+            "z" => z, "p_raw" => p_raw
+        ))
+    end
+
+    # Apply correction
+    adjusted = if correction == "bonferroni"
+        min.(1.0, raw_p_values .* n_comparisons)
+    elseif correction == "holm"
+        sorted_idx = sortperm(raw_p_values)
+        adj = zeros(length(raw_p_values))
+        for (rank, orig_idx) in enumerate(sorted_idx)
+            adj[orig_idx] = min(1.0, raw_p_values[orig_idx] * (n_comparisons - rank + 1))
+        end
+        # Enforce monotonicity
+        for i in 2:length(sorted_idx)
+            adj[sorted_idx[i]] = max(adj[sorted_idx[i]], adj[sorted_idx[i-1]])
+        end
+        adj
+    else
+        raw_p_values  # No correction
+    end
+
+    for (i, comp) in enumerate(comparisons)
+        comp["p_adjusted"] = adjusted[i]
+        comp["significant"] = adjusted[i] < alpha
+    end
+
+    return Dict{String,Any}(
+        "comparisons" => comparisons,
+        "n_comparisons" => n_comparisons,
+        "correction" => correction,
+        "test_type" => "Dunn's test (post-hoc pairwise, $correction correction)"
+    )
+end
+
+# ===========================================================================
+# Kolmogorov-Smirnov 2-Sample Test
+# ===========================================================================
+
+"""
+    ks_2sample(x, y; alpha=0.05) -> Dict
+
+KOLMOGOROV-SMIRNOV 2-SAMPLE TEST: Tests whether two samples come from the
+same continuous distribution. Distribution-free — no assumptions about shape.
+"""
+function ks_2sample(x::Vector{Float64}, y::Vector{Float64}; alpha::Float64=0.05)
+    n1 = length(x)
+    n2 = length(y)
+    combined = sort(vcat(x, y))
+
+    # Empirical CDFs
+    D_max = 0.0
+    for val in combined
+        ecdf1 = count(<=(val), x) / n1
+        ecdf2 = count(<=(val), y) / n2
+        D_max = max(D_max, abs(ecdf1 - ecdf2))
+    end
+
+    # Asymptotic p-value via Kolmogorov distribution approximation
+    n_eff = sqrt(n1 * n2 / (n1 + n2))
+    lambda = (n_eff + 0.12 + 0.11 / n_eff) * D_max
+
+    # Marsaglia et al. approximation for P(K > lambda)
+    p_value = 2.0 * sum((-1)^(k-1) * exp(-2 * k^2 * lambda^2) for k in 1:100)
+    p_value = clamp(p_value, 0.0, 1.0)
+
+    return Dict{String,Any}(
+        "D_statistic" => D_max,
+        "p_value" => p_value,
+        "significant" => p_value < alpha,
+        "n1" => n1, "n2" => n2,
+        "test_type" => "Kolmogorov-Smirnov two-sample test"
     )
 end

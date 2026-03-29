@@ -425,4 +425,67 @@ using StatistEase
         @test haskey(r, "upper_approximation")
     end
 
+    # ═══════════════════════════════════════════════════════════════════
+    # FISHER'S EXACT TEST
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "Fisher's Exact Test" begin
+        # Classic example: treatment vs control
+        r = fisher_exact_test(1, 9, 11, 3)
+        @test haskey(r, "p_value")
+        @test haskey(r, "odds_ratio")
+        @test 0.0 <= r["p_value"] <= 1.0
+
+        # Perfectly balanced: not significant
+        r2 = fisher_exact_test(5, 5, 5, 5)
+        @test r2["p_value"] > 0.5
+
+        # Extreme association: highly significant
+        r3 = fisher_exact_test(10, 0, 0, 10)
+        @test r3["p_value"] < 0.001
+        @test r3["odds_ratio"] == Inf
+    end
+
+    # ═══════════════════════════════════════════════════════════════════
+    # DUNN'S POST-HOC TEST
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "Dunn's Test" begin
+        groups = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]
+        r = dunn_test(groups)
+        @test r["n_comparisons"] == 3  # C(3,2) = 3 pairwise
+        @test length(r["comparisons"]) == 3
+        @test r["correction"] == "bonferroni"
+
+        # Each comparison has required fields
+        for comp in r["comparisons"]
+            @test haskey(comp, "z")
+            @test haskey(comp, "p_raw")
+            @test haskey(comp, "p_adjusted")
+            @test comp["p_adjusted"] >= comp["p_raw"]  # Correction inflates p
+        end
+
+        # Holm correction
+        r_holm = dunn_test(groups; correction="holm")
+        @test r_holm["correction"] == "holm"
+    end
+
+    # ═══════════════════════════════════════════════════════════════════
+    # KOLMOGOROV-SMIRNOV 2-SAMPLE
+    # ═══════════════════════════════════════════════════════════════════
+    @testset "KS 2-Sample" begin
+        # Same distribution: not significant
+        x = randn(100)
+        y = randn(100)
+        r = ks_2sample(x, y)
+        @test haskey(r, "D_statistic")
+        @test 0.0 <= r["D_statistic"] <= 1.0
+        @test 0.0 <= r["p_value"] <= 1.0
+
+        # Very different distributions: significant
+        x2 = randn(50)
+        y2 = randn(50) .+ 5.0  # Shifted by 5
+        r2 = ks_2sample(x2, y2)
+        @test r2["significant"] == true
+        @test r2["D_statistic"] > 0.5
+    end
+
 end  # Full Test Suite

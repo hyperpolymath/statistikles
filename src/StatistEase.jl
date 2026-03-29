@@ -98,6 +98,7 @@ export main, run_examples, statistical_assistant_chat,
        mann_whitney_u, wilcoxon_signed_rank, kruskal_wallis,
        friedman_test, cochrans_q, stuart_maxwell_test,
        permanova, permanova_multi, midranks, tie_correction,
+       fisher_exact_test, dunn_test, ks_2sample,
        # Effect sizes & power
        mle_fit, estimate_complexity, adjust_p_values,
        # Bayesian & estimation
