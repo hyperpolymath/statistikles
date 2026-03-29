@@ -3,7 +3,7 @@
 # Every exported function tested. Zero tolerance for errors/warnings.
 
 using Test
-using Statistics: mean
+using Statistics: mean, var
 using StatistEase
 
 @testset "StatistEase Full Test Suite" begin
@@ -728,6 +728,394 @@ using StatistEase
         @test report["total_obligations"] == 7
         @test length(report["pending"]) == 7
         @test typeof(report["echidna_available"]) == Bool
+    end
+
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  POINT-TO-POINT TESTS                                         ║
+    # ║  Verify individual function contracts in isolation             ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "P2P: Return type contracts" begin
+        # Every statistical function must return Dict{String,Any}
+        data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+        @test descriptive_stats(data) isa Dict{String,Any}
+        @test t_test_independent(data[1:4], data[5:8]) isa Dict{String,Any}
+        @test pearson_correlation(data, reverse(data)) isa Dict{String,Any}
+        @test simple_linear_regression(data, data .* 2) isa Dict{String,Any}
+        @test mann_whitney_u(data[1:4], data[5:8]) isa Dict{String,Any}
+        @test wilcoxon_signed_rank(data[1:4], data[5:8] .- 1.0) isa Dict{String,Any}
+        @test kruskal_wallis([data[1:3], data[4:6], data[7:8]]) isa Dict{String,Any}
+        @test fisher_exact_test(5, 3, 2, 8) isa Dict{String,Any}
+        @test adjust_p_values([0.01, 0.04, 0.03]) isa Dict
+        @test spearman_correlation(data, reverse(data)) isa Dict{String,Any}
+        @test grubbs_test(data) isa Dict{String,Any}
+        @test partial_correlation(data, reverse(data), randn(8)) isa Dict{String,Any}
+    end
+
+    @testset "P2P: p-value bounds" begin
+        # Every p-value must be in [0, 1]
+        for _ in 1:10
+            g1 = randn(20)
+            g2 = randn(20) .+ rand()
+            @test 0.0 <= t_test_independent(g1, g2)["p_value"] <= 1.0
+            @test 0.0 <= mann_whitney_u(g1, g2)["p_value"] <= 1.0
+            @test 0.0 <= wilcoxon_signed_rank(g1, g2)["p_value"] <= 1.0
+            @test 0.0 <= ks_2sample(g1, g2)["p_value"] <= 1.0
+        end
+    end
+
+    @testset "P2P: Effect size labels" begin
+        @test EffectSize(0.1, "cohens_d").label == "negligible"
+        @test EffectSize(0.3, "cohens_d").label == "small"
+        @test EffectSize(0.6, "cohens_d").label == "medium"
+        @test EffectSize(1.0, "cohens_d").label == "large"
+        @test EffectSize(0.05, "r").label == "negligible"
+        @test EffectSize(0.2, "r").label == "small"
+        @test EffectSize(0.4, "r").label == "medium"
+        @test EffectSize(0.8, "r").label == "large"
+        @test EffectSize(0.005, "eta_squared").label == "negligible"
+        @test EffectSize(0.03, "eta_squared").label == "small"
+        @test EffectSize(0.1, "eta_squared").label == "medium"
+        @test EffectSize(0.2, "eta_squared").label == "large"
+    end
+
+    @testset "P2P: Edge cases" begin
+        # Empty-ish data
+        @test descriptive_stats([1.0, 2.0])["n"] == 2
+
+        # All identical values
+        r = descriptive_stats([5.0, 5.0, 5.0, 5.0])
+        @test r["variance"] == 0.0
+        @test r["std"] == 0.0
+
+        # Single group in KW throws DomainError
+        @test_throws DomainError kruskal_wallis([[1.0, 2.0]])
+
+        # Probability bounds
+        @test_throws AssertionError Probability(-0.01)
+        @test_throws AssertionError Probability(1.01)
+        @test Probability(0.0).value == 0.0
+        @test Probability(1.0).value == 1.0
+    end
+
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  END-TO-END TESTS                                              ║
+    # ║  Full pipeline: data → analysis → cross-verify → persist       ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "E2E: Full analysis pipeline" begin
+        # Simulate a real analysis workflow
+        group_a = [23.0, 25.0, 28.0, 30.0, 27.0, 26.0, 29.0, 31.0, 24.0, 28.0]
+        group_b = [31.0, 33.0, 35.0, 29.0, 34.0, 36.0, 32.0, 30.0, 37.0, 35.0]
+
+        # Step 1: Descriptive stats for each group
+        desc_a = descriptive_stats(group_a)
+        desc_b = descriptive_stats(group_b)
+        @test desc_a["n"] == 10
+        @test desc_b["n"] == 10
+        @test desc_b["mean"] > desc_a["mean"]
+
+        # Step 2: Check normality
+        norm_a = anderson_darling(group_a)
+        norm_b = anderson_darling(group_b)
+
+        # Step 3: Choose test based on normality
+        if norm_a["normal"] && norm_b["normal"]
+            result = t_test_independent(group_a, group_b)
+        else
+            result = mann_whitney_u(group_a, group_b)
+        end
+        @test haskey(result, "p_value")
+        @test result["p_value"] < 0.05  # Groups are clearly different
+
+        # Step 4: Effect size
+        diff = mean(group_b) - mean(group_a)
+        pooled_sd = sqrt((var(group_a) + var(group_b)) / 2)
+        d = diff / pooled_sd
+        es = EffectSize(d, "cohens_d")
+        @test es.label in ["medium", "large"]
+
+        # Step 5: Write to bridge for Aspasia audit
+        txn_id = write_transaction(
+            "t_test_independent",
+            Dict("group_a" => group_a, "group_b" => group_b),
+            result,
+            "Group B scored significantly higher than Group A"
+        )
+        @test length(txn_id) == 36
+
+        # Step 6: Check ECHIDNA proof coverage
+        report = proof_coverage_report()
+        @test report["total_obligations"] >= 7
+    end
+
+    @testset "E2E: Nonparametric pipeline" begin
+        # 3 groups, ordinal data → KW → Dunn post-hoc → corrections
+        g1 = [1.0, 2.0, 1.5, 2.5, 1.0]
+        g2 = [3.0, 4.0, 3.5, 4.5, 3.0]
+        g3 = [5.0, 6.0, 5.5, 6.5, 5.0]
+
+        kw = kruskal_wallis([g1, g2, g3])
+        @test kw["significant"] == true
+
+        dunn = dunn_test([g1, g2, g3]; correction="holm")
+        @test dunn["n_comparisons"] == 3
+        # At least some pairs should differ
+        sig_count = count(c -> c["significant"], dunn["comparisons"])
+        @test sig_count >= 1
+
+        # Correct p-values
+        raw_ps = [c["p_raw"] for c in dunn["comparisons"]]
+        adj = adjust_p_values(raw_ps; method="fdr")
+        @test all(adj["adjusted"] .>= raw_ps)
+    end
+
+    @testset "E2E: Correlation → Regression pipeline" begin
+        x = collect(1.0:20.0)
+        y = 2.0 .* x .+ 3.0 .+ randn(20) .* 0.5
+
+        # Pearson
+        pr = pearson_correlation(x, y)
+        @test pr["r"] > 0.95
+
+        # Spearman should agree
+        sr = spearman_correlation(x, y)
+        @test sr["rho"] > 0.9
+
+        # Regression
+        reg = simple_linear_regression(x, y)
+        @test isapprox(reg["slope"], 2.0, atol=0.3)
+        @test isapprox(reg["intercept"], 3.0, atol=1.5)
+        @test reg["r_squared"] > 0.9
+    end
+
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  ASPECT TESTS                                                  ║
+    # ║  Cross-cutting concerns: types, NaN handling, determinism      ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "Aspect: NaN handling" begin
+        data_with_nan = [1.0, 2.0, NaN, 4.0, 5.0]
+        r = descriptive_stats(data_with_nan)
+        @test r["n"] == 4  # NaN filtered out
+        @test !isnan(r["mean"])
+    end
+
+    @testset "Aspect: Determinism" begin
+        # Same input → same output (no hidden randomness in pure functions)
+        data = [3.0, 1.0, 4.0, 1.0, 5.0, 9.0, 2.0, 6.0]
+        r1 = descriptive_stats(data)
+        r2 = descriptive_stats(data)
+        @test r1["mean"] == r2["mean"]
+        @test r1["std"] == r2["std"]
+        @test r1["skewness"] == r2["skewness"]
+        @test r1["kurtosis"] == r2["kurtosis"]
+
+        # Rank tests are deterministic (no random permutations)
+        g1 = [1.0, 2.0, 3.0]
+        g2 = [4.0, 5.0, 6.0]
+        mw1 = mann_whitney_u(g1, g2)
+        mw2 = mann_whitney_u(g1, g2)
+        @test mw1["U_statistic"] == mw2["U_statistic"]
+        @test mw1["p_value"] == mw2["p_value"]
+    end
+
+    @testset "Aspect: Symmetry" begin
+        # Pearson r(x,y) = r(y,x)
+        x = randn(20)
+        y = randn(20)
+        @test pearson_correlation(x, y)["r"] ≈ pearson_correlation(y, x)["r"]
+
+        # Spearman ρ(x,y) = ρ(y,x)
+        @test spearman_correlation(x, y)["rho"] ≈ spearman_correlation(y, x)["rho"]
+
+        # MW U: group order affects U1/U2 but p-value stays the same
+        g1 = randn(15)
+        g2 = randn(15) .+ 1.0
+        @test mann_whitney_u(g1, g2)["p_value"] ≈ mann_whitney_u(g2, g1)["p_value"]
+
+        # KS is symmetric
+        @test ks_2sample(g1, g2)["D_statistic"] ≈ ks_2sample(g2, g1)["D_statistic"]
+    end
+
+    @testset "Aspect: Mathematical invariants" begin
+        data = [2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]
+        r = descriptive_stats(data)
+
+        # QM-AM-GM-HM inequality (for positive data)
+        @test r["quadratic_mean"] >= r["mean"] - 1e-10
+        @test r["mean"] >= r["geometric_mean"] - 1e-10
+        @test r["geometric_mean"] >= r["harmonic_mean"] - 1e-10
+
+        # Variance = std²
+        @test isapprox(r["variance"], r["std"]^2, atol=1e-10)
+
+        # IQR = Q3 - Q1
+        @test isapprox(r["iqr"], r["q3"] - r["q1"], atol=1e-10)
+
+        # Range = max - min
+        @test isapprox(r["range"], r["max"] - r["min"], atol=1e-10)
+
+        # CLR sums to zero
+        clr = centered_log_ratio([0.3, 0.5, 0.2])
+        @test isapprox(sum(clr), 0.0, atol=1e-10)
+
+        # Tropical: min(a,a) = a (idempotence)
+        a = TropicalValue(7.0, "min_plus")
+        @test (a + a).value == 7.0
+
+        # Modular: (a + b) mod n = ((a mod n) + (b mod n)) mod n
+        @test ModularInt(17, 7).value == mod(17, 7)
+        @test (ModularInt(17, 7) + ModularInt(23, 7)).value == mod(17 + 23, 7)
+    end
+
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  EXECUTION TESTS                                               ║
+    # ║  Performance, no errors on large data, no stack overflow       ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "Execution: Large data" begin
+        big_data = randn(10_000)
+        r = descriptive_stats(big_data)
+        @test r["n"] == 10_000
+        @test !isnan(r["mean"])
+        @test !isnan(r["std"])
+
+        # MW on large groups
+        mw = mann_whitney_u(randn(500), randn(500) .+ 0.1)
+        @test 0.0 <= mw["p_value"] <= 1.0
+
+        # KW with many groups
+        groups = [randn(50) .+ i * 0.5 for i in 1:5]
+        kw = kruskal_wallis(groups)
+        @test kw["k_groups"] == 5
+    end
+
+    @testset "Execution: No stack overflow on deep recursion" begin
+        # Midranks on large vector (iterative, shouldn't overflow)
+        large = randn(5000)
+        ranks = midranks(large)
+        @test length(ranks) == 5000
+        @test isapprox(sum(ranks), 5000 * 5001 / 2, atol=1e-6)
+    end
+
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  LIFECYCLE TESTS                                               ║
+    # ║  TypeLL session protocol, bridge round-trip, state transitions  ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "Lifecycle: Full audit session (L12)" begin
+        # compute → verify → prove → persist → report → complete
+        result = Dict{String,Any}("p_value" => 0.03, "test" => "t_test")
+        s1 = new_audit_session("lifecycle-001", result)
+        @test s1.state == :compute
+
+        s2 = advance(s1, :verify, Dict("numerical_ok" => true))
+        @test s2.state == :verify
+        @test s2.verify_result !== nothing
+
+        s3 = advance(s2, :prove, Dict("trust_level" => 4, "prover" => "agda"))
+        @test s3.state == :prove
+        @test s3.proof_result !== nothing
+
+        s4 = advance(s3, :persist, "verisimdb-rec-001")
+        @test s4.state == :persist
+        @test s4.persist_id == "verisimdb-rec-001"
+
+        s5 = advance(s4, :report, nothing)
+        @test s5.state == :report
+
+        s6 = advance(s5, :complete, nothing)
+        @test s6.state == :complete
+    end
+
+    @testset "Lifecycle: Session type violations" begin
+        result = Dict{String,Any}("p_value" => 0.5)
+        s = new_audit_session("violation-001", result)
+
+        # Cannot skip steps
+        @test_throws ErrorException advance(s, :prove, nothing)
+        @test_throws ErrorException advance(s, :persist, nothing)
+        @test_throws ErrorException advance(s, :complete, nothing)
+
+        # Can only go forward
+        s2 = advance(s, :verify, Dict("ok" => true))
+        @test_throws ErrorException advance(s2, :compute, nothing)
+    end
+
+    @testset "Lifecycle: Bridge round-trip" begin
+        # Write transaction
+        txn_id = write_transaction(
+            "lifecycle_test",
+            Dict("data" => [1.0, 2.0, 3.0]),
+            Dict("mean" => 2.0),
+            "Mean is 2"
+        )
+
+        # Should appear in pending
+        @test txn_id in list_pending_audits()
+
+        # Not yet audited
+        @test read_audit(txn_id) === nothing
+
+        # Summary reflects state
+        summary = cross_verify_summary()
+        @test summary["pending"] >= 1
+    end
+
+    # ╔══════════════════════════════════════════════════════════════════╗
+    # ║  BENCHMARKS                                                    ║
+    # ║  Timing gates — functions must complete within bounds          ║
+    # ╚══════════════════════════════════════════════════════════════════╝
+
+    @testset "Bench: Descriptive stats < 100ms on 10K" begin
+        data = randn(10_000)
+        t = @elapsed descriptive_stats(data)
+        @test t < 0.1  # 100ms
+    end
+
+    @testset "Bench: Mann-Whitney < 200ms on 1K×1K" begin
+        t = @elapsed mann_whitney_u(randn(1000), randn(1000))
+        @test t < 0.2
+    end
+
+    @testset "Bench: Midranks < 50ms on 10K" begin
+        t = @elapsed midranks(randn(10_000))
+        @test t < 0.05
+    end
+
+    @testset "Bench: KS 2-sample < 500ms on 1K×1K" begin
+        t = @elapsed ks_2sample(randn(1000), randn(1000))
+        @test t < 0.5
+    end
+
+    @testset "Bench: PERMANOVA < 5s on 100 obs, 999 perms" begin
+        n = 100
+        D = rand(n, n)
+        D = (D + D') / 2  # Symmetric
+        for i in 1:n; D[i,i] = 0.0; end
+        labels = repeat(["A", "B"], inner=n÷2)
+        t = @elapsed permanova(D, labels; n_permutations=999)
+        @test t < 5.0
+    end
+
+    @testset "Bench: Tropical matrix 100×100 < 1s" begin
+        A = rand(100, 100)
+        B = rand(100, 100)
+        t = @elapsed tropical_matrix_multiply(A, B)
+        @test t < 1.0
+    end
+
+    @testset "Bench: Power mean < 10ms on 10K" begin
+        data = abs.(randn(10_000)) .+ 0.1
+        t = @elapsed power_mean(data, 2.0)
+        @test t < 0.01
+    end
+
+    @testset "Bench: Bootstrap CI < 2s (1K reps)" begin
+        data = randn(100)
+        t = @elapsed bootstrap_ci(data, mean; n_reps=1000)
+        @test t < 2.0
     end
 
 end  # Full Test Suite
