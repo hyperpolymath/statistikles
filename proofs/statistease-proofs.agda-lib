@@ -1,0 +1,3 @@
+name: statistease-proofs
+depend: standard-library
+include: .

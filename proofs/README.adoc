@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= StatistEase Formal Proofs (Agda)
+
+Constructive proofs of core statistical identities used by StatistEase.
+Verified by Agda's dependent type checker — no postulates, no holes.
+
+== Proof Catalogue
+
+[cols="1,2,2,1"]
+|===
+| # | Identity | File | Status
+
+| 1 | Tropical addition associative | TropicalSemiring.agda | Proven
+| 2 | Tropical addition commutative | TropicalSemiring.agda | Proven
+| 3 | Tropical distributivity | TropicalSemiring.agda | Proven
+| 4 | Tropical idempotence | TropicalSemiring.agda | Proven
+| 5 | Tropical multiplicative identity | TropicalSemiring.agda | Proven
+| 6 | Chi-square df identity | RankIdentities.agda | Proven
+| 7 | Rank sum (concrete to n=100) | RankIdentities.agda | Proven
+| 8 | Bonferroni (elem ≤ sum) | Inequalities.agda | Proven
+| 9 | Tie correction bound (sq-mono) | Inequalities.agda | Proven
+| 10 | Mean ordering transitivity | Inequalities.agda | Proven
+|===
+
+== Building
+
+Requires Agda 2.6.4+ and agda-stdlib.
+
+```bash
+agda --safe StatistEase/TropicalSemiring.agda
+agda --safe StatistEase/RankIdentities.agda
+agda --safe StatistEase/Inequalities.agda
+```
+
+== Integration with ECHIDNA
+
+These proofs correspond to the `StatProofObligation` entries in
+`src/bridge/echidna_adapter.jl`. ECHIDNA dispatches verification
+requests to Agda for constructive proofs and Z3 for arithmetic.
