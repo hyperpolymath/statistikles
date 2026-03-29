@@ -1,5 +1,5 @@
 name = "StatistEase"
-uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+uuid = "cc532b54-de7e-466e-8dd9-45d18a432455"
 version = "0.1.0"
 authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 
@@ -25,3 +25,9 @@ HTTP = "1.10.19"
 JSON3 = "1.14.3"
 StatsBase = "0.34.10"
 julia = "1.10"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

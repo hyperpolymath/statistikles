@@ -35,10 +35,71 @@ function tropical_dot_product(v1::Vector{Float64}, v2::Vector{Float64})
 end
 
 """
-    bell_test_chsh(counts::Dict{String, Int}) -> Float64
+    tropical_mean(data::Vector{Float64}) -> Float64
+
+TROPICAL MEAN (min-plus): The minimum value (identity of tropical addition).
+"""
+function tropical_mean(data::Vector{Float64})
+    return minimum(data)
+end
+
+"""
+    tropical_matrix_multiply(A::Matrix{Float64}, B::Matrix{Float64}) -> Matrix{Float64}
+
+TROPICAL MATRIX MULTIPLICATION: (A ⊗ B)ᵢⱼ = min_k(Aᵢₖ + Bₖⱼ)
+Used for shortest-path problems and scheduling.
+"""
+function tropical_matrix_multiply(A::Matrix{Float64}, B::Matrix{Float64})
+    m, n = size(A)
+    n2, p = size(B)
+    @assert n == n2 "Inner dimensions must match"
+    C = fill(Inf, m, p)
+    for i in 1:m, j in 1:p
+        for k in 1:n
+            C[i, j] = min(C[i, j], A[i, k] + B[k, j])
+        end
+    end
+    return C
+end
+
+"""
+    tropical_eigenvalue(A::Matrix{Float64}) -> Float64
+
+TROPICAL EIGENVALUE: min cycle mean of the directed graph represented by A.
+"""
+function tropical_eigenvalue(A::Matrix{Float64})
+    n = size(A, 1)
+    @assert size(A, 1) == size(A, 2) "Matrix must be square"
+    # Karp's algorithm for minimum cycle mean
+    d = fill(Inf, n + 1, n)
+    d[1, 1] = 0.0
+    for k in 1:n
+        for i in 1:n, j in 1:n
+            if d[k, i] < Inf && A[i, j] < Inf
+                d[k + 1, j] = min(d[k + 1, j], d[k, i] + A[i, j])
+            end
+        end
+    end
+    λ = Inf
+    for j in 1:n
+        if d[n + 1, j] < Inf
+            max_ratio = -Inf
+            for k in 1:n
+                if d[k, j] < Inf
+                    max_ratio = max(max_ratio, (d[n + 1, j] - d[k, j]) / (n + 1 - k))
+                end
+            end
+            λ = min(λ, max_ratio)
+        end
+    end
+    return λ
+end
+
+"""
+    bell_test_chsh(correlations::Vector{Float64}) -> Float64
 
 BELL TEST (CHSH): Tests the CHSH inequality for quantum entanglement.
-Expects counts for (a,b) settings in {0,1}x{0,1}.
+S = E(0,0) - E(0,1) + E(1,0) + E(1,1). Classical bound: |S| ≤ 2.
 """
 function bell_test_chsh(correlations::Vector{Float64})
     # S = E(0,0) - E(0,1) + E(1,0) + E(1,1)

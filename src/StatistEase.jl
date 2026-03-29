@@ -89,23 +89,57 @@ include("tools/lmstudio.jl")     # Local LLM connectivity
 include("tools/chat.jl")         # Interactive session management
 
 export main, run_examples, statistical_assistant_chat,
-       descriptive_stats, t_test_independent, pearson_correlation,
-       simple_linear_regression, multiple_regression, logistic_regression, permanova,
-       mle_fit, estimate_complexity, adjust_p_values, path_analysis,
-       pca, bootstrap_ci, moving_average, autocorrelation, shannon_entropy, kl_divergence,
-       kaplan_meier, log_rank_test, meta_analysis,
+       # Descriptive
+       descriptive_stats, power_mean, weighted_stats, frequency_table,
+       # Inferential
+       t_test_independent, pearson_correlation,
+       simple_linear_regression, multiple_regression, logistic_regression,
+       # Nonparametric
+       mann_whitney_u, wilcoxon_signed_rank, kruskal_wallis,
        friedman_test, cochrans_q, stuart_maxwell_test,
+       permanova, permanova_multi, midranks, tie_correction,
+       # Effect sizes & power
+       mle_fit, estimate_complexity, adjust_p_values,
+       # Bayesian & estimation
+       path_analysis, pca, bootstrap_ci,
+       # Time series & signal
+       moving_average, autocorrelation, dynamic_time_warping,
+       independent_component_analysis,
+       # Information theory
+       shannon_entropy, kl_divergence,
+       # Survival
+       kaplan_meier, log_rank_test,
+       # Meta-analysis
+       meta_analysis,
+       # Robust
        mahalanobis_distance, huber_m_estimator, ransac_regression,
+       # Causal
        instrumental_variables, difference_in_differences, regression_discontinuity,
-       morans_i, gwr_basic, dynamic_time_warping,
+       # Spatial
+       morans_i, gwr_basic,
+       # ML proxy
        spline_regression, random_forest_proxy,
+       # NLP
        lexicon_sentiment, topic_modeling_nmf,
+       # Advanced regression
        mixed_effects_intercept, ordinal_logistic_regression,
-       independent_component_analysis, expectation_maximization_normal,
-       functional_pca, mcnemar_test, padic_valuation, centered_log_ratio,
-       interval_overlap_test, choquet_integral, tropical_dot_product,
-       bell_test_chsh, degree_centrality, box_counting_dimension,
-       hurst_exponent, rough_set_approximations, rough_membership,
-       calculate_PRE_suite
+       expectation_maximization_normal, functional_pca,
+       # Algebraic: p-adic, complex, modular
+       mcnemar_test, padic_valuation, complex_circular_normality,
+       modular_stats, gcd_stats,
+       # Compositional & interval
+       centered_log_ratio, interval_overlap_test,
+       # Non-classical: tropical, Choquet, quantum
+       choquet_integral, tropical_dot_product, tropical_mean,
+       tropical_matrix_multiply, tropical_eigenvalue,
+       bell_test_chsh,
+       # Graph & fractal
+       degree_centrality, box_counting_dimension, hurst_exponent,
+       # Rough sets
+       rough_set_approximations, rough_membership,
+       # PRE framework
+       calculate_PRE_suite,
+       # Corrections
+       adjust_p_values
 
 end # module
