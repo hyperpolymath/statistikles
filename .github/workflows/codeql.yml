@@ -22,7 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: javascript-typescript
+          # Julia is not supported by CodeQL — scan workflow YAML only
+          - language: actions
             build-mode: none
 
     steps:

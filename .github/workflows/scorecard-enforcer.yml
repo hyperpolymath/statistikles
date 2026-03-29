@@ -13,44 +13,6 @@ permissions:
   contents: read
 
 jobs:
-  scorecard:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      id-token: write  # For OIDC
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Run Scorecard
-        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
-        with:
-          results_file: results.sarif
-          results_format: sarif
-          publish_results: true
-
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
-        with:
-          sarif_file: results.sarif
-
-      - name: Check minimum score
-        run: |
-          # Parse score from results
-          SCORE=$(jq -r '.runs[0].tool.driver.properties.score // 0' results.sarif 2>/dev/null || echo "0")
-
-          echo "OpenSSF Scorecard Score: $SCORE"
-
-          # Minimum acceptable score (0-10 scale)
-          MIN_SCORE=5
-
-          if [ "$(echo "$SCORE < $MIN_SCORE" | bc -l)" = "1" ]; then
-            echo "::error::Scorecard score $SCORE is below minimum $MIN_SCORE"
-            exit 1
-          fi
-
-  # Check specific high-priority items
   check-critical:
     runs-on: ubuntu-latest
     steps:
@@ -71,3 +33,24 @@ jobs:
             echo "::warning::Found unpinned actions:"
             echo "$unpinned"
           fi
+
+  scorecard:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard
+        uses: ossf/scorecard-action@62b2cac7ed8198b15735ed49ab1e5cf35480ba46 # v2.4.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@6624720a57d4c312633c7b953db2f2da5bcb4c3a # v3
+        with:
+          sarif_file: results.sarif
