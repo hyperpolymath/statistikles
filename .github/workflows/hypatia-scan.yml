@@ -76,7 +76,7 @@ jobs:
           echo "- Medium: $MEDIUM" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload findings artifact
-        uses: actions/upload-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        uses: actions/upload-artifact@65462f22b1165aba250f484e8dff98c1b84b6ef2 # v4.6.0
         with:
           name: hypatia-findings
           path: hypatia-findings.json
