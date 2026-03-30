@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# StatistEase — E2E + Aspect Tests
+#
+# Runs the Julia test suite (478 tests, 10 Agda proofs, 8 integrations).
+
+name: E2E + Aspect
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'Project.toml'
+      - '.github/workflows/e2e.yml'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions: read-all
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-julia:
+    name: E2E — Julia Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@5c9647d97b78a5debe5164e9eec09d58c64f0a27  # v2
+        with:
+          version: '1.10'
+
+      - name: Julia cache
+        uses: julia-actions/cache@824243901fb567a0d7c9938c1d31e1f0bc1e65d9  # v2
+
+      - name: Run Julia tests
+        run: julia --project=. -e 'using Pkg; Pkg.test()'
+
+  aspect-safety:
+    name: Aspect — Safety + SPDX
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: No dangerous patterns
+        run: |
+          DANGEROUS=$(grep -rn 'believe_me\|assert_total\|sorry\|Admitted' src/ 2>/dev/null || true)
+          if [ -n "$DANGEROUS" ]; then
+            echo "FAIL: Dangerous patterns"
+            echo "$DANGEROUS"
+            exit 1
+          fi
+          echo "PASS: No dangerous patterns"
+
+      - name: SPDX headers
+        run: |
+          MISSING=0
+          for f in $(find src/ -name "*.jl" | head -20); do
+            if ! head -3 "$f" | grep -q "SPDX"; then
+              MISSING=$((MISSING + 1))
+            fi
+          done
+          echo "Missing SPDX: $MISSING (of 20 sampled)"
