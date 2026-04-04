@@ -93,3 +93,6 @@ ai-cli-crash-capture/
 
 # Sync artifacts
 sync_report*.txt
+
+# wokelangiser generated i18n locale files (too large for GitHub)
+generated/wokelangiser/i18n/
