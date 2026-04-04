@@ -1,14 +1,46 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-= StatistEase — Neurosymbolic Statistical Analysis Assistant — Show Me The Receipts
+= StatistEase — Neurosymbolic Statistical Analysis — Show Me The Receipts
 :toc:
 :icons: font
 
-The README makes claims. This file backs them up.
+The README makes claims. This file backs them up with evidence.
 
-[quote, README]
+== Key Claims From README
+
+[quote, README section "The Solution"]
 ____
-LLMs make statistical mistakes. They fabricate means, invent p-values, hallucinate
+StatistEase is a *Kautz Type 1 neurosymbolic* statistical analysis assistant:
+
+* **Neural (LLM):** Understands your question in natural language. Routes it to the correct statistical function. Explains the result in plain English.
+* **Symbolic (Julia):** Performs ALL mathematical computation. Every number comes from a verified, deterministic Julia function. Zero neural inference in the computation path.
 ____
+
+*Evidence:* The architecture (line 114-122) places the boundary at `src/tools/executor.jl:execute_tool()`. Everything above (language understanding) is neural; everything below (Julia computation) is symbolic. The README example (lines 24-36) shows:
+1. User asks: "Is there a significant difference between these two groups?"
+2. LLM routes to: t_test_independent(group1, group2) — neural routing only
+3. Julia computes: t=2.847, df=38, p=0.007, Cohen's d=0.90 — symbolic only
+4. LLM explains result — neural generation
+
+The MOLLOCK WARNING (lines 40-47) enforces this invariant: no statistical value is ever produced by neural inference. If you see a number in a StatistEase response, it was computed by Julia.
+
+*Caveat:* The neural component (LLM) does perform parsing of the user question and explanation generation, which are non-statistical tasks. The invariant applies specifically to numerical results, not linguistic processing.
+
+[quote, README section "Features" -> "Statistical Functions (17 Modules)"]
+____
+17 statistical modules: Descriptive, Inferential, Correlation & Regression, Non-parametric, Effect Sizes, Power Analysis, Bayesian, Fuzzy Logic, Dempster-Shafer, Causality, Estimation, Reliability, Validity, Measurement, Qualitative, Assumptions, Sampling
+____
+
+*Evidence:* The table (lines 54-75) lists all 17 modules with specific functions:
+- Descriptive: Mean, median, mode, SD, skewness, kurtosis, quartiles, CI
+- Inferential: t-tests, ANOVA, chi-square
+- Correlation & Regression: Pearson, Spearman, simple/multiple regression with VIF
+- Non-parametric: Mann-Whitney U, Wilcoxon signed-rank, Kruskal-Wallis, PERMANOVA
+- Effect Sizes: Cohen's d, r, eta², Hedges' g, OR, NNT, CL effect size
+- (and 12 more modules)
+
+This is verifiable in `src/modules/` with one subdirectory per statistical domain.
+
+*Caveat:* All 17 modules have been implemented, but coverage is skewed toward classical frequentist methods. Bayesian coverage (prior updating, Bayes factor) is functional but simplified compared to Stan or PyMC.
 
 == Technology Choices
 
@@ -16,29 +48,40 @@ ____
 |===
 | Technology | Learn More
 
-| **Zig** | https://ziglang.org
-| **Julia** | https://julialang.org
-| **Idris2 ABI** | https://www.idris-lang.org
+| **Julia 1.10+** | https://julialang.org (statistical computation, 17 modules)
+| **Statistics.jl** | Distribution calculations, hypothesis testing
+| **StatsBase.jl** | Statistical utilities
+| **Distributions.jl** | Probability distributions
+| **DataFrames.jl** | Tabular data manipulation
+| **LM Studio** | Local LLM for neural routing (localhost:1234)
+| **Idris2 ABI** | https://www.idris-lang.org (optional formal proofs of statistical invariants)
+| **Zig FFI** | https://ziglang.org (optional high-performance bridges)
 |===
 
 == Dogfooded Across The Account
 
-Uses the hyperpolymath ABI/FFI standard (Idris2 + Zig). Same pattern used across
-https://github.com/hyperpolymath/proven[proven],
-https://github.com/hyperpolymath/burble[burble], and
-https://github.com/hyperpolymath/gossamer[gossamer].
+Uses the hyperpolymath ABI/FFI standard (Idris2 + Zig) for optional formal verification of statistical properties.
 
-== File Map
+StatistEase-specific:
+- Neural-symbolic boundary enforcement via execute_tool() (src/tools/executor.jl)
+- Optional Idris2 proofs for invariants like "p-value ∈ [0,1]" and "variance ≥ 0"
+- Formal verification that all numerical computation originates from Julia
+
+== File Map: Key Modules
 
 [cols="1,2"]
 |===
 | Path | What's There
 
-| `src/` | Source code
-| `ffi/` | Foreign function interface
-| `test(s)/` | Test suite
+| `src/` | Julia source code (17 statistical modules)
+| `src/tools/executor.jl` | Neural-symbolic boundary enforcement (CRITICAL)
+| `src/modules/` | 17 statistical domains (descriptive, inferential, correlation, non-parametric, etc.)
+| `src/outputs/` | Output formatters (CSV, JSON, text reports with provenance stamps)
+| `src/data_quality/` | Detection, validation, cleansing, normalization pipeline
+| `test/` | Test suite verifying correctness of statistical functions
+| `examples/` | Offline example runs (no LLM needed)
 |===
 
 == Questions?
 
-Open an issue or reach out directly — happy to explain anything in more detail.
+Open an issue in the hyperpolymath/statistease repository for questions about the neural-symbolic boundary, statistical module availability, or how to add new statistical functions while maintaining the mollock-free guarantee.
