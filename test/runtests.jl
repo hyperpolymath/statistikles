@@ -1328,3 +1328,10 @@ using StatistEase
     end
 
 end  # Full Test Suite
+
+# ── Extended test categories (CRG Grade C) ───────────────────────────────────
+# E2E tests: full statistical pipelines from input to report
+include("e2e_test.jl")
+
+# Property tests: mathematical invariants validated over random inputs
+include("property_test.jl")
