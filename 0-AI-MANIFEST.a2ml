@@ -94,6 +94,30 @@ src/
 ✅ Read `.machine_readable/6a2/STATE.a2ml` for current status
 ✅ Read `.machine_readable/6a2/NEUROSYM.a2ml` for architecture
 
+## Calling ECHIDNA via BoJ
+
+All ECHIDNA invocations go through the `echidna-llm-mcp` BoJ cartridge.
+**Never call ECHIDNA directly — always go through BoJ.**
+
+| Tool | Description |
+|------|-------------|
+| `echidna_list_provers` | Discover all 105 provers with tier/category/complexity |
+| `echidna_prove` | Invoke a prover on proof content |
+| `echidna_verify` | Verify inline proof content (typed outcome) |
+| `echidna_verify_raw` | Direct binary invocation (EProver, CaDiCaL, SAT solvers) |
+| `echidna_suggest` | Neural tactic suggestions (Julia ML corpus-backed) |
+| `echidna_suggest_tactics` | Aspect-tag tactic suggestions — advisory only |
+| `echidna_search` | Keyword search over 66,674-proof corpus |
+| `echidna_session_create` | Start interactive tactic session |
+
+```json
+{ "tool": "echidna_list_provers", "args": {} }
+{ "tool": "echidna_prove", "args": { "prover": "Lean", "content": "theorem t : 1 + 1 = 2 := rfl" } }
+{ "tool": "echidna_suggest_tactics", "args": { "goal": "n + 0 = n", "prover": "Lean" } }
+```
+
+Full protocol: `boj-server/cartridges/echidna-llm-mcp/docs/CALL-PROTOCOL.adoc`
+
 ## LIFECYCLE HOOKS
 
 ### on-enter (Session Start)
