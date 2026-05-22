@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # BowtieRisk.jl Integration — Risk analysis with barrier modeling.
 #
 # Extends BetLang's VaR/risk-of-ruin with structured threat modeling.

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # ECHIDNA Adapter — Formal proof dispatch for statistical properties.
 #
 # Dispatches proof obligations to ECHIDNA's 48-prover backend via GraphQL.

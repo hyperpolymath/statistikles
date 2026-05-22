@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # ZeroProb.jl Integration — Zero-probability event handling.
 #
 # Extends BetLang's ternary bets with proper handling of events that

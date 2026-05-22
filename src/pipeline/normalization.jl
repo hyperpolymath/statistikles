@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Data normalization — fourth stage of the Data Quality Pathway.
 #
 # Raw Input → Detection → Validation → Cleansing → [NORMALIZATION] → Analysis

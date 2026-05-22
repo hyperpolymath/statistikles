@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Fuzzy logic operations — symbolic computation only.
 
 function fuzzy_membership(value::Float64, center::Float64, width::Float64)

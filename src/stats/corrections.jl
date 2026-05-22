@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 
 # Multiple Comparison Corrections — Symbolic P-value Adjustment.
 #

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Bayesian statistics — symbolic computation only.
 
 function bayesian_update(prior::Vector{Float64}, likelihood::Matrix{Float64}, data_index::Int)

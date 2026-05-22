@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 
 # Robust Statistics — Resilient Estimation and Outlier Detection.
 #

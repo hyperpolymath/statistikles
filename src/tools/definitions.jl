@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Tool definitions for LM Studio function calling.
 # These definitions tell the LLM what symbolic tools are available.
 # The LLM NEVER performs calculations — it requests tool calls,

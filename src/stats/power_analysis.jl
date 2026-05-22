@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Power analysis and sample size calculations — symbolic computation only.
 
 function power_analysis_t_test(; effect_size::Union{Float64,Nothing}=nothing,

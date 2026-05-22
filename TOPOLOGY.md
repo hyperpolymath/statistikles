@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
 <!-- TOPOLOGY.md — StatistEase architecture map and completion dashboard -->
 <!-- Last updated: 2026-02-20 -->
 

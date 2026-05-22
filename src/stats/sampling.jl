@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Sampling design calculations — symbolic computation only.
 
 function design_effect(icc::Float64, cluster_size::Int)

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # ASCII/Unicode graph output for terminal display.
 # These provide immediate visual feedback without external dependencies.
 

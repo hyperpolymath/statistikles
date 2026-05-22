@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Causals.jl Integration — Causal DAG modeling for bet chains and statistical tests.
 #
 # Maps bet sequences to causal DAGs and provides Bradford Hill assessment.

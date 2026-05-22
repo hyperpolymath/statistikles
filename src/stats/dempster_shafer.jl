@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Dempster-Shafer Theory of Evidence — symbolic computation only.
 
 function dempster_shafer_combination(m1::Dict{String,Float64}, m2::Dict{String,Float64})

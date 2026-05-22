@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Measurement theory — ICC, SEM, item analysis. Symbolic computation only.
 
 function intraclass_correlation(ratings::Matrix{Float64}; icc_type::String="ICC(2,1)")

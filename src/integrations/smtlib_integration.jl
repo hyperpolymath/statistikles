@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SMTLib.jl Integration — Exact arithmetic verification for statistics.
 #
 # Uses SMT constraints to formally verify:

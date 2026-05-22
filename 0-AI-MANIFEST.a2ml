@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # ⚠️ STOP - CRITICAL READING REQUIRED
 
 **THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
@@ -82,7 +82,7 @@ src/
 1. **MOLLOCK RULE** - No statistical value from neural inference. Ever.
 2. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
 3. **Single source of truth** - `.machine_readable/` is authoritative
-4. **License consistency** - All code PMPL-1.0-or-later
+4. **License consistency** - All code MPL-2.0
 5. **Author attribution** - Always "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
 6. **Julia for computation** - All maths in Julia, no Chapel/Python/R
 
@@ -136,5 +136,5 @@ Full protocol: `boj-server/cartridges/echidna-llm-mcp/docs/CALL-PROTOCOL.adoc`
 - **Format Version:** 1.0.0
 - **Created:** 2026-02-20
 - **Maintained By:** hyperpolymath
-- **License:** PMPL-1.0-or-later
+- **License:** MPL-2.0
 - **Protocol:** https://github.com/hyperpolymath/0-ai-gatekeeper-protocol

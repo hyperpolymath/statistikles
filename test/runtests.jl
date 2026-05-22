@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # StatistEase — Comprehensive Unit Test Suite
 # Every exported function tested. Zero tolerance for errors/warnings.
 

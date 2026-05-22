@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # TypeLL Statistical Type Levels 1-12
 #
 # Type safety hierarchy for statistical computations. Each level adds

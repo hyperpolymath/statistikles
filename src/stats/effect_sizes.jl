@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Effect size calculators and converters — symbolic computation only.
 
 function effect_sizes(; cohens_d::Union{Float64,Nothing}=nothing,

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # QuantumCircuit.jl Integration — Quantum statistics and Bell tests.
 #
 # Generates measurement correlations from quantum circuits for

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Reliability analysis — symbolic computation only.
 
 function cronbachs_alpha(items::Matrix{Float64})
