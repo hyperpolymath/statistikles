@@ -36,12 +36,12 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Setup Julia
-        uses: julia-actions/setup-julia@5c9647d97b78a5debe5164e9eec09d58c64f0a27  # v2
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32  # v2
         with:
           version: '1.10'
 
       - name: Julia cache
-        uses: julia-actions/cache@824243901fb567a0d7c9938c1d31e1f0bc1e65d9  # v2
+        uses: julia-actions/cache@d10a6fd8f31b12404a54613ebad242900567f2b9  # v2
 
       - name: Run Julia tests
         run: julia --project=. -e 'using Pkg; Pkg.test()'
