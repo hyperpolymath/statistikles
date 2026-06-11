@@ -1,10 +1,11 @@
+# // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # SPDX-License-Identifier: PMPL-1.0
 name: OSSF Scorecard
 on:
   push:
     branches: [main, master]
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '23 4 * * 1'
   workflow_dispatch:
 # Estate guardrail: cancel superseded runs so re-pushes / rebased PR
 # updates do not pile up queued runs against the shared account-wide
