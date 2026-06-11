@@ -1,4 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = StatistEase — Neurosymbolic Statistical Analysis Assistant
+image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/statistease"]
+
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[License: MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
+
 :author: Jonathan D.A. Jewell
 :email: j.d.a.jewell@open.ac.uk
 :license: MPL-2.0
@@ -123,6 +129,6 @@ computed by a verified Julia function.
 
 == License
 
-MPL-2.0 (Palimpsest License)
+This project is licensed under the Mozilla Public License, v. 2.0. See the `LICENSE` file for details.
 
-Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+SPDX-License-Identifier: MPL-2.0
