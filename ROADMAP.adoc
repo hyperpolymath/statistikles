@@ -1,23 +1,44 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= Statistease Roadmap
+= StatistEase Roadmap
 
-== Current Status
+== Current Status (2026-07)
 
-Initial development phase.
+The *symbolic library is real and tested*: ~40 statistics modules under
+`src/stats/`, a single neural/symbolic dispatch chokepoint
+(`src/tools/executor.jl`), and 632 `@test` assertions (runtests + e2e +
+property + reference-validation) running under Julia 1.10 CI (`e2e.yml`).
+
+The *neural path and external verification pipeline are not yet done*: the
+LLM↔executor loop has no automated integration test, and the
+explain/prove/demonstrate/verify pipeline depends on external, unshipped
+systems (echidna, an adversarial SLM auditor).
 
 == Milestones
 
-=== v0.1.0 - Foundation
-* [ ] Core functionality
-* [ ] Basic documentation
-* [ ] CI/CD pipeline
+=== v0.1.0 — Trustworthy core (in progress)
+* [x] ~40 symbolic statistics modules
+* [x] executor.jl neural/symbolic boundary
+* [x] Test suite over the symbolic layer (632 assertions)
+* [x] Ground-truth validation of core functions against independently
+      derived values (`test/reference_validation_test.jl`)
+* [x] Offline example (`examples/run_examples.jl`)
+* [ ] Extend ground-truth validation to the advanced/exotic modules
+* [ ] Integration test for the LLM → tool_call → executor loop (mockable HTTP)
 
-=== v1.0.0 - Stable Release
-* [ ] Full feature set
-* [ ] Comprehensive tests
-* [ ] Production ready
+=== v0.2.0 — Neural interface hardened
+* [ ] Abstract the LLM backend (currently LM Studio-specific) behind an
+      OpenAI-compatible interface with a fallback
+* [ ] Golden-transcript tests for natural-language routing
+* [ ] Publish to the Julia General registry
 
-== Future Directions
+=== v1.0.0 — Verified assistant
+* [ ] Adversarial verification pipeline (explain/prove/demonstrate/verify)
+* [ ] Formal proofs (Agda) extended from discrete analogues toward the
+      real-valued properties they stand in for
+* [ ] Audit of every `proxy`/`basic` method against a reference implementation
 
-_To be determined based on community feedback._
+== Non-goals (for now)
+
+* Re-implementing full Bayesian engines (Stan/PyMC scope)
+* GUI — the interface is chat + offline API

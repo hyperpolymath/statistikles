@@ -628,12 +628,14 @@ using StatistEase
     # LEVENE'S TEST (already exists, add test)
     # ═══════════════════════════════════════════════════════════════════
     @testset "Levene's Test" begin
-        # Equal variances
-        g1 = randn(30)
-        g2 = randn(30)
-        # Note: levenes_test requires one_way_anova to be defined
-        # Just test it doesn't error
-        @test true  # Placeholder — levenes_test depends on one_way_anova internal
+        # one_way_anova is now defined (stats/inferential.jl), so
+        # levenes_test can be exercised for real.
+        g1 = collect(1.0:30.0)
+        g2 = collect(101.0:130.0)  # same spread, different location
+        r = StatistEase.levenes_test([g1, g2])
+        @test haskey(r, "F_statistic")
+        @test 0.0 <= r["p_value"] <= 1.0
+        @test r["significant"] == false
     end
 
     # ═══════════════════════════════════════════════════════════════════
@@ -1335,3 +1337,7 @@ include("e2e_test.jl")
 
 # Property tests: mathematical invariants validated over random inputs
 include("property_test.jl")
+
+# Reference validation: the trusted symbolic layer checked against
+# hand-derived / independently computed ground-truth values
+include("reference_validation_test.jl")

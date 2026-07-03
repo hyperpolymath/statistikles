@@ -28,22 +28,29 @@ The MOLLOCK WARNING (lines 40-47) enforces this invariant: no statistical value 
 
 *Caveat:* The neural component (LLM) does perform parsing of the user question and explanation generation, which are non-statistical tasks. The invariant applies specifically to numerical results, not linguistic processing.
 
-[quote, README section "Features" -> "Statistical Functions (17 Modules)"]
+[quote, README section "Features" -> "Statistical Functions"]
 ____
-17 statistical modules: Descriptive, Inferential, Correlation & Regression, Non-parametric, Effect Sizes, Power Analysis, Bayesian, Fuzzy Logic, Dempster-Shafer, Causality, Estimation, Reliability, Validity, Measurement, Qualitative, Assumptions, Sampling
+~40 statistical modules under `src/stats/`, spanning classical (Descriptive,
+Inferential, Correlation & Regression, Non-parametric, Effect Sizes, Power
+Analysis, Bayesian, Causality, Estimation, Reliability, Validity, Measurement,
+Sampling) through to exotic methods (Dempster-Shafer, fuzzy logic, tropical
+algebra, p-adic, quantum/CHSH, rough sets, Choquet integral).
 ____
 
-*Evidence:* The table (lines 54-75) lists all 17 modules with specific functions:
+*Evidence:* `src/stats/` contains 40 `.jl` modules; `src/tools/executor.jl`
+dispatches ~50 named tools to them. Examples:
 - Descriptive: Mean, median, mode, SD, skewness, kurtosis, quartiles, CI
-- Inferential: t-tests, ANOVA, chi-square
+- Inferential: Welch t-test, one-way ANOVA, chi-square
 - Correlation & Regression: Pearson, Spearman, simple/multiple regression with VIF
 - Non-parametric: Mann-Whitney U, Wilcoxon signed-rank, Kruskal-Wallis, PERMANOVA
 - Effect Sizes: Cohen's d, r, eta², Hedges' g, OR, NNT, CL effect size
-- (and 12 more modules)
 
-This is verifiable in `src/modules/` with one subdirectory per statistical domain.
-
-*Caveat:* All 17 modules have been implemented, but coverage is skewed toward classical frequentist methods. Bayesian coverage (prior updating, Bayes factor) is functional but simplified compared to Stan or PyMC.
+*Caveat:* Coverage is broad but skewed toward classical frequentist methods.
+Bayesian coverage is functional but simplified compared to Stan or PyMC, and
+several advanced methods are explicitly labelled `proxy`/`basic`
+(`random_forest_proxy`, `gwr_basic`). The trusted symbolic layer is now
+checked against independently-derived ground-truth values in
+`test/reference_validation_test.jl`.
 
 == Technology Choices
 
@@ -51,7 +58,7 @@ This is verifiable in `src/modules/` with one subdirectory per statistical domai
 |===
 | Technology | Learn More
 
-| **Julia 1.10+** | https://julialang.org (statistical computation, 17 modules)
+| **Julia 1.10+** | https://julialang.org (statistical computation, ~40 modules)
 | **Statistics.jl** | Distribution calculations, hypothesis testing
 | **StatsBase.jl** | Statistical utilities
 | **Distributions.jl** | Probability distributions
@@ -76,13 +83,15 @@ StatistEase-specific:
 |===
 | Path | What's There
 
-| `src/` | Julia source code (17 statistical modules)
+| `src/` | Julia source code (StatistEase.jl entry point + subdirectories)
 | `src/tools/executor.jl` | Neural-symbolic boundary enforcement (CRITICAL)
-| `src/modules/` | 17 statistical domains (descriptive, inferential, correlation, non-parametric, etc.)
-| `src/outputs/` | Output formatters (CSV, JSON, text reports with provenance stamps)
-| `src/data_quality/` | Detection, validation, cleansing, normalization pipeline
-| `test/` | Test suite verifying correctness of statistical functions
-| `examples/` | Offline example runs (no LLM needed)
+| `src/stats/` | ~40 statistical domain modules (descriptive, inferential, correlation, non-parametric, etc.)
+| `src/output/` | Output formatters (ASCII tables/graphs, CSV, JSON, text reports)
+| `src/pipeline/` | Canonicalization, dimensional analysis, detection, validation, cleansing, normalization
+| `src/tools/` | LLM function-calling schemas (definitions.jl), LM Studio client (lmstudio.jl), chat loop (chat.jl)
+| `src/bridge/`, `src/integrations/` | Optional cross-verification bridges and inline integrations
+| `test/` | Test suite (632 @test assertions; reference_validation_test.jl checks against ground truth)
+| `examples/` | Offline example run (`run_examples.jl`, no LLM needed)
 |===
 
 == Questions?

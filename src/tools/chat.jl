@@ -160,18 +160,18 @@ function run_examples()
 
     println("\n  2. Independent t-test:")
     t = t_test_independent([85.0, 90, 78, 92, 88], [76.0, 82, 71, 80, 85])
-    println("     t($(round(t["df"], digits=1))) = $(round(t["t_statistic"], digits=3)), p = $(round(t["p_value_two_tailed"], digits=4))")
+    println("     t($(round(t["df"], digits=1))) = $(round(t["t_stat"], digits=3)), p = $(round(t["p_value"], digits=4))")
     println("     Cohen's d = $(round(t["cohens_d"], digits=3)) ($(t["effect_size_interpretation"]))")
 
     println("\n  3. One-way ANOVA:")
     a = one_way_anova([[5.0,6,7,8], [8.0,9,10,11], [3.0,4,5,6]])
     println("     F($(a["df_between"]),$(a["df_within"])) = $(round(a["F_statistic"], digits=3)), p = $(round(a["p_value"], digits=4))")
-    println("     eta-sq = $(round(a["eta_squared"], digits=3)) ($(a["effect_size_interpretation"]))")
+    println("     eta-sq = $(round(a["eta_squared"], digits=3))")
 
     println("\n  4. Pearson Correlation:")
     c = pearson_correlation([1.0,2,3,4,5], [2.0,4,5,4,5])
     println("     r = $(round(c["r"], digits=3)), p = $(round(c["p_value"], digits=4))")
-    println("     $(c["interpretation"]) $(c["direction"])")
+    println("     $(c["interpretation"]) association")
 
     println("\n  5. James-Stein Estimator:")
     js = james_stein_estimator([10.0, 12, 8, 15, 11])
