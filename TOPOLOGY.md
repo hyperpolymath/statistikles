@@ -107,11 +107,18 @@ VERIFICATION (PLANNED)
 
 INFRASTRUCTURE
   RSR template compliance            ██████████ 100%    All RSR files present
-  Tests                              ░░░░░░░░░░   0%    Not yet written
-  CI/CD                              ░░░░░░░░░░   0%    Workflows present, not configured
+  Tests                              █████████░  90%    632 @test assertions across
+                                                        runtests + e2e + property +
+                                                        reference-validation
+  CI/CD                              ████████░░  80%    14 workflows; e2e.yml runs
+                                                        Pkg.test on Julia 1.10
+  Neural path (LLM↔executor)         ██░░░░░░░░  20%    executor.jl real; no
+                                                        integration test for the loop
 
 ─────────────────────────────────────────────────────────────────────────────
-OVERALL:                            ██████░░░░  60%    Core complete, verification planned
+OVERALL:                            ███████░░░  70%    Symbolic library real & tested;
+                                                        neural path + external
+                                                        verification pipeline pending
 ```
 
 ## Key Dependencies

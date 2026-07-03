@@ -11,14 +11,16 @@ status = "active"
 [project-context]
 name = "StatistEase"
 purpose = "Neurosymbolic statistical analysis assistant — Julia symbolic computation + LLM natural language interface"
-completion-percentage = 85
+completion-percentage = 70
 
 [position]
 phase = "cross-verification"
 maturity = "alpha"
 
 [stats]
-source-modules = 50
-test-count = 131
+source-modules = 65
+stats-domain-modules = 40
+test-count = 632
+test-count-note = "@test assertions across runtests.jl, e2e_test.jl, property_test.jl, reference_validation_test.jl"
 test-failures = 0
-ci-workflows = 17
+ci-workflows = 14

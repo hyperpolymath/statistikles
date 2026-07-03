@@ -107,7 +107,7 @@ export main, run_examples, statistical_assistant_chat,
        # Descriptive
        descriptive_stats, power_mean, weighted_stats, frequency_table,
        # Inferential
-       t_test_independent, pearson_correlation,
+       t_test_independent, one_way_anova, pearson_correlation,
        simple_linear_regression, multiple_regression, logistic_regression,
        partial_correlation, grubbs_test, spearman_correlation,
        # Multivariate
