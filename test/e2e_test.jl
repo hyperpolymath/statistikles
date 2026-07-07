@@ -32,14 +32,14 @@ using StatistEase
                          "harmonic_mean", "geometric_mean",
                          "trimmed_mean", "winsorized_mean", "quadratic_mean"]
         for key in required_keys
-            @test haskey(report, key) "Missing key: $key"
+            @test haskey(report, key)
         end
 
         # Numerical sanity: all values must be finite (no NaN/Inf)
         for key in required_keys
             val = report[key]
             if val isa Number
-                @test isfinite(val) || val isa Int "Non-finite value for $key: $val"
+                @test isfinite(val) || val isa Int
             end
         end
 
@@ -72,7 +72,7 @@ using StatistEase
                        "q1", "q3", "iqr", "mad", "skewness", "kurtosis",
                        "trimmed_mean", "quadratic_mean"]
         for key in finite_keys
-            @test isfinite(report[key]) "Pipeline produced non-finite $key"
+            @test isfinite(report[key])
         end
 
         # Harmonic/geometric mean require positive data

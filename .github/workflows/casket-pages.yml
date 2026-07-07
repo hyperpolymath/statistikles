@@ -1,5 +1,5 @@
-# // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # SPDX-License-Identifier: MPL-2.0
+# // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 name: GitHub Pages
 on:
   push:
@@ -15,7 +15,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Cold cabal build of casket-ssg (GHC 9.8) exceeds 15 min and was being
+    # cancelled before the cache could ever save; warm-cache runs are fast.
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4

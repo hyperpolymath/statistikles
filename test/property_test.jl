@@ -56,8 +56,8 @@ end
             data = fill(x, n)
             r = descriptive_stats(data)
             @test !haskey(r, "error")
-            @test isapprox(r["mean"], x, atol=1e-10) "mean(fill($x,$n)) ≠ $x, got $(r["mean"])"
-            @test isapprox(r["median"], x, atol=1e-10) "median(fill($x,$n)) ≠ $x"
+            @test isapprox(r["mean"], x, atol=1e-10)
+            @test isapprox(r["median"], x, atol=1e-10)
         end
     end
 
@@ -74,8 +74,8 @@ end
             @test !haskey(r, "error")
             # Julia's var() uses Bessel correction (n-1 denominator) but with a
             # constant array every deviation is 0, so variance = 0 regardless.
-            @test isapprox(r["variance"], 0.0, atol=1e-10) "var(fill($x,$n)) ≠ 0, got $(r["variance"])"
-            @test isapprox(r["std"],      0.0, atol=1e-10) "std(fill($x,$n)) ≠ 0, got $(r["std"])"
+            @test isapprox(r["variance"], 0.0, atol=1e-10)
+            @test isapprox(r["std"],      0.0, atol=1e-10)
         end
     end
 
@@ -90,9 +90,9 @@ end
             r_sorted = descriptive_stats(sort(data))
             @test !haskey(r_orig,   "error")
             @test !haskey(r_sorted, "error")
-            @test isapprox(r_orig["mean"], r_sorted["mean"], atol=1e-10) "mean changed after sort"
-            @test isapprox(r_orig["std"],  r_sorted["std"],  atol=1e-10) "std changed after sort"
-            @test isapprox(r_orig["variance"], r_sorted["variance"], atol=1e-10) "variance changed after sort"
+            @test isapprox(r_orig["mean"], r_sorted["mean"], atol=1e-10)
+            @test isapprox(r_orig["std"],  r_sorted["std"],  atol=1e-10)
+            @test isapprox(r_orig["variance"], r_sorted["variance"], atol=1e-10)
         end
     end
 
@@ -114,7 +114,7 @@ end
             @test !haskey(r_comb, "error")
 
             expected_mean = (n_a * mean(a) + n_b * mean(b)) / n_total
-            @test isapprox(r_comb["mean"], expected_mean, atol=1e-8) "Pooled mean identity violated"
+            @test isapprox(r_comb["mean"], expected_mean, atol=1e-8)
         end
     end
 
@@ -127,8 +127,8 @@ end
             data = rand_array()
             r = descriptive_stats(data)
             @test !haskey(r, "error")
-            @test r["min"] <= r["mean"] + 1e-10 "min > mean"
-            @test r["mean"] <= r["max"] + 1e-10 "mean > max"
+            @test r["min"] <= r["mean"] + 1e-10
+            @test r["mean"] <= r["max"] + 1e-10
         end
     end
 
@@ -141,7 +141,7 @@ end
             data = rand_array()
             r = descriptive_stats(data)
             @test !haskey(r, "error")
-            @test isapprox(r["iqr"], r["q3"] - r["q1"], atol=1e-10) "IQR ≠ Q3 - Q1"
+            @test isapprox(r["iqr"], r["q3"] - r["q1"], atol=1e-10)
         end
     end
 
@@ -155,10 +155,10 @@ end
             r = descriptive_stats(data)
             @test !haskey(r, "error")
             # QM ≥ AM
-            @test r["quadratic_mean"] >= r["mean"] - 1e-10 "QM < AM violated"
+            @test r["quadratic_mean"] >= r["mean"] - 1e-10
             # AM ≥ HM (only if harmonic_mean is finite and positive)
             if isfinite(r["harmonic_mean"]) && r["harmonic_mean"] > 0
-                @test r["mean"] >= r["harmonic_mean"] - 1e-10 "AM < HM violated"
+                @test r["mean"] >= r["harmonic_mean"] - 1e-10
             end
         end
     end
@@ -176,9 +176,9 @@ end
             m_two    = power_mean(data,  2.0)  # quadratic
 
             @test isfinite(m_minus1) && isfinite(m_zero) && isfinite(m_one) && isfinite(m_two)
-            @test m_minus1 <= m_zero  + 1e-10 "M_{-1} > M_0"
-            @test m_zero   <= m_one   + 1e-10 "M_0 > M_1"
-            @test m_one    <= m_two   + 1e-10 "M_1 > M_2"
+            @test m_minus1 <= m_zero  + 1e-10
+            @test m_zero   <= m_one   + 1e-10
+            @test m_one    <= m_two   + 1e-10
         end
     end
 
@@ -196,7 +196,7 @@ end
             @test !haskey(r_scaled, "error")
             # CV = std/mean — scaling both by k cancels out
             if abs(r_orig["mean"]) > 1e-10 && abs(r_scaled["mean"]) > 1e-10
-                @test isapprox(r_orig["cv"], r_scaled["cv"], atol=1e-8) "CV not scale-invariant"
+                @test isapprox(r_orig["cv"], r_scaled["cv"], atol=1e-8)
             end
         end
     end
@@ -218,7 +218,7 @@ end
             @test r_weighted isa Dict
             @test haskey(r_weighted, "weighted_mean")
 
-            @test isapprox(r_weighted["weighted_mean"], r_unweighted["mean"], atol=1e-8) "Uniform-weight mean ≠ arithmetic mean"
+            @test isapprox(r_weighted["weighted_mean"], r_unweighted["mean"], atol=1e-8)
         end
     end
 
@@ -233,7 +233,7 @@ end
             r = pearson_correlation(x, y)
             @test r isa Dict || r isa Number
             corr_val = r isa Dict ? r["r"] : r
-            @test -1.0 - 1e-10 <= corr_val <= 1.0 + 1e-10 "Pearson correlation out of [-1,1]: $corr_val"
+            @test -1.0 - 1e-10 <= corr_val <= 1.0 + 1e-10
         end
     end
 
@@ -250,11 +250,11 @@ end
 
             t_result = t_test_independent(g1, g2)
             @test haskey(t_result, "p_value")
-            @test 0.0 <= t_result["p_value"] <= 1.0 "t-test p-value out of [0,1]: $(t_result["p_value"])"
+            @test 0.0 <= t_result["p_value"] <= 1.0
 
             mw_result = mann_whitney_u(g1, g2)
             @test haskey(mw_result, "p_value")
-            @test 0.0 <= mw_result["p_value"] <= 1.0 "MW p-value out of [0,1]: $(mw_result["p_value"])"
+            @test 0.0 <= mw_result["p_value"] <= 1.0
         end
     end
 

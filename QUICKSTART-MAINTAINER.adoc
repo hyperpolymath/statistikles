@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-// Template: QUICKSTART-MAINTAINER.adoc — packaging, deploying, and maintaining
-// Replace statistease, {{PACKAGE_NAME}}, {{DEPS}} with actuals
 = statistease — Quick Start for Platform Maintainers
 :toc:
 :toclevels: 2
@@ -13,7 +11,11 @@ distribution on your platform.
 
 == Runtime Dependencies
 
-{{DEPS}}
+* Julia 1.10+ (package dependencies are resolved by `Pkg` from `Project.toml`:
+  CSV, DataFrames, Distributions, HTTP, JSON3, StatsBase)
+* Optional, for the conversational interface only: an OpenAI-compatible LLM
+  endpoint (defaults to LM Studio at `http://localhost:1234/v1`; override with
+  `STATISTEASE_LM_URL`, `STATISTEASE_API_KEY`, `STATISTEASE_MODEL`)
 
 == Build from Source
 
@@ -24,7 +26,8 @@ cd statistease
 just build-release
 ----
 
-Output: `{{BUILD_OUTPUT_PATH}}`
+Output: a precompiled Julia project environment (no standalone binary — the
+package is loaded with `julia --project=. -e 'using StatistEase'`)
 
 == Packaging
 
@@ -66,10 +69,10 @@ Files installed:
 | `$PREFIX/bin/`
 | Executables
 
-| `$PREFIX/share/{{PACKAGE_NAME}}/`
+| `$PREFIX/share/statistease/`
 | Data files, assets
 
-| `$PREFIX/share/doc/{{PACKAGE_NAME}}/`
+| `$PREFIX/share/doc/statistease/`
 | Documentation
 
 | `$PREFIX/share/applications/`
@@ -81,9 +84,9 @@ Files installed:
 
 == Configuration
 
-Default config location: `$XDG_CONFIG_HOME/{{PACKAGE_NAME}}/config.toml`
+Default config location: `$XDG_CONFIG_HOME/statistease/config.toml`
 
-Fallback: `$HOME/.config/{{PACKAGE_NAME}}/config.toml`
+Fallback: `$HOME/.config/statistease/config.toml`
 
 == Health Checks
 
@@ -103,7 +106,7 @@ just build-release
 just install --prefix=/usr/local
 ----
 
-Or via OPSM: `opsm update {{PACKAGE_NAME}}`
+Or via OPSM: `opsm update statistease`
 
 == Security Notes
 
@@ -118,8 +121,8 @@ For deploying multiple instances (e.g., different users or tenants):
 
 [source,bash]
 ----
-just install --prefix=/opt/{{PACKAGE_NAME}}-instance1 --config=/etc/{{PACKAGE_NAME}}/instance1.toml
-just install --prefix=/opt/{{PACKAGE_NAME}}-instance2 --config=/etc/{{PACKAGE_NAME}}/instance2.toml
+just install --prefix=/opt/statistease-instance1 --config=/etc/statistease/instance1.toml
+just install --prefix=/opt/statistease-instance2 --config=/etc/statistease/instance2.toml
 ----
 
 Each instance has isolated config, data, and logs.
