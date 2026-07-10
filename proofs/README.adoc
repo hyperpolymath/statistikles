@@ -2,30 +2,93 @@
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Statistikles Formal Proofs (Agda)
 
-Constructive proofs of core statistical identities used by Statistikles.
-Verified by Agda's dependent type checker — no postulates, no holes.
+*Status: EXPERIMENTAL.* These modules type-check under `agda --safe` with no
+postulates and no holes — but they are *not yet* proofs of the statistical
+theorems Statistikles relies on. Every lemma below is stated and proven over
+the natural numbers (`ℕ`). The runtime computes over `Float64` (IEEE-754
+doubles), so each entry is a *discrete proxy for* — not a proof of — the
+statistical target in the right-hand column.
+
+[IMPORTANT]
+====
+*Scope: current proofs quantify over `ℕ`, not `Float64`.* None of them quantify
+over `ℝ` or over the IEEE-754 `Float64` the runtime actually uses. The gap
+between the ℕ lemma proven here and the ℝ/`Float64` statement the statistic
+needs is real and is tracked below as "target (pending)". Read "Proven (ℕ)" as
+"this discrete lemma type-checks", *not* as "the statistic is verified".
+Restating these over the reals is deferred future work (production-readiness
+reframe W2-4); it is deliberately *not* attempted here.
+====
 
 == Proof Catalogue
 
-[cols="1,2,2,1"]
-|===
-| # | Identity | File | Status
+Each row gives the *exact* lemma the Agda source proves (its type signature),
+the module it lives in, and the statistical result it is intended to
+approximate. The middle column is *proven over ℕ*; the right-hand target is
+*pending*.
 
-| 1 | Tropical addition associative | TropicalSemiring.agda | Proven
-| 2 | Tropical addition commutative | TropicalSemiring.agda | Proven
-| 3 | Tropical distributivity | TropicalSemiring.agda | Proven
-| 4 | Tropical idempotence | TropicalSemiring.agda | Proven
-| 5 | Tropical multiplicative identity | TropicalSemiring.agda | Proven
-| 6 | Chi-square df identity | RankIdentities.agda | Proven
-| 7 | Rank sum (concrete to n=100) | RankIdentities.agda | Proven
-| 8 | Bonferroni (elem ≤ sum) | Inequalities.agda | Proven
-| 9 | Tie correction bound (sq-mono) | Inequalities.agda | Proven
-| 10 | Mean ordering transitivity | Inequalities.agda | Proven
+[cols="1,5,2,4",options="header"]
 |===
+| # | Lemma actually proven (over `ℕ`) | File | Statistical target (pending)
+
+| 1
+| `min-assoc : ∀ a b c → min a (min b c) ≡ min (min a b) c` — `min` on `ℕ` is associative
+| TropicalSemiring.agda
+| Associativity of tropical addition `⊕ = min` on `ℝ ∪ {+∞}`
+
+| 2
+| `min-comm : ∀ a b → min a b ≡ min b a` — `min` on `ℕ` is commutative
+| TropicalSemiring.agda
+| Commutativity of tropical `⊕ = min` on `ℝ ∪ {+∞}`
+
+| 3
+| `+-distrib-min : ∀ a b c → a + min b c ≡ min (a + b) (a + c)` — `+` distributes over `min` on `ℕ`
+| TropicalSemiring.agda
+| Tropical `⊗ = +` distributes over `⊕ = min` on `ℝ ∪ {+∞}`
+
+| 4
+| `min-idem : ∀ a → min a a ≡ a` — `min` on `ℕ` is idempotent
+| TropicalSemiring.agda
+| Idempotence of tropical `⊕` on `ℝ ∪ {+∞}`
+
+| 5
+| `tropical-mul-identity : ∀ a → zero + a ≡ a` — `0` is the left identity of `+` on `ℕ` (definitional)
+| TropicalSemiring.agda
+| `0` is the tropical `⊗`-identity (and `+∞` the `⊕`-identity) on `ℝ ∪ {+∞}`
+
+| 6
+| `df-identity : ∀ k → suc k ∸ 1 ≡ k` and `df-nonneg : ∀ k → zero ≤ k` — truncated subtraction on `ℕ`
+| RankIdentities.agda
+| χ² degrees of freedom `= (categories − 1)` is well-defined and non-negative
+
+| 7
+| `sum-to` running-sum recursion with concrete checks (`sum-to 5 ≡ 15`, …, `sum-to 100 ≡ 5050`) and `sum-to-mono : n ≤ m → sum-to n ≤ sum-to m` on `ℕ`
+| RankIdentities.agda
+| Rank/midrank sum identity `Σᵢ₌₁ⁿ i = n(n+1)/2` over `ℝ` (tie handling)
+
+| 8
+| `elem-le-sum : ∀ x xs → x ≤ x + list-sum xs` — a list element is `≤` the list sum, on `ℕ`
+| Inequalities.agda
+| Bonferroni inequality `P(⋃ Aᵢ) ≤ Σ P(Aᵢ)` over `ℝ`
+
+| 9
+| `sq-mono : a ≤ b → a * a ≤ b * b` — squaring is monotone on `ℕ`
+| Inequalities.agda
+| Monotonicity of the tie-correction term `Σ(tᵢ³ − tᵢ)` in `N` over `ℝ`
+
+| 10
+| `mean-ordering-transitive : a ≤ b → b ≤ c → a ≤ c` — transitivity of `≤` on `ℕ`
+| Inequalities.agda
+| Transitivity of the power-mean ordering `M_p ≤ M_q ≤ M_r ⇒ M_p ≤ M_r` over `ℝ`
+|===
+
+All ten lemmas are `Proven (ℕ)`; all ten statistical targets remain `pending`.
 
 == Building
 
-Requires Agda 2.6.4+ and agda-stdlib.
+Requires Agda 2.6.4+ and agda-stdlib 2.x (library `statistikles-proofs.agda-lib`
+depends on `standard-library`). Every module must type-check under `--safe`
+(no weakening):
 
 ```bash
 agda --safe Statistikles/TropicalSemiring.agda
@@ -33,8 +96,14 @@ agda --safe Statistikles/RankIdentities.agda
 agda --safe Statistikles/Inequalities.agda
 ```
 
-== Integration with ECHIDNA
+CI runs exactly this on every `proofs/**/*.agda` module — see
+`.github/workflows/agda.yml`. That workflow also fails if a new `.agda` file is
+added under `proofs/` without being type-checked, and rejects any `postulate`.
 
-These proofs correspond to the `StatProofObligation` entries in
-`src/bridge/echidna_adapter.jl`. ECHIDNA dispatches verification
-requests to Agda for constructive proofs and Z3 for arithmetic.
+== Integration with ECHIDNA (aspirational)
+
+The intended design is for these proofs to back the `StatProofObligation`
+entries in `src/bridge/echidna_adapter.jl`, with ECHIDNA dispatching
+constructive obligations to Agda and arithmetic obligations to Z3. That wiring
+is *not yet in place*, and the correspondence between these `ℕ` lemmas and the
+runtime's `Float64` statistics is future work — intentionally out of scope here.

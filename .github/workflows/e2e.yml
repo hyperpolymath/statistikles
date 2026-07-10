@@ -63,6 +63,13 @@ jobs:
             echo "$DANGEROUS"
             exit 1
           fi
+          # Experimental Agda proofs must stay constructive — no postulates.
+          PROOF_POSTULATES=$(grep -rnw --include='*.agda' 'postulate' proofs/ 2>/dev/null || true)
+          if [ -n "$PROOF_POSTULATES" ]; then
+            echo "FAIL: postulate found under proofs/"
+            echo "$PROOF_POSTULATES"
+            exit 1
+          fi
           echo "PASS: No dangerous patterns"
 
       - name: SPDX headers

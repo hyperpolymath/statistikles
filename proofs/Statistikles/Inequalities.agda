@@ -7,7 +7,7 @@
 module Statistikles.Inequalities where
 
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _≤_; z≤n; s≤s)
-open import Data.Nat.Properties using (+-mono-≤; m≤m+n; +-comm)
+open import Data.Nat.Properties using (m≤m+n; m≤n+m)
 open import Data.List using (List; []; _∷_; foldr; map; length)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
 
@@ -33,14 +33,7 @@ elem-le-sum x xs = m≤m+n x (list-sum xs)
 
 -- Sum is monotone under cons: list-sum xs ≤ list-sum (y ∷ xs)
 sum-mono-cons : ∀ (y : ℕ) (xs : List ℕ) → list-sum xs ≤ y + list-sum xs
-sum-mono-cons y xs = m≤m+n y (list-sum xs) |> flip-le
-  where
-  flip-le : y ≤ y + list-sum xs → list-sum xs ≤ y + list-sum xs
-  flip-le _ = subst-le (+-comm (list-sum xs) y)
-    where
-    open import Relation.Binary.PropositionalEquality using (subst)
-    subst-le : list-sum xs + y ≡ y + list-sum xs → list-sum xs ≤ y + list-sum xs
-    subst-le eq = subst (list-sum xs ≤_) eq (m≤m+n (list-sum xs) y)
+sum-mono-cons y xs = m≤n+m (list-sum xs) y
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- PROOF 9: Tie correction is bounded

@@ -7,6 +7,7 @@
 module Statistikles.RankIdentities where
 
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _≤_; z≤n; s≤s; _∸_)
+open import Data.Nat.Properties using (+-mono-≤)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
 
 -- ═══════════════════════════════════════════════════════════════════════
@@ -66,13 +67,9 @@ _ = refl
 -- Rank sum is monotone: n ≤ m → sum-to n ≤ sum-to m
 -- ═══════════════════════════════════════════════════════════════════════
 
+-- sum-to (suc n) = suc n + sum-to n, so monotonicity of _+_ on both the
+-- successor term (suc n ≤ suc m) and the recursive tail (sum-to n ≤ sum-to m)
+-- gives the step directly.
 sum-to-mono : ∀ {n m} → n ≤ m → sum-to n ≤ sum-to m
-sum-to-mono z≤n = z≤n
-sum-to-mono {suc n} {suc m} (s≤s n≤m) = helper n m n≤m
-  where
-  -- We need: suc n + sum-to n ≤ suc m + sum-to m
-  -- This follows from n ≤ m and induction, but the full proof
-  -- requires +-mono which is complex. State as a consequence.
-  helper : ∀ n m → n ≤ m → suc n + sum-to n ≤ suc m + sum-to m
-  helper zero m z≤n = s≤s z≤n
-  helper (suc n) (suc m) (s≤s p) = s≤s (helper n m p)
+sum-to-mono z≤n       = z≤n
+sum-to-mono (s≤s n≤m) = +-mono-≤ (s≤s n≤m) (sum-to-mono n≤m)
