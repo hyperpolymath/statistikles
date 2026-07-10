@@ -56,7 +56,7 @@ end
 struct Probability
     value::Float64
     function Probability(v::Float64)
-        @assert 0.0 <= v <= 1.0 "Probability must be in [0, 1], got $v"
+        require_probability(v, "Probability")
         new(v)
     end
 end
@@ -126,8 +126,12 @@ struct ModularInt
     modulus::Int
     ModularInt(v::Int, m::Int) = new(mod(v, m), m)
 end
-Base.:+(a::ModularInt, b::ModularInt) = (@assert a.modulus == b.modulus; ModularInt(a.value + b.value, a.modulus))
-Base.:*(a::ModularInt, b::ModularInt) = (@assert a.modulus == b.modulus; ModularInt(a.value * b.value, a.modulus))
+Base.:+(a::ModularInt, b::ModularInt) = a.modulus == b.modulus ?
+    ModularInt(a.value + b.value, a.modulus) :
+    throw(ArgumentError("ModularInt addition requires equal moduli, got $(a.modulus) and $(b.modulus)"))
+Base.:*(a::ModularInt, b::ModularInt) = a.modulus == b.modulus ?
+    ModularInt(a.value * b.value, a.modulus) :
+    throw(ArgumentError("ModularInt multiplication requires equal moduli, got $(a.modulus) and $(b.modulus)"))
 
 # ===========================================================================
 # Level 9-10: Verification provenance types

@@ -13,7 +13,7 @@ MORAN'S I: Measures global spatial autocorrelation.
 """
 function morans_i(x::Vector{Float64}, W::Matrix{Float64})
     n = length(x)
-    @assert size(W) == (n, n)
+    require_dims_match(W, n, "W")
     
     z = x .- mean(x)
     S0 = sum(W)
