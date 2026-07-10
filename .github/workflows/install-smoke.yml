@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Statistikles — Install Smoke Test
+#
+# Exercises the documented install path (QUICKSTART-USER.adoc) so it cannot
+# silently rot: `just setup` must instantiate the environment, the package
+# must load, and the Justfile must parse.
+
+name: Install Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Justfile'
+      - 'Project.toml'
+      - 'src/**'
+      - '.tool-versions'
+      - '.github/workflows/install-smoke.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: read-all
+
+concurrency:
+  group: install-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-smoke:
+    name: Smoke — Documented Install Path
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32  # v2
+        with:
+          version: '1.10'
+
+      - name: Julia cache
+        uses: julia-actions/cache@a45e8fa8be21c18a06b7177052533149e61e9b38  # v3.1.0
+
+      - name: Setup just
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3  # v4.0.0
+
+      - name: Run documented install path
+        run: just setup && julia --project=. -e 'using Statistikles' && just --list

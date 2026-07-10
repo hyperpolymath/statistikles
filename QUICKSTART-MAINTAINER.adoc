@@ -27,74 +27,37 @@ just build-release
 ----
 
 Output: a precompiled Julia project environment (no standalone binary — the
-package is loaded with `julia --project=. -e 'using Statistikles'`)
+package is loaded with `julia --project=. -e 'using Statistikles'`).
+`build-release` is equivalent to `build`: it instantiates the dependencies
+(`Pkg.instantiate()`) and precompiles them (`Pkg.precompile()`).
 
 == Packaging
 
-=== Guix
+Statistikles is a Julia package: the canonical distribution unit is the git
+repository plus `Project.toml`, consumed through Julia's `Pkg`. There is no
+install step beyond `just setup` — the project environment lives inside the
+checkout, and compiled artifacts live in the user's Julia depot (`~/.julia`).
 
-[source,bash]
-----
-guix build -f guix.scm
-----
-
-=== Nix
-
-[source,bash]
-----
-nix build
-----
-
-=== Container (Stapeln)
-
-[source,bash]
-----
-just stapeln-export    # Generates Containerfile
-podman build -t statistikles .
-----
-
-=== Manual Package
-
-[source,bash]
-----
-just install --prefix=/usr/local
-----
-
-Files installed:
-
-[cols="1,2"]
-|===
-| Path | Contents
-
-| `$PREFIX/bin/`
-| Executables
-
-| `$PREFIX/share/statistikles/`
-| Data files, assets
-
-| `$PREFIX/share/doc/statistikles/`
-| Documentation
-
-| `$PREFIX/share/applications/`
-| .desktop file (Linux, if GUI)
-
-| `$PREFIX/share/man/man1/`
-| Man pages
-|===
+Container (`Containerfile`) and Guix (`guix.scm`) packaging surfaces exist in
+the repository but are not yet functional — do not base a distribution package
+on them until they are completed.
 
 == Configuration
 
-Default config location: `$XDG_CONFIG_HOME/statistikles/config.toml`
+The conversational interface is configured entirely through environment
+variables (no config file):
 
-Fallback: `$HOME/.config/statistikles/config.toml`
+* `STATISTIKLES_LM_URL` — OpenAI-compatible endpoint (default `http://localhost:1234/v1`)
+* `STATISTIKLES_API_KEY` — API key if the endpoint requires one
+* `STATISTIKLES_MODEL` — model identifier
 
 == Health Checks
 
 [source,bash]
 ----
-just doctor            # Full diagnostic
-just run --version   # Version check
-just run --selftest  # Built-in self-test
+just doctor                                        # Tooling diagnostic
+julia --project=. -e 'using Statistikles'          # Package loads cleanly
+just test                                          # Full test suite
 ----
 
 == Updating
@@ -103,29 +66,13 @@ just run --selftest  # Built-in self-test
 ----
 git pull
 just build-release
-just install --prefix=/usr/local
 ----
-
-Or via OPSM: `opsm update statistikles`
 
 == Security Notes
 
 * License: MPL-2.0 (Palimpsest License)
-* All dependencies SHA-pinned
-* `panic-attacker` scan results: link:INSTALL-SECURITY-REPORT.adoc[]
+* GitHub Actions are SHA-pinned
 * OpenSSF Scorecard: see badge in README
-
-== Multi-Instance Deployment
-
-For deploying multiple instances (e.g., different users or tenants):
-
-[source,bash]
-----
-just install --prefix=/opt/statistikles-instance1 --config=/etc/statistikles/instance1.toml
-just install --prefix=/opt/statistikles-instance2 --config=/etc/statistikles/instance2.toml
-----
-
-Each instance has isolated config, data, and logs.
 
 == Reporting Issues
 

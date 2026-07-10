@@ -1,68 +1,63 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-// Template: QUICKSTART-DEV.adoc — clone → build → test → PR
-// Replace statistikles, {{BUILD_CMD}}, {{TEST_CMD}}, {{LANG_STACK}} with actuals
 = statistikles — Quick Start for Developers
 :toc:
 :toclevels: 2
 
 == Tech Stack
 
-{{LANG_STACK}}
+* **Julia 1.10+** — all statistical computation and the CLI
+  (dependencies: CSV, DataFrames, Distributions, HTTP, JSON3, StatsBase)
+* **Agda** — formal proofs in `proofs/` (not required to build or test)
+* **Zig** — FFI bridge in `ffi/zig/` (not required to build or test)
+* Optional: an OpenAI-compatible LLM endpoint (LM Studio by default) for the
+  conversational interface
 
 == Set Up Development Environment
-
-=== Option A: Guix (preferred)
-
-[source,bash]
-----
-guix shell
-----
-
-=== Option B: Nix (fallback)
-
-[source,bash]
-----
-nix develop
-----
-
-=== Option C: Manual
 
 [source,bash]
 ----
 git clone https://github.com/hyperpolymath/statistikles.git
 cd statistikles
-just setup-dev
+just setup
 ----
+
+`just setup` runs `julia --project=. -e 'using Pkg; Pkg.instantiate()'` to
+resolve and install the Julia package dependencies.
 
 == Build
 
 [source,bash]
 ----
-{{BUILD_CMD}}
+just build
 ----
+
+This precompiles the Julia project environment
+(`julia --project=. -e 'using Pkg; Pkg.precompile()'`).
 
 == Test
 
 [source,bash]
 ----
-{{TEST_CMD}}
+just test
 ----
+
+This runs the full suite via `julia --project=. test/runtests.jl`.
 
 == Project Structure
 
 [source]
 ----
 statistikles/
-├── src/                  # Source code
-├── src/abi/              # Idris2 ABI definitions (if applicable)
-├── ffi/zig/              # Zig FFI bridge (if applicable)
-├── tests/                # Test suite
+├── src/                  # Julia source (module: Statistikles)
+├── src/stats/            # Statistical function modules
+├── src/tools/            # Executor, chat, LM Studio client
+├── proofs/               # Agda proofs
+├── ffi/zig/              # Zig FFI bridge
+├── test/                 # Test suite (runtests.jl)
 ├── docs/                 # Documentation
 ├── .machine_readable/    # Checkpoint files (STATE, META, ECOSYSTEM)
 ├── Justfile              # Task runner recipes
-├── guix.scm              # Guix environment
-├── flake.nix             # Nix environment (fallback)
 └── 0-AI-MANIFEST.a2ml    # AI agent entry point
 ----
 
@@ -70,11 +65,12 @@ statistikles/
 
 [source,bash]
 ----
-just build          # Build the project
+just setup          # Install Julia package dependencies
+just build          # Precompile the project environment
 just test           # Run tests
+just run            # Run the assistant
 just doctor         # Self-diagnostic
 just lint           # Lint and format
-just panic-scan     # Security scan via panic-attacker
 just tour           # Guided tour of the codebase
 ----
 
@@ -84,26 +80,24 @@ just tour           # Guided tour of the codebase
 ----
 just lint           # Format and lint
 just test           # All tests pass
-just panic-scan     # No new security issues
 ----
 
 == Contractile Invariants
 
-Read `.machine_readable/MUST.contractile` before making changes.
+Read `.machine_readable/contractiles/Mustfile.a2ml` before making changes.
 Key invariants that must never be violated:
 
-{{MUST_INVARIANTS}}
+* **Neural-symbolic boundary**: no statistical value is ever produced by
+  neural inference. Every number crosses `src/tools/executor.jl:execute_tool()`
+  upward only after being computed by a verified Julia function.
+* No dangerous escape hatches in `src/` (`believe_me`, `assert_total`,
+  `sorry`, `Admitted`) — enforced by CI.
+* SPDX license headers on source files.
 
 == LLM/AI Agent Development
 
-If using an AI assistant, load the warmup context first:
-
-[source,bash]
-----
-just llm-context    # Outputs role-appropriate context
-----
-
-Or read `0-AI-MANIFEST.a2ml` and `.claude/CLAUDE.md` directly.
+If using an AI assistant, read `0-AI-MANIFEST.a2ml` first — it is the AI
+agent entry point and links the machine-readable state files.
 
 == Get Help
 
