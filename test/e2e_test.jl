@@ -109,8 +109,10 @@ using Statistikles
         # Every value must be a JSON-serialisable primitive (Number, String, Bool, Nothing)
         for (key, val) in report
             @test key isa String
-            @test (val isa Number || val isa String || val isa Bool || val === nothing ||
-                   val isa Vector) "Key $key has non-serialisable type $(typeof(val))"
+            serialisable = val isa Number || val isa String || val isa Bool ||
+                           val === nothing || val isa Vector
+            serialisable || @warn "Non-serialisable report value" key type=typeof(val)
+            @test serialisable
         end
 
         # Key statistical assertions on the well-known [1..10] dataset
