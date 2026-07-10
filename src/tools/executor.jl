@@ -26,6 +26,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return t_test_paired(g1, convert(Vector{Float64}, arguments["group2"]); alpha)
             elseif tt == "one_sample"
                 return t_test_one_sample(g1, Float64(get(arguments, "mu0", 0.0)); alpha)
+            else
+                return Dict{String,Any}("error" => "Unknown type '$tt' for t_test")
             end
 
         elseif tool_name == "anova"
@@ -100,6 +102,7 @@ function execute_tool(tool_name::String, arguments::Dict)
             stat_name = get(arguments, "statistic", "mean")
             stat_fn = stat_name == "mean" ? mean : stat_name == "median" ? median : var
             reps = Int(get(arguments, "n_reps", 1000))
+            reps > 100_000 && return Dict{String,Any}("error" => "n_reps=$reps exceeds maximum 100000")
             return bootstrap_ci(data, stat_fn; n_reps=reps)
 
         elseif tool_name == "time_series"
@@ -113,6 +116,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return Dict("acf" => autocorrelation(data, lag))
             elseif arguments["type"] == "dtw"
                 return Dict("dtw_distance" => dynamic_time_warping(data, convert(Vector{Float64}, arguments["target"])))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for time_series")
             end
 
         elseif tool_name == "information_theory"
@@ -122,6 +127,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 p = convert(Vector{Float64}, arguments["p"])
                 q = convert(Vector{Float64}, arguments["q"])
                 return Dict("kl_divergence" => kl_divergence(p, q))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for information_theory")
             end
 
         elseif tool_name == "survival_analysis"
@@ -132,6 +139,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return log_rank_test(convert(Vector{Float64}, arguments["times"]),
                                    convert(Vector{Bool}, arguments["events"]),
                                    arguments["groups"])
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for survival_analysis")
             end
 
         elseif tool_name == "meta_analysis"
@@ -147,6 +156,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return Dict("distances" => mahalanobis_distance(X))
             elseif arguments["type"] == "huber"
                 return Dict("estimate" => huber_m_estimator(convert(Vector{Float64}, arguments["data"])))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for robust_stats")
             end
 
         elseif tool_name == "causal_inference"
@@ -162,6 +173,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return regression_discontinuity(convert(Vector{Float64}, arguments["y"]), 
                                               convert(Vector{Float64}, arguments["x"]), 
                                               Float64(arguments["threshold"]))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for causal_inference")
             end
 
         elseif tool_name == "spatial_stats"
@@ -170,6 +183,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 raw_w = arguments["w"]
                 W = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_w]...))
                 return morans_i(x, W)
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for spatial_stats")
             end
 
         elseif tool_name == "machine_learning"
@@ -180,6 +195,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 raw_x = arguments["x"]
                 X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_x]...))
                 return random_forest_proxy(X, convert(Vector{Float64}, arguments["y"]))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for machine_learning")
             end
 
         elseif tool_name == "nlp_symbolic"
@@ -189,7 +206,11 @@ function execute_tool(tool_name::String, arguments::Dict)
             elseif arguments["type"] == "topic_modeling"
                 raw_x = arguments["x"]
                 X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in raw_x]...))
-                return topic_modeling_nmf(X; k=Int(get(arguments, "k", 3)))
+                k = Int(get(arguments, "k", 3))
+                k > 20 && return Dict{String,Any}("error" => "k=$k exceeds maximum component count 20")
+                return topic_modeling_nmf(X; k=k)
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for nlp_symbolic")
             end
 
         elseif tool_name == "advanced_modeling"
@@ -199,16 +220,24 @@ function execute_tool(tool_name::String, arguments::Dict)
             elseif arguments["type"] == "ordinal_logistic"
                 X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in arguments["x"]]...))
                 return ordinal_logistic_regression(X, convert(Vector{Int}, arguments["y"]))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for advanced_modeling")
             end
 
         elseif tool_name == "signal_processing"
             if arguments["type"] == "ica"
                 X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in arguments["x"]]...))
-                return independent_component_analysis(X; k=Int(get(arguments, "k", 2)))
+                k = Int(get(arguments, "k", 2))
+                k > 20 && return Dict{String,Any}("error" => "k=$k exceeds maximum component count 20")
+                return independent_component_analysis(X; k=k)
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for signal_processing")
             end
 
         elseif tool_name == "bayesian_em"
-            return expectation_maximization_normal(convert(Vector{Float64}, arguments["data"]), Int(arguments["k"]))
+            k = Int(arguments["k"])
+            k > 20 && return Dict{String,Any}("error" => "k=$k exceeds maximum component count 20")
+            return expectation_maximization_normal(convert(Vector{Float64}, arguments["data"]), k)
 
         elseif tool_name == "functional_data"
             X = Matrix{Float64}(hcat([convert(Vector{Float64}, col) for col in arguments["x"]]...))
@@ -219,6 +248,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return mcnemar_test(Int(arguments["b"]), Int(arguments["c"]))
             elseif arguments["type"] == "padic"
                 return Dict("valuation" => padic_valuation(Int(arguments["n"]), Int(arguments["p"])))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for algebraic_stats")
             end
 
         elseif tool_name == "representation_stats"
@@ -228,6 +259,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 a = Tuple{Float64, Float64}(arguments["interval_a"])
                 b = Tuple{Float64, Float64}(arguments["interval_b"])
                 return interval_overlap_test(a, b)
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for representation_stats")
             end
 
         elseif tool_name == "non_classical_prob"
@@ -237,6 +270,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return Dict("result" => tropical_dot_product(v1, v2))
             elseif arguments["type"] == "bell_test"
                 return Dict("chsh_s" => bell_test_chsh(convert(Vector{Float64}, arguments["correlations"])))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for non_classical_prob")
             end
 
         elseif tool_name == "structured_dynamic"
@@ -250,12 +285,16 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return Dict("dimension" => box_counting_dimension(img))
             elseif arguments["type"] == "hurst"
                 return Dict("hurst" => hurst_exponent(convert(Vector{Float64}, arguments["data"])))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for structured_dynamic")
             end
 
         elseif tool_name == "unconventional_frameworks"
             if arguments["type"] == "rough_set"
                 return rough_set_approximations(convert(Vector{Int}, arguments["features"]), 
                                               convert(Vector{Int}, arguments["target"]))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for unconventional_frameworks")
             end
 
         elseif tool_name == "pre_suite"
@@ -282,6 +321,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 raw_d = arguments["data"]
                 d = Matrix{Int}(hcat([convert(Vector{Int}, col) for col in raw_d]...))
                 return cochrans_q(d)
+            else
+                return Dict{String,Any}("error" => "Unknown type '$tt' for nonparametric_test")
             end
 
         elseif tool_name == "permanova"
@@ -289,6 +330,7 @@ function execute_tool(tool_name::String, arguments::Dict)
             dm = Matrix{Float64}(hcat([convert(Vector{Float64}, row) for row in raw_dm]...)')
             labels = arguments["group_labels"]
             n_perm = Int(get(arguments, "n_permutations", 999))
+            n_perm > 100_000 && return Dict{String,Any}("error" => "n_permutations=$n_perm exceeds maximum 100000")
             alpha = Float64(get(arguments, "alpha", 0.05))
             return permanova(dm, labels; n_permutations=n_perm, alpha=alpha)
 
@@ -324,6 +366,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 return test_normality(convert(Vector{Float64}, arguments["data"]))
             elseif arguments["type"] == "levene"
                 return levenes_test([convert(Vector{Float64}, g) for g in arguments["groups"]])
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for test_assumptions")
             end
 
         elseif tool_name == "bayesian_analysis"
@@ -390,6 +434,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 raw = arguments["items"]
                 items = Matrix{Float64}(hcat([convert(Vector{Float64}, row) for row in raw]...)')
                 return item_analysis(items, vec(sum(items, dims=2)))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$mt' for measurement_analysis")
             end
 
         elseif tool_name == "validity_assessment"
@@ -413,6 +459,8 @@ function execute_tool(tool_name::String, arguments::Dict)
                 raw = arguments["ratings_matrix"]
                 mat = Matrix{Float64}(hcat([convert(Vector{Float64}, row) for row in raw]...)')
                 return intraclass_correlation(mat; icc_type=get(arguments, "icc_type", "ICC(2,1)"))
+            else
+                return Dict{String,Any}("error" => "Unknown type '$irr' for inter_rater_reliability")
             end
 
         elseif tool_name == "qualitative_analysis"
@@ -435,15 +483,20 @@ function execute_tool(tool_name::String, arguments::Dict)
                     proportion=Float64(get(arguments, "proportion", 0.5)),
                     confidence=Float64(get(arguments, "confidence", 0.95)),
                     population=pop)
+            else
+                return Dict{String,Any}("error" => "Unknown type '$(arguments["type"])' for sampling_design")
             end
 
         else
             return Dict{String,Any}("error" => "Unknown tool: $tool_name")
         end
     catch e
-        return Dict{String,Any}(
-            "error" => "Tool execution failed: $(string(e))",
-            "trace" => sprint(showerror, e, catch_backtrace())
-        )
+        # Stable, concise error string. The full backtrace is only attached when
+        # STATISTIKLES_DEBUG is set, so normal output stays clean and stable.
+        err = Dict{String,Any}("error" => "Tool execution failed: $(string(e))")
+        if get(ENV, "STATISTIKLES_DEBUG", "") != ""
+            err["trace"] = sprint(showerror, e, catch_backtrace())
+        end
+        return err
     end
 end
