@@ -36,7 +36,9 @@ erl_crash.dump
 # Julia
 *.jl.cov
 *.jl.mem
-/Manifest.toml
+# Manifest.toml is COMMITTED here (supply-chain pinning of the compute half;
+# Dependabot has no Julia ecosystem, so the committed manifest + CI
+# Pkg.instantiate is the compensating control). Do not re-ignore it.
 
 # ReScript
 /lib/bs/
