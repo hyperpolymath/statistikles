@@ -17,7 +17,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # Gate on secret presence so runs without the dispatch token skip
+      # cleanly instead of failing (step-level `if` only; job-level
+      # secrets conditionals cause silent startup failures).
+      - name: Check dispatch token presence
+        id: token
+        env:
+          FARM_DISPATCH_TOKEN: ${{ secrets.FARM_DISPATCH_TOKEN }}
+        run: |
+          if [ -n "$FARM_DISPATCH_TOKEN" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::FARM_DISPATCH_TOKEN not set; skipping forge propagation"
+          fi
+
       - name: Trigger Propagation
+        if: steps.token.outputs.present == 'true'
         uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v3
         with:
           token: ${{ secrets.FARM_DISPATCH_TOKEN }}
@@ -32,4 +48,5 @@ jobs:
             }
 
       - name: Confirm
+        if: steps.token.outputs.present == 'true'
         run: echo "::notice::Propagation triggered for ${{ github.event.repository.name }}"
