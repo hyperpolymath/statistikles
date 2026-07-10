@@ -58,7 +58,11 @@ hard architectural invariant.
 
 == Features
 
-=== Statistical Functions (17 Modules)
+=== Statistical Functions (40 Modules)
+
+The table below is a curated highlight — the full set of 40 modules lives in
+`src/stats/` (including survival, spatial, robust, time-series, meta-analysis,
+NLP, and non-classical statistics).
 
 [cols="1,2"]
 |===

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
-// Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+# Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
 # RSR Standard Justfile Template
@@ -239,25 +239,14 @@ init:
 # BUILD & COMPILE
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Build the project (debug mode)
-build *args:
-    @echo "Building statistikles (debug)..."
-    # TODO: Replace with your build command
-    # Examples:
-    #   cargo build {{args}}                    # Rust
-    #   mix compile {{args}}                    # Elixir
-    #   zig build {{args}}                      # Zig
-    #   deno task build {{args}}                # Deno/ReScript
+# Build the project (precompile the Julia environment)
+build *args: setup
+    @echo "Precompiling statistikles..."
+    julia --project=. -e 'using Pkg; Pkg.precompile()'
     @echo "Build complete"
 
-# Build in release mode with optimizations
-build-release *args:
-    @echo "Building statistikles (release)..."
-    # TODO: Replace with your release build command
-    # Examples:
-    #   cargo build --release {{args}}
-    #   MIX_ENV=prod mix compile {{args}}
-    #   zig build -Doptimize=ReleaseFast {{args}}
+# Release build — same as `build` (Julia has no separate release mode)
+build-release *args: build
     @echo "Release build complete"
 
 # Build and watch for changes (requires entr or similar)
@@ -343,15 +332,13 @@ lint:
 # RUN & EXECUTE
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Run the application
+# Run the assistant (falls back to offline examples if LM Studio is absent)
 run *args: build
-    # TODO: Replace with your run command
-    echo "Run not configured yet"
+    julia --project=. -e 'using Statistikles; main()'
 
-# Run with verbose output
+# Run with verbose output (traces method precompilation)
 run-verbose *args: build
-    # TODO: Replace with verbose run command
-    echo "Run not configured yet"
+    julia --project=. --trace-compile=stderr -e 'using Statistikles; main()'
 
 # Install to user path
 install: build-release
@@ -362,14 +349,14 @@ install: build-release
 # DEPENDENCIES
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Install/check all dependencies
-deps:
-    @echo "Checking dependencies..."
-    # TODO: Replace with your dependency check
-    # Examples:
-    #   cargo check
-    #   mix deps.get
-    #   gleam deps download
+# One-time setup: resolve and install Julia package dependencies
+setup:
+    @command -v julia >/dev/null 2>&1 || { echo "Julia not found — install Julia 1.10+ from https://julialang.org/downloads/"; exit 1; }
+    julia --project=. -e 'using Pkg; Pkg.instantiate()'
+    @echo "Setup complete — try 'just run'"
+
+# Install/check all dependencies (alias of `setup`)
+deps: setup
     @echo "All dependencies satisfied"
 
 # Audit dependencies for vulnerabilities
@@ -729,6 +716,7 @@ doctor:
     @echo "Checking required tools..."
     @command -v just >/dev/null 2>&1 && echo "  [OK] just" || echo "  [FAIL] just not found"
     @command -v git >/dev/null 2>&1 && echo "  [OK] git" || echo "  [FAIL] git not found"
+    @command -v julia >/dev/null 2>&1 && echo "  [OK] julia ($(julia --version))" || echo "  [FAIL] julia not found — install Julia 1.10+"
     @echo "Checking for hardcoded paths..."
     @grep -rn '$HOME\|$ECLIPSE_DIR' --include='*.rs' --include='*.ex' --include='*.res' --include='*.gleam' --include='*.sh' . 2>/dev/null | head -5 || echo "  [OK] No hardcoded paths"
     @echo "Diagnostics complete."

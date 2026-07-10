@@ -4,64 +4,22 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
 # Quickstart
 
-Get up and running in 60 seconds.
+The canonical quickstart guides live at the repository root:
 
-## Prerequisites
+- [QUICKSTART-USER.adoc](../QUICKSTART-USER.adoc) — install and run in 5 minutes
+- [QUICKSTART-DEV.adoc](../QUICKSTART-DEV.adoc) — clone, build, test, PR
+- [QUICKSTART-MAINTAINER.adoc](../QUICKSTART-MAINTAINER.adoc) — packaging and deployment
 
-- [Git](https://git-scm.com/) 2.40+
-- [just](https://github.com/casey/just) (command runner)
-- Your language toolchain (see `Justfile` for details)
-
-## From Template (New Project)
-
-```bash
-git clone https://github.com/hyperpolymath/rsr-template-repo my-project
-cd my-project
-rm -rf .git && git init -b main
-just init       # interactive placeholder replacement
-```
-
-## Clone and Setup (Existing Project)
+The short version:
 
 ```bash
 git clone https://github.com/hyperpolymath/statistikles.git
 cd statistikles
-just deps
+just setup    # julia --project=. -e 'using Pkg; Pkg.instantiate()'
+just run      # julia --project=. -e 'using Statistikles; main()'
+just test     # julia --project=. test/runtests.jl
 ```
 
-## Build and Test
-
-```bash
-just build
-just test
-```
-
-## Verify Everything Works
-
-```bash
-just check
-```
-
-## Project Structure
-
-```
-src/         # Source code
-tests/       # Test suite
-benches/     # Benchmarks
-docs/        # Documentation
-.github/     # CI/CD workflows
-```
-
-## What Next?
-
-- Browse the [docs/](.) for architecture and conventions
-- Run `just --list` to see all available commands
-- Read [CONTRIBUTING.md](../CONTRIBUTING.md) when you are ready to contribute
-
-## Troubleshooting
-
-If `just deps` fails, ensure your toolchain version matches the
-project requirements listed in the `Justfile` or `.machine_readable/ECOSYSTEM.a2ml`.
-
-Open a [Discussion](https://github.com/hyperpolymath/statistikles/discussions)
-if you get stuck.
+Requires [Julia](https://julialang.org/downloads/) 1.10+ and
+[just](https://github.com/casey/just). See the
+[README](../README.adoc) for the full feature overview.
