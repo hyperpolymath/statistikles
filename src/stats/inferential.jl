@@ -103,3 +103,69 @@ function one_way_anova(groups::Vector{Vector{Float64}}; alpha::Float64=0.05)
         "test_type" => "One-way ANOVA (independent groups)"
     )
 end
+
+"""
+    chi_square_test(observed::Matrix{Int}; alpha=0.05) -> Dict
+
+CHI-SQUARE TEST OF INDEPENDENCE: Tests whether two categorical variables are
+independent in an r×c contingency table of observed frequencies.
+- EFFECT SIZE: Reports Cramér's V.
+- OUTPUT: chi-squared statistic, df = (r-1)(c-1), and p-value from the
+  chi-squared distribution.
+"""
+function chi_square_test(observed::Matrix{Int}; alpha::Float64=0.05)
+    r, c = size(observed)
+    n = sum(observed)
+    row_sums = sum(observed, dims=2)
+    col_sums = sum(observed, dims=1)
+
+    chi2 = 0.0
+    for i in 1:r, j in 1:c
+        expected = row_sums[i] * col_sums[j] / n
+        if expected > 0
+            chi2 += (observed[i, j] - expected)^2 / expected
+        end
+    end
+    df = (r - 1) * (c - 1)
+    p_value = 1 - cdf(Chisq(df), chi2)
+
+    return Dict{String,Any}(
+        "chi_squared" => chi2,
+        "df" => df,
+        "p_value" => p_value,
+        "significant" => p_value < alpha,
+        "cramers_v" => sqrt(chi2 / (n * (min(r, c) - 1))),
+        "n" => n,
+        "test_type" => "Chi-square test of independence"
+    )
+end
+
+"""
+    chi_square_goodness_of_fit(observed, expected_proportions=nothing; alpha=0.05) -> Dict
+
+CHI-SQUARE GOODNESS-OF-FIT: Tests whether observed category counts match an
+expected distribution. Defaults to a uniform distribution across categories
+when `expected_proportions` is not supplied.
+"""
+function chi_square_goodness_of_fit(observed::Vector{Int},
+                                    expected_proportions::Union{Vector{Float64},Nothing}=nothing;
+                                    alpha::Float64=0.05)
+    k = length(observed)
+    n = sum(observed)
+    props = isnothing(expected_proportions) ? fill(1.0 / k, k) : expected_proportions
+    expected = n .* props
+
+    chi2 = sum((observed .- expected) .^ 2 ./ expected)
+    df = k - 1
+    p_value = 1 - cdf(Chisq(df), chi2)
+
+    return Dict{String,Any}(
+        "chi_squared" => chi2,
+        "df" => df,
+        "p_value" => p_value,
+        "significant" => p_value < alpha,
+        "expected" => expected,
+        "n" => n,
+        "test_type" => "Chi-square goodness-of-fit"
+    )
+end

@@ -1341,3 +1341,7 @@ include("property_test.jl")
 # Reference validation: the trusted symbolic layer checked against
 # hand-derived / independently computed ground-truth values
 include("reference_validation_test.jl")
+
+# Executor router coverage: every LLM-facing tool name in definitions.jl
+# is exercised through execute_tool (or explicitly skipped with a reason)
+include("executor_router_test.jl")

@@ -144,9 +144,29 @@ end
 """
     frequency_table(data::Vector{String}) -> Dict
 
-CATEGORICAL ANALYSIS: Computes frequencies and relative percentages 
+CATEGORICAL ANALYSIS: Computes frequencies and relative percentages
 for discrete data sets.
 """
 function frequency_table(data::Vector{String})
-    # ... [Implementation using countmap]
+    n = length(data)
+    n == 0 && return Dict{String,Any}("error" => "Need at least 1 observation")
+
+    counts = StatsBase.countmap(data)
+    categories = sort(collect(keys(counts)))
+    freqs = [counts[c] for c in categories]
+    rel_freqs = freqs ./ n .* 100.0
+    cum_freqs = cumsum(freqs)
+    cum_rel_freqs = cumsum(rel_freqs)
+
+    return Dict{String,Any}(
+        "categories" => categories,
+        "frequencies" => freqs,
+        "relative_frequencies" => rel_freqs,
+        "cumulative_frequencies" => cum_freqs,
+        "cumulative_relative_frequencies" => cum_rel_freqs,
+        "n" => n,
+        "n_categories" => length(categories),
+        "mode" => categories[argmax(freqs)],
+        "test_type" => "Frequency table (categorical)"
+    )
 end
