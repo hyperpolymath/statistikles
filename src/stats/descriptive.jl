@@ -101,7 +101,7 @@ function descriptive_stats(data::Vector{Float64})
         "min" => sorted[1],
         "max" => sorted[end],
         "range" => sorted[end] - sorted[1],
-        "outlier_fences" => (q1 - 1.5 * iqr_val, q3 + 1.5 * iqr_val),
+        "outlier_fences" => [q1 - 1.5 * iqr_val, q3 + 1.5 * iqr_val],
         "normality_hint" => abs(skew) < 2 && abs(kurt) < 7 ?
                             "Approximately normal" : "Possibly non-normal"
     )
