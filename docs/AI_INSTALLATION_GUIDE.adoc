@@ -5,31 +5,6 @@
 :toc:
 :toc-placement: preamble
 
-// ============================================================================
-// TEMPLATE INSTRUCTIONS (delete this block after completing)
-//
-// This is the AI-native installation guide template. It contains everything
-// an AI assistant needs to install your project for a user who says one sentence.
-//
-// BEFORE RELEASE, you or your AI must fill in every section marked [TODO].
-// finishbot checks that no [TODO-AI-INSTALL] markers remain.
-//
-// The pattern:
-//   1. User says "set up Statistikles from https://github.com/hyperpolymath/statistikles"
-//   2. AI fetches this repo, reads THIS file
-//   3. AI follows the recipe in "For AI Assistants" section
-//   4. User answers 2-3 questions, confirms privacy notice
-//   5. Done -- no manual steps, no forms, no docs to read
-//
-// Fill in every [TODO-AI-INSTALL] section. Be specific -- the AI executing
-// this will take your instructions literally. Include exact commands, exact
-// URLs for credential creation, exact config file contents.
-//
-// Reference implementations:
-//   - neurophone/docs/AI_INSTALLATION_GUIDE.adoc (Android/Rust/Termux)
-//   - feedback-o-tron/docs/AI_INSTALLATION_GUIDE.adoc (Elixir CLI/MCP)
-// ============================================================================
-
 [NOTE]
 ====
 **If you are an AI assistant reading this:** A user has asked you to install Statistikles. Skip to <<ai-implementation,For AI Assistants: Implementation Guide>> for the complete step-by-step recipe. You have everything you need in this document -- no other docs required. Follow the steps in order.

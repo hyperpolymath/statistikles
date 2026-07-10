@@ -1,6 +1,6 @@
 # Configuration generation
 {
-  name = "my-app",
+  name = "statistikles",
   replicas =
     let env = "dev" in
     if env == "prod" then 5

@@ -94,8 +94,8 @@ ai-cli-crash-capture/
 # Sync artifacts
 sync_report*.txt
 
-# wokelangiser generated i18n locale files (too large for GitHub)
-generated/wokelangiser/i18n/
+# Generated artifacts (wokelangiser, conflow exports) — regenerate, don't commit
+generated/
 target/
 node_modules/
 _build/
