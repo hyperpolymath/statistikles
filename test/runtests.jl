@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: MPL-2.0
-# StatistEase — Comprehensive Unit Test Suite
+# Statistikles — Comprehensive Unit Test Suite
 # Every exported function tested. Zero tolerance for errors/warnings.
 
 using Test
 using Statistics
-using StatistEase
+using Statistikles
 
-@testset "StatistEase Full Test Suite" begin
+@testset "Statistikles Full Test Suite" begin
 
     # ═══════════════════════════════════════════════════════════════════
     # DESCRIPTIVE STATISTICS
@@ -632,7 +632,7 @@ using StatistEase
         # levenes_test can be exercised for real.
         g1 = collect(1.0:30.0)
         g2 = collect(101.0:130.0)  # same spread, different location
-        r = StatistEase.levenes_test([g1, g2])
+        r = Statistikles.levenes_test([g1, g2])
         @test haskey(r, "F_statistic")
         @test 0.0 <= r["p_value"] <= 1.0
         @test r["significant"] == false

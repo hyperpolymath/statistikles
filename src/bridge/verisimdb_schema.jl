@@ -17,7 +17,7 @@ using HTTP
 using Dates
 using UUIDs
 
-const VERISIMDB_PORT = parse(Int, get(ENV, "STATISTEASE_VERISIMDB_PORT", "8096"))
+const VERISIMDB_PORT = parse(Int, get(ENV, "STATISTIKLES_VERISIMDB_PORT", "8096"))
 const VERISIMDB_URL = "http://localhost:$(VERISIMDB_PORT)"
 
 """
@@ -34,7 +34,7 @@ function store_result(test_name::String, result::Dict, input_hash::String;
         "test_name" => test_name,
         "result" => result,
         "input_hash" => input_hash,
-        "source" => "StatistEase.jl",
+        "source" => "Statistikles.jl",
         "version" => "0.1.0"
     )
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
-# Main chat interface for StatistEase.
+# Main chat interface for Statistikles.
 #
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  NEUROSYMBOLIC STATISTICAL ANALYSIS ASSISTANT                          ║
@@ -19,14 +19,14 @@
 # ║  │  • Misremembered formulas                                     │      ║
 # ║  │  • Confident but wrong test recommendations                  │      ║
 # ║  │                                                               │      ║
-# ║  │  StatistEase eliminates mollocks by REQUIRING all numbers    │      ║
+# ║  │  Statistikles eliminates mollocks by REQUIRING all numbers    │      ║
 # ║  │  to flow through symbolic computation. The LLM interprets,  │      ║
 # ║  │  it does not calculate. If you see a statistic that didn't   │      ║
 # ║  │  come from a [symbolic] tool call, treat it with suspicion.  │      ║
 # ║  └───────────────────────────────────────────────────────────────┘      ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
-const SYSTEM_PROMPT = """You are StatistEase, a neurosymbolic statistical analysis assistant.
+const SYSTEM_PROMPT = """You are Statistikles, a neurosymbolic statistical analysis assistant.
 
 CRITICAL DESIGN PRINCIPLE: You are the NEURAL component. You handle natural language
 understanding and interpretation. You NEVER perform calculations yourself. ALL statistics
@@ -68,7 +68,7 @@ neural computation — that produces mollocks (plausible fabrications)."""
 function statistical_assistant_chat()
     println()
     println("=" ^ 72)
-    println("  StatistEase — Neurosymbolic Statistical Analysis")
+    println("  Statistikles — Neurosymbolic Statistical Analysis")
     println("=" ^ 72)
     println()
     println("  Every calculation is performed by verified Julia code.")
@@ -99,7 +99,7 @@ function statistical_assistant_chat()
 
         push!(messages, Dict{String,Any}("role" => "user", "content" => input))
 
-        print("\n  StatistEase: ")
+        print("\n  Statistikles: ")
         response = call_lm_studio(messages, tools)
 
         if haskey(response, "error")
@@ -190,7 +190,7 @@ end
 function main()
     println()
     println("  ┌─────────────────────────────────────────────────────────────┐")
-    println("  │  StatistEase v0.1.0                                        │")
+    println("  │  Statistikles v0.1.0                                        │")
     println("  │  Neurosymbolic Statistical Analysis Assistant              │")
     println("  │                                                             │")
     println("  │  DESIGN: LLM = natural language router/interpreter          │")

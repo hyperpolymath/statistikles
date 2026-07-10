@@ -8,7 +8,7 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 - **LOC**: ~11,900
 - **Languages**: Julia, Agda, Idris2, Zig
 - **Existing ABI proofs**: `src/abi/*.idr` (template-level)
-- **Existing verification**: 3 Agda proof files in `proofs/StatistEase/`
+- **Existing verification**: 3 Agda proof files in `proofs/Statistikles/`
   - `Inequalities.agda` — statistical inequalities
   - `RankIdentities.agda` — rank-based test identities
   - `TropicalSemiring.agda` — tropical semiring properties (mentions "no postulates" in comment, but grep found a match — needs audit)
@@ -16,7 +16,7 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 ## What Needs Proving
 
-### Tropical Semiring Audit (proofs/StatistEase/TropicalSemiring.agda)
+### Tropical Semiring Audit (proofs/Statistikles/TropicalSemiring.agda)
 - Verify the "no postulates" claim is still accurate
 - Ensure semiring laws (associativity, commutativity, distributivity, identity) are all constructively proven
 

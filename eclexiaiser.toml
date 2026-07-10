@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MPL-2.0
-# eclexiaiser manifest for statistease
+# eclexiaiser manifest for statistikles
 
 [project]
-name = "statistease"
+name = "statistikles"
 
 [[functions]]
 name = "main"

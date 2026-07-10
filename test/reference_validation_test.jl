@@ -93,14 +93,14 @@
         # Groups with identical spread: |deviations from median| are the
         # same in every group, so between-group SS is 0 and F is 0.
         groups = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]
-        r = StatistEase.levenes_test(groups)
+        r = Statistikles.levenes_test(groups)
         @test isapprox(r["F_statistic"], 0.0; atol = 1e-12)
         @test r["significant"] == false
     end
 
     @testset "Executor dispatch: anova tool" begin
         direct = one_way_anova([[1.0, 2.0, 3.0], [2.0, 3.0, 4.0], [3.0, 4.0, 5.0]])
-        via_tool = StatistEase.execute_tool("anova",
+        via_tool = Statistikles.execute_tool("anova",
             Dict{String,Any}("groups" => [[1.0, 2.0, 3.0], [2.0, 3.0, 4.0], [3.0, 4.0, 5.0]]))
         @test isapprox(via_tool["F_statistic"], direct["F_statistic"]; atol = 1e-12)
         @test isapprox(via_tool["p_value"], direct["p_value"]; atol = 1e-12)

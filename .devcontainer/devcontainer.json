@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
-// Dev Container configuration for StatistEase
+// Dev Container configuration for Statistikles
 // Works with: VS Code Dev Containers, GitHub Codespaces, Gitpod
 // Container runtime: Podman (recommended) or any OCI-compliant runtime
 {
-  "name": "StatistEase",
+  "name": "Statistikles",
 
   "build": {
     "dockerfile": "Containerfile",

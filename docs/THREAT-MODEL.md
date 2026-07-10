@@ -4,13 +4,13 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
 <!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
 
-# Threat Model: StatistEase
+# Threat Model: Statistikles
 
 ## Document Info
 
 | Field         | Value                          |
 |---------------|--------------------------------|
-| Project       | StatistEase               |
+| Project       | Statistikles               |
 | Version       | 1.0                            |
 | Last Reviewed | 2026-02-20                       |
 | Author        | Jonathan D.A. Jewell                     |
@@ -36,7 +36,7 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 ## System Overview
 
-Brief description of StatistEase and its architecture.
+Brief description of Statistikles and its architecture.
 
 > See [TOPOLOGY.md](../TOPOLOGY.md) for the full architecture diagram and completion dashboard.
 

@@ -6,6 +6,6 @@ Contact: mailto:j.d.a.jewell@open.ac.uk
 Expires: 2026-12-31T23:59:59.000Z
 Encryption: TBD
 Preferred-Languages: en
-Canonical: https://github.com/hyperpolymath/statistease/.well-known/security.txt
-Policy: https://github.com/hyperpolymath/statistease/blob/main/SECURITY.md
-Hiring: https://https://github.com/hyperpolymath/statistease/careers
+Canonical: https://github.com/hyperpolymath/statistikles/.well-known/security.txt
+Policy: https://github.com/hyperpolymath/statistikles/blob/main/SECURITY.md
+Hiring: https://https://github.com/hyperpolymath/statistikles/careers

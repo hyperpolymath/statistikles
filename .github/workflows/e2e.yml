@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# StatistEase — E2E + Aspect Tests
+# Statistikles — E2E + Aspect Tests
 #
 # Runs the Julia test suite (478 tests, 10 Agda proofs, 8 integrations).
 

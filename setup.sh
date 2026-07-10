@@ -1,12 +1,12 @@
 #!/bin/sh
 # SPDX-License-Identifier: MPL-2.0
-# setup.sh — Universal setup script for statistease
+# setup.sh — Universal setup script for statistikles
 #
 # Detects your shell, platform, and installs prerequisites.
 # Then hands off to `just setup` for project-specific configuration.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/hyperpolymath/statistease/main/setup.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/hyperpolymath/statistikles/main/setup.sh | sh
 #   # or after cloning:
 #   ./setup.sh
 #
@@ -167,7 +167,7 @@ install_just() {
 
 # ── Main ──
 main() {
-    printf "%s=== statistease Setup ===%s\n\n" "$BOLD" "$RESET"
+    printf "%s=== statistikles Setup ===%s\n\n" "$BOLD" "$RESET"
 
     # Detect environment
     SHELL_NAME=$(detect_shell)
@@ -198,8 +198,8 @@ main() {
     # Step 2: Check if we're in the repo directory
     if [ ! -f "Justfile" ] && [ ! -f "justfile" ]; then
         warn "Not in a repo directory (no Justfile found)"
-        info "Clone first: git clone https://github.com/hyperpolymath/statistease.git"
-        info "Then: cd statistease && ./setup.sh"
+        info "Clone first: git clone https://github.com/hyperpolymath/statistikles.git"
+        info "Then: cd statistikles && ./setup.sh"
         exit 1
     fi
 

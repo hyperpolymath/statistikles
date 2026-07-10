@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# e2e_test.jl — End-to-end pipeline tests for StatistEase
+# e2e_test.jl — End-to-end pipeline tests for Statistikles
 #
 # Tests full statistical workflows from raw data input through to structured
 # output reports. Validates that the pipeline stages compose correctly and
@@ -9,9 +9,9 @@
 
 using Test
 using Statistics
-using StatistEase
+using Statistikles
 
-@testset "StatistEase E2E Pipeline Tests" begin
+@testset "Statistikles E2E Pipeline Tests" begin
 
     # ═══════════════════════════════════════════════════════════════════
     # 1. FULL DESCRIPTIVE STATS PIPELINE
@@ -206,4 +206,4 @@ using StatistEase
         @test 0.0 <= mw["p_value"] <= 1.0
     end
 
-end # @testset "StatistEase E2E Pipeline Tests"
+end # @testset "Statistikles E2E Pipeline Tests"

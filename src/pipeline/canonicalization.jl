@@ -36,7 +36,7 @@
 # papers had gene names corrupted to dates by Excel. These are not edge
 # cases — they are the NORMAL failure mode of data exchange.
 #
-# If we don't catch this HERE, both StatistEase and Aspasia will compute
+# If we don't catch this HERE, both Statistikles and Aspasia will compute
 # confidently on misinterpreted data, agree with each other (because they
 # both misinterpreted the same way), and produce a verified wrong answer.
 

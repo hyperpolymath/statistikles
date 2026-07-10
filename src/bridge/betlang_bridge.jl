@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # BetLang Bridge — Probabilistic programming integration.
 #
-# Brings betlang's unique capabilities into StatistEase:
+# Brings betlang's unique capabilities into Statistikles:
 #   - 14 uncertainty-aware number systems
 #   - Advanced Bayesian inference (MCMC, ABC, importance sampling)
 #   - 14 sampling methods (HMC, SMC, Latin hypercube, Sobol, etc.)
@@ -10,7 +10,7 @@
 #   - Financial risk (VaR, CVaR, risk-of-ruin, Dutch book detection)
 #   - Game theory (Nash equilibria, auctions)
 #
-# StatistEase provides back to betlang:
+# Statistikles provides back to betlang:
 #   - Production-quality nonparametric tests (midranks, tie correction)
 #   - Cross-verification (Aspasia + ECHIDNA triangle)
 #   - Formal proofs (Agda)

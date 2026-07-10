@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Statistikles  — Neurosymbolic Statistical Analysis Assistant
+
+image::assets/statistikles-hero.png[Statistikles — a neurosymbolic assistant for statistics; neural learns and adapts, symbolic reasons and explains; stronger together,align="center"]
+
 image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/statistikles"]
 
 image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[License: MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]

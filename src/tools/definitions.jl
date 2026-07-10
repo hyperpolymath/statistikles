@@ -2,7 +2,7 @@
 # Tool definitions for LM Studio function calling.
 # These definitions tell the LLM what symbolic tools are available.
 # The LLM NEVER performs calculations — it requests tool calls,
-# and StatistEase executes verified Julia code.
+# and Statistikles executes verified Julia code.
 
 function get_tools()
     return Dict{String,Any}[

@@ -6,8 +6,8 @@
 uuid = "a4cd8055-f92e-511b-9c0c-84a8214da79c"
 primary-forge = "github"
 primary-owner = "hyperpolymath"
-canonical-name = "statistease"
-prefixed-name = "db-statistease"
+canonical-name = "statistikles"
+prefixed-name = "db-statistikles"
 
 [clade]
 primary = "db"
@@ -16,9 +16,9 @@ assigned = "2026-03-16"
 rationale = ""
 
 [forges]
-github = "hyperpolymath/statistease"
-gitlab = "hyperpolymath/statistease"
-bitbucket = "hyperpolymath/statistease"
+github = "hyperpolymath/statistikles"
+gitlab = "hyperpolymath/statistikles"
+bitbucket = "hyperpolymath/statistikles"
 
 [lineage]
 type = "standalone"

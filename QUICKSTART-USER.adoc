@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // Template: QUICKSTART-USER.adoc — 5-minute path to working software
-// Replace statistease, Statistease — See README.adoc for details., just run, Statistease started successfully. with actuals
-= statistease — Quick Start for Users
+// Replace statistikles, Statistikles — See README.adoc for details., just run, Statistikles started successfully. with actuals
+= statistikles — Quick Start for Users
 :toc:
 :toclevels: 2
 
-== What is statistease?
+== What is statistikles?
 
-Statistease — See README.adoc for details.
+Statistikles — See README.adoc for details.
 
 == Prerequisites
 
@@ -38,8 +38,8 @@ Before you begin, ensure you have:
 [source,bash]
 ----
 # Clone and set up
-git clone https://github.com/hyperpolymath/statistease.git
-cd statistease
+git clone https://github.com/hyperpolymath/statistikles.git
+cd statistikles
 just setup
 ----
 
@@ -62,7 +62,7 @@ just stapeln-run
 
 [source,bash]
 ----
-just install --portable --prefix=./statistease-portable
+just install --portable --prefix=./statistikles-portable
 ----
 
 == First Run
@@ -76,7 +76,7 @@ Expected output:
 
 [source]
 ----
-Statistease started successfully.
+Statistikles started successfully.
 ----
 
 == Self-Diagnostic
@@ -103,7 +103,7 @@ just heal
 * **In-app**: `just run --help`
 * **Guided tour**: `just tour`
 * **Report a problem**: `just help-me` (pre-fills diagnostic context)
-* **Wiki**: https://github.com/hyperpolymath/statistease/wiki
+* **Wiki**: https://github.com/hyperpolymath/statistikles/wiki
 
 == Uninstall
 

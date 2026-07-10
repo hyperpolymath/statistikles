@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= statistease — Quick Start for Platform Maintainers
+= statistikles — Quick Start for Platform Maintainers
 :toc:
 :toclevels: 2
 
 == Overview
 
-This guide covers packaging, deploying, and maintaining statistease for
+This guide covers packaging, deploying, and maintaining statistikles for
 distribution on your platform.
 
 == Runtime Dependencies
@@ -15,19 +15,19 @@ distribution on your platform.
   CSV, DataFrames, Distributions, HTTP, JSON3, StatsBase)
 * Optional, for the conversational interface only: an OpenAI-compatible LLM
   endpoint (defaults to LM Studio at `http://localhost:1234/v1`; override with
-  `STATISTEASE_LM_URL`, `STATISTEASE_API_KEY`, `STATISTEASE_MODEL`)
+  `STATISTIKLES_LM_URL`, `STATISTIKLES_API_KEY`, `STATISTIKLES_MODEL`)
 
 == Build from Source
 
 [source,bash]
 ----
-git clone https://github.com/hyperpolymath/statistease.git
-cd statistease
+git clone https://github.com/hyperpolymath/statistikles.git
+cd statistikles
 just build-release
 ----
 
 Output: a precompiled Julia project environment (no standalone binary — the
-package is loaded with `julia --project=. -e 'using StatistEase'`)
+package is loaded with `julia --project=. -e 'using Statistikles'`)
 
 == Packaging
 
@@ -50,7 +50,7 @@ nix build
 [source,bash]
 ----
 just stapeln-export    # Generates Containerfile
-podman build -t statistease .
+podman build -t statistikles .
 ----
 
 === Manual Package
@@ -69,10 +69,10 @@ Files installed:
 | `$PREFIX/bin/`
 | Executables
 
-| `$PREFIX/share/statistease/`
+| `$PREFIX/share/statistikles/`
 | Data files, assets
 
-| `$PREFIX/share/doc/statistease/`
+| `$PREFIX/share/doc/statistikles/`
 | Documentation
 
 | `$PREFIX/share/applications/`
@@ -84,9 +84,9 @@ Files installed:
 
 == Configuration
 
-Default config location: `$XDG_CONFIG_HOME/statistease/config.toml`
+Default config location: `$XDG_CONFIG_HOME/statistikles/config.toml`
 
-Fallback: `$HOME/.config/statistease/config.toml`
+Fallback: `$HOME/.config/statistikles/config.toml`
 
 == Health Checks
 
@@ -106,7 +106,7 @@ just build-release
 just install --prefix=/usr/local
 ----
 
-Or via OPSM: `opsm update statistease`
+Or via OPSM: `opsm update statistikles`
 
 == Security Notes
 
@@ -121,13 +121,13 @@ For deploying multiple instances (e.g., different users or tenants):
 
 [source,bash]
 ----
-just install --prefix=/opt/statistease-instance1 --config=/etc/statistease/instance1.toml
-just install --prefix=/opt/statistease-instance2 --config=/etc/statistease/instance2.toml
+just install --prefix=/opt/statistikles-instance1 --config=/etc/statistikles/instance1.toml
+just install --prefix=/opt/statistikles-instance2 --config=/etc/statistikles/instance2.toml
 ----
 
 Each instance has isolated config, data, and logs.
 
 == Reporting Issues
 
-* Upstream: https://github.com/hyperpolymath/statistease/issues
+* Upstream: https://github.com/hyperpolymath/statistikles/issues
 * With diagnostic: `just help-me` (pre-fills context)

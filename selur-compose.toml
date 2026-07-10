@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# Stapeln service definition for statistease
+# Stapeln service definition for statistikles
 #
 # Usage:
 #   podman-compose -f selur-compose.toml up -d
 #   just stack-up
 
 [project]
-name = "statistease"
+name = "statistikles"
 
 [services.app]
 build = { context = ".", dockerfile = "Containerfile" }
