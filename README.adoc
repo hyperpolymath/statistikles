@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= StatistEase — Neurosymbolic Statistical Analysis Assistant
-image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/statistease"]
+= Statistikles  — Neurosymbolic Statistical Analysis Assistant
+image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/statistikles"]
 
 image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[License: MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
 
@@ -16,11 +16,11 @@ LLMs make statistical mistakes. They fabricate means, invent p-values, hallucina
 confidence intervals, and present plausible-sounding nonsense as fact. We call these
 outputs **mollocks** — they look right, feel right, and are wrong.
 
-StatistEase exists to stop this.
+Statistikles exists to stop this.
 
 == The Solution
 
-StatistEase is a *Kautz Type 1 neurosymbolic* statistical analysis assistant:
+Statistikles is a *Kautz Type 1 neurosymbolic* statistical analysis assistant:
 
 * **Neural (LLM):** Understands your question in natural language. Routes it to the
   correct statistical function. Explains the result in plain English.
@@ -48,7 +48,7 @@ LLM explains: "Yes, there is a statistically significant difference
 *HARD NOTICE — MOLLOCK WARNING*
 
 This software enforces a strict neural-symbolic boundary. No statistical value
-is ever produced by neural inference. If you see a number in a StatistEase
+is ever produced by neural inference. If you see a number in a Statistikles
 response, it was computed by Julia. This is not a preference — it is a
 hard architectural invariant.
 ====
@@ -106,15 +106,15 @@ Raw Input → Detection → Validation → Cleansing → Normalization → Analy
 == Quick Start
 
 ```bash
-cd statistease
+cd statistikles
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
-julia --project=. -e 'using StatistEase; main()'
+julia --project=. -e 'using Statistikles; main()'
 ```
 
 Or run without LLM (offline examples):
 
 ```bash
-julia --project=. -e 'using StatistEase; run_examples()'
+julia --project=. -e 'using Statistikles; run_examples()'
 ```
 
 == Architecture
