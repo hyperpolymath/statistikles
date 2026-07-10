@@ -11,8 +11,8 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 | Field         | Value                          |
 |---------------|--------------------------------|
 | Project       | Statistikles               |
-| Version       | 1.0                            |
-| Last Reviewed | 2026-02-20                       |
+| Version       | 1.1                            |
+| Last Reviewed | 2026-07-10                       |
 | Author        | Jonathan D.A. Jewell                     |
 | Methodology   | STRIDE                         |
 
@@ -51,7 +51,7 @@ Brief description of Statistikles and its architecture.
 | Build artifacts       | Internal       | CI pipeline  | Binaries, WASM bundles                     |
 | Container images      | Internal       | CI pipeline  | Chainguard-based, signed via image signing tool |
 | SBOM / provenance     | Public         | CI pipeline  | SLSA attestations                          |
-| Dependencies          | Public         | Lockfile     | Cargo.lock, deno.lock, gleam.toml          |
+| Dependencies          | Public         | Lockfile     | Project.toml + Manifest.toml (Julia); GitHub Actions SHA pins |
 | Infrastructure config | Confidential   | Maintainers | Containerfiles, compose files, orchestration config |
 
 ## Trust Boundaries
@@ -65,6 +65,8 @@ Brief description of Statistikles and its architecture.
 | User input (CLI/Web)         | End user                   | Application logic          |
 | Dependency resolution        | Package registry           | Build environment          |
 | Forge mirroring              | GitHub                     | GitLab / Bitbucket         |
+| Neural → symbolic handoff    | LLM (chat interface)       | Julia tool executor        |
+| FFI / C-ABI calls            | External C-ABI caller      | Zig FFI library (ffi/zig)  |
 
 ## Threat Actors
 
@@ -128,15 +130,40 @@ Brief description of Statistikles and its architecture.
 | Container escape                 | Runtime environment | Low      | High   | Medium | Hardened container runtime; read-only rootfs; no-new-privileges |
 | Compromised action dependency    | CI/CD pipeline     | Medium     | High   | High   | SHA-pin all actions; never use `@latest` tags  |
 
+## Application-Specific Boundaries
+
+Statistikles is a neurosymbolic system: an LLM (the neural half) interprets
+natural-language questions and dispatches to verified Julia functions (the
+symbolic half) via the tool executor (`src/tools/executor.jl`). The product's
+core guarantee — every number comes from auditable symbolic code, never from
+the LLM — makes these two boundaries the primary application attack surface.
+
+### Neural → Symbolic Boundary
+
+| Threat                          | Affected Asset    | Likelihood | Impact | Risk   | Mitigation                                    |
+|---------------------------------|-------------------|------------|--------|--------|------------------------------------------------|
+| LLM numeric fabrication ("mollock": invented p-values, effect sizes) | Numeric outputs | High | High | High | System prompt forbids LLM arithmetic (`src/tools/chat.jl`); numeric boundary guardrail checks that numerics in responses originate from symbolic tool results |
+| Prompt injection via user data (instructions embedded in CSV values, column names, or the question) | Application logic | Medium | High | High | LLM has no side-effecting tools; all tool calls dispatch to pure Julia statistics; data is parsed as data (CSV/JSON3), never executed |
+| Tool mis-routing (LLM selects the wrong test / wrong Julia function, yielding plausible but wrong statistics) | Numeric outputs | Medium | Medium | Medium | Typed tool schemas (`src/tools/definitions.jl`); assumption checks in the stats layer; router/executor test coverage |
+| Silent-null sub-types (degenerate inputs make a stats function return `NaN`/`missing`/`nothing` silently; the LLM papers over the gap with fabricated prose or numbers) | Numeric outputs | Medium | High | High | Degenerate-input validation in the stats layer returns explicit errors instead of silent nulls; executor surfaces errors verbatim to the user |
+
+### FFI / C-ABI Boundary (`ffi/zig`)
+
+| Threat                          | Affected Asset    | Likelihood | Impact | Risk   | Mitigation                                    |
+|---------------------------------|-------------------|------------|--------|--------|------------------------------------------------|
+| Unvalidated inputs crossing the ABI (null handles, bad lengths, non-terminated strings) | Runtime environment | Medium | High | High | Every export checks handle/pointer validity and returns typed `Result` codes (`null_pointer`, `invalid_param`) instead of dereferencing |
+| Memory-safety violations (use-after-free, double-free, leaks across `statistikles_free`/`statistikles_free_string`) | Runtime environment | Low | High | Medium | Zig allocator discipline; opaque `Handle` prevents direct field access; FFI integration tests (`ffi/zig/test`) |
+| ABI layout drift between the Zig implementation and the declared C ABI | Build artifacts | Low | Medium | Low | Layouts declared in one place and kept in sync; FFI build + integration tests in CI |
+
 ## Mitigations in Place
 
 - **SLSA Provenance**: Build attestations via slsa-github-generator
 - **Secret Scanning**: TruffleHog + secret-scanner workflow on every push
 - **Static Analysis**: CodeQL on supported languages
-- **Supply Chain**: OpenSSF Scorecard (scorecard.yml + scorecard-enforcer.yml)
+- **Supply Chain**: OpenSSF Scorecard (scorecard.yml)
 - **Container Signing**: Ed25519 signatures on all published images (optional: use your signing tool)
 - **Container Runtime**: Hardened container runtime with formal verification (optional)
-- **Dependency Pinning**: All GitHub Actions SHA-pinned; lockfiles committed
+- **Dependency Pinning**: All GitHub Actions SHA-pinned; Julia Manifest.toml committed (Dependabot has no Julia ecosystem, so the pinned manifest resolved by CI `Pkg.instantiate`/`Pkg.test` is the compensating control)
 - **Workflow Validation**: workflow-linter.yml checks all workflow changes
 - **Security Scanning**: Neurosymbolic scanning (hypatia-scan.yml, optional)
 - **Bot Governance**: Bot orchestration with confidence thresholds (optional)
