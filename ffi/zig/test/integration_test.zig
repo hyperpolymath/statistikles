@@ -2,42 +2,39 @@
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // STATISTIKLES Integration Tests
 //
-// These tests verify that the Zig FFI correctly implements the Idris2 ABI
+// These tests exercise the Zig FFI through the SAME `Handle`/`Result` types the
+// implementation exports — imported from the root module (`build.zig` wires
+// `src/main.zig` in as the `statistikles` module) rather than re-declared here,
+// so the tests and the library can never drift out of sync on the ABI.
 
 const std = @import("std");
 const testing = std.testing;
 
-// Import FFI functions
-extern fn statistikles_init() ?*opaque {};
-extern fn statistikles_free(?*opaque {}) void;
-extern fn statistikles_process(?*opaque {}, u32) c_int;
-extern fn statistikles_get_string(?*opaque {}) ?[*:0]const u8;
-extern fn statistikles_free_string(?[*:0]const u8) void;
-extern fn statistikles_last_error() ?[*:0]const u8;
-extern fn statistikles_version() [*:0]const u8;
-extern fn statistikles_is_initialized(?*opaque {}) u32;
+const sk = @import("statistikles");
+const Handle = sk.Handle;
+const Result = sk.Result;
 
 //==============================================================================
 // Lifecycle Tests
 //==============================================================================
 
 test "create and destroy handle" {
-    const handle = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(handle);
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(handle);
 
-    try testing.expect(handle != null);
+    try testing.expect(@intFromPtr(handle) != 0);
 }
 
 test "handle is initialized" {
-    const handle = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(handle);
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(handle);
 
-    const initialized = statistikles_is_initialized(handle);
+    const initialized = sk.statistikles_is_initialized(handle);
     try testing.expectEqual(@as(u32, 1), initialized);
 }
 
 test "null handle is not initialized" {
-    const initialized = statistikles_is_initialized(null);
+    const initialized = sk.statistikles_is_initialized(null);
     try testing.expectEqual(@as(u32, 0), initialized);
 }
 
@@ -46,16 +43,14 @@ test "null handle is not initialized" {
 //==============================================================================
 
 test "process with valid handle" {
-    const handle = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(handle);
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(handle);
 
-    const result = statistikles_process(handle, 42);
-    try testing.expectEqual(@as(c_int, 0), result); // 0 = ok
+    try testing.expectEqual(Result.ok, sk.statistikles_process(handle, 42));
 }
 
 test "process with null handle returns error" {
-    const result = statistikles_process(null, 42);
-    try testing.expectEqual(@as(c_int, 4), result); // 4 = null_pointer
+    try testing.expectEqual(Result.null_pointer, sk.statistikles_process(null, 42));
 }
 
 //==============================================================================
@@ -63,17 +58,17 @@ test "process with null handle returns error" {
 //==============================================================================
 
 test "get string result" {
-    const handle = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(handle);
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(handle);
 
-    const str = statistikles_get_string(handle);
-    defer if (str) |s| statistikles_free_string(s);
+    const str = sk.statistikles_get_string(handle);
+    defer if (str) |s| sk.statistikles_free_string(s);
 
     try testing.expect(str != null);
 }
 
 test "get string with null handle" {
-    const str = statistikles_get_string(null);
+    const str = sk.statistikles_get_string(null);
     try testing.expect(str == null);
 }
 
@@ -82,9 +77,9 @@ test "get string with null handle" {
 //==============================================================================
 
 test "last error after null handle operation" {
-    _ = statistikles_process(null, 0);
+    _ = sk.statistikles_process(null, 0);
 
-    const err = statistikles_last_error();
+    const err = sk.statistikles_last_error();
     try testing.expect(err != null);
 
     if (err) |e| {
@@ -94,13 +89,13 @@ test "last error after null handle operation" {
 }
 
 test "no error after successful operation" {
-    const handle = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(handle);
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(handle);
 
-    _ = statistikles_process(handle, 0);
+    try testing.expectEqual(Result.ok, sk.statistikles_process(handle, 0));
 
-    // Error should be cleared after successful operation
-    // (This depends on implementation)
+    // A successful operation clears the last error.
+    try testing.expect(sk.statistikles_last_error() == null);
 }
 
 //==============================================================================
@@ -108,18 +103,22 @@ test "no error after successful operation" {
 //==============================================================================
 
 test "version string is not empty" {
-    const ver = statistikles_version();
+    const ver = sk.statistikles_version();
     const ver_str = std.mem.span(ver);
 
     try testing.expect(ver_str.len > 0);
 }
 
 test "version string is semantic version format" {
-    const ver = statistikles_version();
+    const ver = sk.statistikles_version();
     const ver_str = std.mem.span(ver);
 
     // Should be in format X.Y.Z
     try testing.expect(std.mem.count(u8, ver_str, ".") >= 1);
+}
+
+test "abi version is monotonic and nonzero" {
+    try testing.expect(sk.statistikles_abi_version() >= 1);
 }
 
 //==============================================================================
@@ -127,46 +126,58 @@ test "version string is semantic version format" {
 //==============================================================================
 
 test "multiple handles are independent" {
-    const h1 = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(h1);
+    const h1 = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(h1);
 
-    const h2 = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(h2);
+    const h2 = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(h2);
 
     try testing.expect(h1 != h2);
 
-    // Operations on h1 should not affect h2
-    _ = statistikles_process(h1, 1);
-    _ = statistikles_process(h2, 2);
+    // Operations on h1 should not affect h2.
+    try testing.expectEqual(Result.ok, sk.statistikles_process(h1, 1));
+    try testing.expectEqual(Result.ok, sk.statistikles_process(h2, 2));
 }
 
-test "double free is safe" {
-    const handle = statistikles_init() orelse return error.InitFailed;
+test "double free is a safe error, not UB" {
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
 
-    statistikles_free(handle);
-    statistikles_free(handle); // Should not crash
+    // First free succeeds.
+    try testing.expectEqual(Result.ok, sk.statistikles_free(handle));
+    // Second free on the same (now dangling) pointer must be rejected with an
+    // error code — a safe no-op, not a second destroy() / undefined behaviour.
+    try testing.expectEqual(Result.invalid_param, sk.statistikles_free(handle));
 }
 
-test "free null is safe" {
-    statistikles_free(null); // Should not crash
+test "operations on a freed handle are rejected" {
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
+    try testing.expectEqual(Result.ok, sk.statistikles_free(handle));
+
+    try testing.expectEqual(Result.invalid_param, sk.statistikles_process(handle, 0));
+    try testing.expectEqual(@as(u32, 0), sk.statistikles_is_initialized(handle));
+}
+
+test "free null is a safe no-op" {
+    // Must not crash; reported as null_pointer, never a destroy().
+    try testing.expectEqual(Result.null_pointer, sk.statistikles_free(null));
 }
 
 //==============================================================================
-// Thread Safety Tests (if applicable)
+// Thread Safety Tests
 //==============================================================================
 
 test "concurrent operations" {
-    const handle = statistikles_init() orelse return error.InitFailed;
-    defer statistikles_free(handle);
+    const handle = sk.statistikles_init() orelse return error.InitFailed;
+    defer _ = sk.statistikles_free(handle);
 
     const ThreadContext = struct {
-        h: *opaque {},
+        h: *Handle,
         id: u32,
     };
 
     const thread_fn = struct {
         fn run(ctx: ThreadContext) void {
-            _ = statistikles_process(ctx.h, ctx.id);
+            _ = sk.statistikles_process(ctx.h, ctx.id);
         }
     }.run;
 
