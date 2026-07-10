@@ -261,8 +261,10 @@ jobs:
 
           echo "has_manifest=true" >> "$GITHUB_OUTPUT"
 
-          # Validate TOML structure using Python 3.11+ tomllib
-          python3 .github/scripts/validate_eclexiaiser.py || {
+          # Validate TOML structure with a dependency-free Rust validator.
+          # (Python is banned by governance policy; rustc is preinstalled on ubuntu-latest.)
+          rustc -O .github/scripts/validate_eclexiaiser.rs -o "$RUNNER_TEMP/validate_eclexiaiser"
+          "$RUNNER_TEMP/validate_eclexiaiser" || {
             echo "::error file=eclexiaiser.toml::Invalid eclexiaiser.toml — see step output for details"
             exit 1
           }
