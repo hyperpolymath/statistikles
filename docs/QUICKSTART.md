@@ -24,8 +24,8 @@ just init       # interactive placeholder replacement
 ## Clone and Setup (Existing Project)
 
 ```bash
-git clone https://github.com/hyperpolymath/statistease.git
-cd statistease
+git clone https://github.com/hyperpolymath/statistikles.git
+cd statistikles
 just deps
 ```
 
@@ -63,5 +63,5 @@ docs/        # Documentation
 If `just deps` fails, ensure your toolchain version matches the
 project requirements listed in the `Justfile` or `.machine_readable/ECOSYSTEM.a2ml`.
 
-Open a [Discussion](https://github.com/hyperpolymath/statistease/discussions)
+Open a [Discussion](https://github.com/hyperpolymath/statistikles/discussions)
 if you get stuck.

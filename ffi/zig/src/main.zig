@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-// STATISTEASE FFI Implementation
+// STATISTIKLES FFI Implementation
 //
 // This module implements the C-compatible FFI declared in src/abi/Foreign.idr
 // All types and layouts must match the Idris2 ABI definitions.
@@ -10,7 +10,7 @@ const std = @import("std");
 
 // Version information (keep in sync with project)
 const VERSION = "0.1.0";
-const BUILD_INFO = "STATISTEASE built with Zig " ++ @import("builtin").zig_version_string;
+const BUILD_INFO = "STATISTIKLES built with Zig " ++ @import("builtin").zig_version_string;
 
 /// Thread-local error storage
 threadlocal var last_error: ?[]const u8 = null;
@@ -52,7 +52,7 @@ pub const Handle = opaque {
 
 /// Initialize the library
 /// Returns a handle, or null on failure
-export fn statistease_init() ?*Handle {
+export fn statistikles_init() ?*Handle {
     const allocator = std.heap.c_allocator;
 
     const handle = allocator.create(Handle) catch {
@@ -71,7 +71,7 @@ export fn statistease_init() ?*Handle {
 }
 
 /// Free the library handle
-export fn statistease_free(handle: ?*Handle) void {
+export fn statistikles_free(handle: ?*Handle) void {
     const h = handle orelse return;
     const allocator = h.allocator;
 
@@ -87,7 +87,7 @@ export fn statistease_free(handle: ?*Handle) void {
 //==============================================================================
 
 /// Process data (example operation)
-export fn statistease_process(handle: ?*Handle, input: u32) Result {
+export fn statistikles_process(handle: ?*Handle, input: u32) Result {
     const h = handle orelse {
         setError("Null handle");
         return .null_pointer;
@@ -111,7 +111,7 @@ export fn statistease_process(handle: ?*Handle, input: u32) Result {
 
 /// Get a string result (example)
 /// Caller must free the returned string
-export fn statistease_get_string(handle: ?*Handle) ?[*:0]const u8 {
+export fn statistikles_get_string(handle: ?*Handle) ?[*:0]const u8 {
     const h = handle orelse {
         setError("Null handle");
         return null;
@@ -133,7 +133,7 @@ export fn statistease_get_string(handle: ?*Handle) ?[*:0]const u8 {
 }
 
 /// Free a string allocated by the library
-export fn statistease_free_string(str: ?[*:0]const u8) void {
+export fn statistikles_free_string(str: ?[*:0]const u8) void {
     const s = str orelse return;
     const allocator = std.heap.c_allocator;
 
@@ -146,7 +146,7 @@ export fn statistease_free_string(str: ?[*:0]const u8) void {
 //==============================================================================
 
 /// Process an array of data
-export fn statistease_process_array(
+export fn statistikles_process_array(
     handle: ?*Handle,
     buffer: ?[*]const u8,
     len: u32,
@@ -182,7 +182,7 @@ export fn statistease_process_array(
 
 /// Get the last error message
 /// Returns null if no error
-export fn statistease_last_error() ?[*:0]const u8 {
+export fn statistikles_last_error() ?[*:0]const u8 {
     const err = last_error orelse return null;
 
     // Return C string (static storage, no need to free)
@@ -196,12 +196,12 @@ export fn statistease_last_error() ?[*:0]const u8 {
 //==============================================================================
 
 /// Get the library version
-export fn statistease_version() [*:0]const u8 {
+export fn statistikles_version() [*:0]const u8 {
     return VERSION.ptr;
 }
 
 /// Get build information
-export fn statistease_build_info() [*:0]const u8 {
+export fn statistikles_build_info() [*:0]const u8 {
     return BUILD_INFO.ptr;
 }
 
@@ -213,7 +213,7 @@ export fn statistease_build_info() [*:0]const u8 {
 pub const Callback = *const fn (u64, u32) callconv(.C) u32;
 
 /// Register a callback
-export fn statistease_register_callback(
+export fn statistikles_register_callback(
     handle: ?*Handle,
     callback: ?Callback,
 ) Result {
@@ -244,7 +244,7 @@ export fn statistease_register_callback(
 //==============================================================================
 
 /// Check if handle is initialized
-export fn statistease_is_initialized(handle: ?*Handle) u32 {
+export fn statistikles_is_initialized(handle: ?*Handle) u32 {
     const h = handle orelse return 0;
     return if (h.initialized) 1 else 0;
 }
@@ -254,22 +254,22 @@ export fn statistease_is_initialized(handle: ?*Handle) u32 {
 //==============================================================================
 
 test "lifecycle" {
-    const handle = statistease_init() orelse return error.InitFailed;
-    defer statistease_free(handle);
+    const handle = statistikles_init() orelse return error.InitFailed;
+    defer statistikles_free(handle);
 
-    try std.testing.expect(statistease_is_initialized(handle) == 1);
+    try std.testing.expect(statistikles_is_initialized(handle) == 1);
 }
 
 test "error handling" {
-    const result = statistease_process(null, 0);
+    const result = statistikles_process(null, 0);
     try std.testing.expectEqual(Result.null_pointer, result);
 
-    const err = statistease_last_error();
+    const err = statistikles_last_error();
     try std.testing.expect(err != null);
 }
 
 test "version" {
-    const ver = statistease_version();
+    const ver = statistikles_version();
     const ver_str = std.mem.span(ver);
     try std.testing.expectEqualStrings(VERSION, ver_str);
 }

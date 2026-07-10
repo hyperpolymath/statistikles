@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: MPL-2.0
-# stapeln.toml — Layer-based container build for statistease
+# stapeln.toml — Layer-based container build for statistikles
 #
 # stapeln builds containers as composable layers (German: "to stack").
 # Each layer is independently cacheable, verifiable, and signable.
 
 [metadata]
-name = "statistease"
+name = "statistikles"
 version = "0.1.0"
-description = "statistease container service"
+description = "statistikles container service"
 author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
 license = "MPL-2.0"
 registry = "ghcr.io/hyperpolymath"
@@ -32,7 +32,7 @@ packages = []
 cache = true
 
 [layers.build]
-description = "statistease build"
+description = "statistikles build"
 extends = "toolchain"
 commands = []
 
@@ -43,7 +43,7 @@ packages = ["ca-certificates", "curl"]
 copy-from = [
     { layer = "build", src = "/app/", dst = "/app/" },
 ]
-entrypoint = ["/app/statistease"]
+entrypoint = ["/app/statistikles"]
 user = "nonroot"
 
 # ── Security ───────────────────────────────────────────────────

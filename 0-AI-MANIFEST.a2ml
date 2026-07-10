@@ -5,7 +5,7 @@
 
 ## WHAT IS THIS?
 
-This is the AI manifest for **StatistEase** — a neurosymbolic statistical
+This is the AI manifest for **Statistikles** — a neurosymbolic statistical
 analysis assistant. Julia performs ALL computation. LLMs perform ONLY natural
 language routing and interpretation.
 
@@ -39,7 +39,7 @@ These 6 a2ml files MUST exist in `.machine_readable/` directory ONLY:
 
 ```
 src/
-├── StatistEase.jl          # Main module (entry point)
+├── Statistikles.jl          # Main module (entry point)
 ├── stats/                  # Statistical functions (17 modules)
 │   ├── descriptive.jl      # Mean, median, SD, quartiles, etc.
 │   ├── inferential.jl      # t-tests, ANOVA, chi-square

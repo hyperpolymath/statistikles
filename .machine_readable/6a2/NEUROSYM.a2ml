@@ -3,7 +3,7 @@
 #
 # NEUROSYM.a2ml — Neurosymbolic integration metadata
 #
-# StatistEase is a TEXTBOOK example of Kautz Type 1 neurosymbolic architecture.
+# Statistikles is a TEXTBOOK example of Kautz Type 1 neurosymbolic architecture.
 # This file documents the neural-symbolic boundary and the MOLLOCK RULE.
 
 [metadata]
@@ -19,7 +19,7 @@ boundary = "src/tools/executor.jl — the execute_tool() function is the neural�
 
 [mollock-rule]
 # A MOLLOCK is a plausible-sounding fabricated statistical output from neural inference.
-# This is the CORE INVARIANT of StatistEase.
+# This is the CORE INVARIANT of Statistikles.
 definition = "No statistical value may ever be produced by neural inference"
 enforcement = [
   "Tool dispatch architecture — LLM can only call predefined Julia functions",

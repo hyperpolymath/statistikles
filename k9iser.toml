@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# k9iser manifest for statistease
+# k9iser manifest for statistikles
 # Statistical analysis and reporting tool
 
 [project]
-name = "statistease"
+name = "statistikles"
 safety_tier = "hunt"
 
 [[source]]

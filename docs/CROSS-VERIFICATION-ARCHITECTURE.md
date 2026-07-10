@@ -11,12 +11,12 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
           ╱   Agda, Lean 4, Z3   ╲
          ╱    Arbitrates disputes  ╲
         ╱                           ╲
-StatistEase ◄─────────────────► Aspasia
+Statistikles ◄─────────────────► Aspasia
   (Julia)    cross-verify via    (GNU Octave)
   Compute     JSON transactions   Audit
 ```
 
-### Layer 1: StatistEase (Julia) — Computation
+### Layer 1: Statistikles (Julia) — Computation
 - All numerical computation happens in Julia's symbolic kernel
 - Every result includes BLAKE3 hash for reproducibility
 - Results written as JSON transactions for Aspasia

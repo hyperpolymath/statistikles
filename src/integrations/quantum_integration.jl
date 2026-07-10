@@ -2,7 +2,7 @@
 # QuantumCircuit.jl Integration — Quantum statistics and Bell tests.
 #
 # Generates measurement correlations from quantum circuits for
-# BetLang's bell_test_chsh and StatistEase's statistical analysis.
+# BetLang's bell_test_chsh and Statistikles's statistical analysis.
 
 """
     simulate_bell_experiment(n_measurements::Int; theta=π/4) -> Dict

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= StatistEase — Neurosymbolic Statistical Analysis — Show Me The Receipts
+= Statistikles — Neurosymbolic Statistical Analysis — Show Me The Receipts
 image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[License: MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
 
 :toc:
@@ -12,7 +12,7 @@ The README makes claims. This file backs them up with evidence.
 
 [quote, README section "The Solution"]
 ____
-StatistEase is a *Kautz Type 1 neurosymbolic* statistical analysis assistant:
+Statistikles is a *Kautz Type 1 neurosymbolic* statistical analysis assistant:
 
 * **Neural (LLM):** Understands your question in natural language. Routes it to the correct statistical function. Explains the result in plain English.
 * **Symbolic (Julia):** Performs ALL mathematical computation. Every number comes from a verified, deterministic Julia function. Zero neural inference in the computation path.
@@ -24,7 +24,7 @@ ____
 3. Julia computes: t=2.847, df=38, p=0.007, Cohen's d=0.90 — symbolic only
 4. LLM explains result — neural generation
 
-The MOLLOCK WARNING (lines 40-47) enforces this invariant: no statistical value is ever produced by neural inference. If you see a number in a StatistEase response, it was computed by Julia.
+The MOLLOCK WARNING (lines 40-47) enforces this invariant: no statistical value is ever produced by neural inference. If you see a number in a Statistikles response, it was computed by Julia.
 
 *Caveat:* The neural component (LLM) does perform parsing of the user question and explanation generation, which are non-statistical tasks. The invariant applies specifically to numerical results, not linguistic processing.
 
@@ -72,7 +72,7 @@ checked against independently-derived ground-truth values in
 
 Uses the hyperpolymath ABI/FFI standard (Idris2 + Zig) for optional formal verification of statistical properties.
 
-StatistEase-specific:
+Statistikles-specific:
 - Neural-symbolic boundary enforcement via execute_tool() (src/tools/executor.jl)
 - Optional Idris2 proofs for invariants like "p-value ∈ [0,1]" and "variance ≥ 0"
 - Formal verification that all numerical computation originates from Julia
@@ -83,7 +83,7 @@ StatistEase-specific:
 |===
 | Path | What's There
 
-| `src/` | Julia source code (StatistEase.jl entry point + subdirectories)
+| `src/` | Julia source code (Statistikles.jl entry point + subdirectories)
 | `src/tools/executor.jl` | Neural-symbolic boundary enforcement (CRITICAL)
 | `src/stats/` | ~40 statistical domain modules (descriptive, inferential, correlation, non-parametric, etc.)
 | `src/output/` | Output formatters (ASCII tables/graphs, CSV, JSON, text reports)
@@ -96,7 +96,7 @@ StatistEase-specific:
 
 == Questions?
 
-Open an issue in the hyperpolymath/statistease repository for questions about the neural-symbolic boundary, statistical module availability, or how to add new statistical functions while maintaining the mollock-free guarantee.
+Open an issue in the hyperpolymath/statistikles repository for questions about the neural-symbolic boundary, statistical module availability, or how to add new statistical functions while maintaining the mollock-free guarantee.
 
 
 == License

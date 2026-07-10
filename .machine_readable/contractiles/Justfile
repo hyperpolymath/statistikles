@@ -18,7 +18,7 @@ set positional-arguments := true
 import? "contractile.just"
 
 # Project metadata — customize these
-project := "StatistEase"
+project := "Statistikles"
 version := "0.1.0"
 tier := "infrastructure"  # 1 | 2 | infrastructure
 
@@ -45,7 +45,7 @@ help recipe="":
 
 # Show this project's info
 info:
-    @echo "Project: statistease"
+    @echo "Project: statistikles"
     @echo "Version: {{version}}"
     @echo "RSR Tier: {{tier}}"
     @echo "Recipes: $(just --summary | wc -w)"
@@ -240,7 +240,7 @@ init:
 
 # Build the project (debug mode)
 build *args:
-    @echo "Building statistease (debug)..."
+    @echo "Building statistikles (debug)..."
     # TODO: Replace with your build command
     # Examples:
     #   cargo build {{args}}                    # Rust
@@ -251,7 +251,7 @@ build *args:
 
 # Build in release mode with optimizations
 build-release *args:
-    @echo "Building statistease (release)..."
+    @echo "Building statistikles (release)..."
     # TODO: Replace with your release build command
     # Examples:
     #   cargo build --release {{args}}
@@ -354,7 +354,7 @@ run-verbose *args: build
 
 # Install to user path
 install: build-release
-    @echo "Installing statistease..."
+    @echo "Installing statistikles..."
     # TODO: Replace with your install command
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -397,7 +397,7 @@ cookbook:
     #!/usr/bin/env bash
     mkdir -p docs
     OUTPUT="docs/just-cookbook.adoc"
-    echo "= statistease Justfile Cookbook" > "$OUTPUT"
+    echo "= statistikles Justfile Cookbook" > "$OUTPUT"
     echo ":toc: left" >> "$OUTPUT"
     echo ":toclevels: 3" >> "$OUTPUT"
     echo "" >> "$OUTPUT"
@@ -423,10 +423,10 @@ cookbook:
 man:
     #!/usr/bin/env bash
     mkdir -p docs/man
-    cat > docs/man/statistease.1 << EOF
-    .TH statistease 1 "$(date +%Y-%m-%d)" "{{version}}" "statistease Manual"
+    cat > docs/man/statistikles.1 << EOF
+    .TH statistikles 1 "$(date +%Y-%m-%d)" "{{version}}" "statistikles Manual"
     .SH NAME
-    statistease \- RSR-compliant project
+    statistikles \- RSR-compliant project
     .SH SYNOPSIS
     .B just
     [recipe] [args...]
@@ -435,7 +435,7 @@ man:
     .SH AUTHOR
     $(git config user.name 2>/dev/null || echo "Author") <$(git config user.email 2>/dev/null || echo "email")>
     EOF
-    echo "Generated: docs/man/statistease.1"
+    echo "Generated: docs/man/statistikles.1"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONTAINERS (Podman + Wolfi)
@@ -444,19 +444,19 @@ man:
 # Build container image
 container-build tag="latest":
     @if [ -f Containerfile ]; then \
-        podman build -t statistease:{{tag}} -f Containerfile .; \
+        podman build -t statistikles:{{tag}} -f Containerfile .; \
     else \
         echo "No Containerfile found"; \
     fi
 
 # Run container
 container-run *args:
-    podman run --rm -it statistease:latest {{args}}
+    podman run --rm -it statistikles:latest {{args}}
 
 # Push container image
 container-push registry="ghcr.io/hyperpolymath" tag="latest":
-    podman tag statistease:{{tag}} {{registry}}/statistease:{{tag}}
-    podman push {{registry}}/statistease:{{tag}}
+    podman tag statistikles:{{tag}} {{registry}}/statistikles:{{tag}}
+    podman push {{registry}}/statistikles:{{tag}}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CI & AUTOMATION
@@ -724,7 +724,7 @@ assail:
 
 # Self-diagnostic — checks dependencies, permissions, paths
 doctor:
-    @echo "Running diagnostics for statistease..."
+    @echo "Running diagnostics for statistikles..."
     @echo "Checking required tools..."
     @command -v just >/dev/null 2>&1 && echo "  [OK] just" || echo "  [FAIL] just not found"
     @command -v git >/dev/null 2>&1 && echo "  [OK] git" || echo "  [FAIL] git not found"
@@ -734,7 +734,7 @@ doctor:
 
 # Auto-repair common issues
 heal:
-    @echo "Attempting auto-repair for statistease..."
+    @echo "Attempting auto-repair for statistikles..."
     @echo "Fixing permissions..."
     @find . -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
     @echo "Cleaning stale caches..."
@@ -743,7 +743,7 @@ heal:
 
 # Guided tour of key features
 tour:
-    @echo "=== statistease Tour ==="
+    @echo "=== statistikles Tour ==="
     @echo ""
     @echo "1. Project structure:"
     @ls -la
@@ -758,12 +758,12 @@ tour:
 
 # Open feedback channel with diagnostic context
 help-me:
-    @echo "=== statistease Help ==="
+    @echo "=== statistikles Help ==="
     @echo "Platform: $(uname -s) $(uname -m)"
     @echo "Shell: $SHELL"
     @echo ""
     @echo "To report an issue:"
-    @echo "  https://github.com/hyperpolymath/statistease/issues/new"
+    @echo "  https://github.com/hyperpolymath/statistikles/issues/new"
     @echo ""
     @echo "Include the output of 'just doctor' in your report."
 

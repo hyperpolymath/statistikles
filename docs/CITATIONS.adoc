@@ -1,36 +1,36 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= StatistEase - Citation Guide
+= Statistikles - Citation Guide
 :toc:
 
 == BibTeX
 
 [source,bibtex]
 ----
-@software{StatistEase_2026,
+@software{Statistikles_2026,
   author = {Jewell, Jonathan D.A.},
-  title = {StatistEase},
+  title = {Statistikles},
   year = {2026},
-  url = {https://github.com/hyperpolymath/StatistEase},
+  url = {https://github.com/hyperpolymath/statistikles},
   license = {MPL-2.0}
 }
 ----
 
 == Harvard Style
 
-Jewell, J.D.A. (2026) _StatistEase_ [Computer software]. Available at: https://github.com/hyperpolymath/StatistEase
+Jewell, J.D.A. (2026) _Statistikles_ [Computer software]. Available at: https://github.com/hyperpolymath/statistikles
 
 == OSCOLA
 
-Jonathan D.A. Jewell, 'StatistEase' (2026) <https://github.com/hyperpolymath/StatistEase>
+Jonathan D.A. Jewell, 'Statistikles' (2026) <https://github.com/hyperpolymath/statistikles>
 
 == MLA
 
-Jewell, Jonathan "StatistEase." 2026, github.com/hyperpolymath/StatistEase.
+Jewell, Jonathan "Statistikles." 2026, github.com/hyperpolymath/statistikles.
 
 == APA 7
 
-Jewell, J.D.A. (2026). _StatistEase_ [Computer software]. GitHub. https://github.com/hyperpolymath/StatistEase
+Jewell, J.D.A. (2026). _Statistikles_ [Computer software]. GitHub. https://github.com/hyperpolymath/statistikles
 
 == See Also
 

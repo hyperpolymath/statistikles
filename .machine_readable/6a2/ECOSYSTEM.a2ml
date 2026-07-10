@@ -8,7 +8,7 @@ version = "0.1.0"
 last-updated = "2026-02-20"
 
 [project]
-name = "StatistEase"
+name = "Statistikles"
 purpose = "Neurosymbolic statistical analysis — LLMs route, Julia computes, nothing is fabricated"
 role = "application"
 
@@ -22,7 +22,7 @@ projects = [
   { name = "echidna", relationship = "integration", note = "Proof verification via GraphQL — explain_that/prove_that functions" },
   { name = "hypatia", relationship = "integration", note = "Neurosymbolic CI/CD scanning" },
   { name = "verisimdb", relationship = "data-source", note = "Vulnerability and verification data" },
-  { name = "panic-attacker", relationship = "tooling", note = "Security scanning of statistease itself" },
+  { name = "panic-attacker", relationship = "tooling", note = "Security scanning of statistikles itself" },
   { name = "gitbot-fleet", relationship = "automation", note = "Bot orchestration for CI/CD" },
   { name = "eclexia", relationship = "sibling", note = "Programming language with shadow pricing — parallel neurosymbolic approach" },
 ]

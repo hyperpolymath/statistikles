@@ -9,11 +9,11 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 TEMPLATE INSTRUCTIONS (delete this block before publishing)
 ============================================================================
 Replace all {{PLACEHOLDER}} values:
-  StatistEase     - Your project name
+  Statistikles     - Your project name
   hyperpolymath            - GitHub/GitLab username or org
-  statistease             - Repository name
+  statistikles             - Repository name
   j.d.a.jewell@open.ac.uk    - Email for conduct reports
-  StatistEase maintainers     - Name of conduct team/committee
+  Statistikles maintainers     - Name of conduct team/committee
   48 hours    - Initial response SLA (e.g., 48 hours)
   2026     - Current year
 
@@ -26,7 +26,7 @@ Review and customise:
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in StatistEase a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, colour, religion, or sexual identity and orientation.
+We as members, contributors, and leaders pledge to make participation in Statistikles a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, colour, religion, or sexual identity and orientation.
 
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
@@ -157,7 +157,7 @@ If you experience or witness unacceptable behaviour, or have any other concerns,
 **What Happens Next**
 
 1. You will receive acknowledgment within **48 hours**
-2. The StatistEase maintainers will review the report
+2. The Statistikles maintainers will review the report
 3. We may ask for additional information
 4. We will determine appropriate action
 5. We will inform you of the outcome (respecting others' privacy)
@@ -173,7 +173,7 @@ All reports will be handled with discretion:
 
 ### Conflicts of Interest
 
-If a StatistEase maintainers member is involved in an incident:
+If a Statistikles maintainers member is involved in an incident:
 
 - They will recuse themselves from the process
 - Another maintainer or external party will handle the report
@@ -183,7 +183,7 @@ If a StatistEase maintainers member is involved in an incident:
 
 ## Enforcement Guidelines
 
-The StatistEase maintainers will follow these guidelines in determining consequences:
+The Statistikles maintainers will follow these guidelines in determining consequences:
 
 ### 1. Correction
 
@@ -241,7 +241,7 @@ If you believe an enforcement decision was made in error:
 
 **Appeals Process**
 
-- Appeals are reviewed by a different StatistEase maintainers member than the original
+- Appeals are reviewed by a different Statistikles maintainers member than the original
 - You will receive a response within 14 days
 - The appeals decision is final
 - You may only appeal once per incident
@@ -314,7 +314,7 @@ We thank these communities for their leadership in creating welcoming spaces.
 
 If you have questions about this Code of Conduct:
 
-- Open a [Discussion](https://github.com/hyperpolymath/statistease/discussions) (for general questions)
+- Open a [Discussion](https://github.com/hyperpolymath/statistikles/discussions) (for general questions)
 - Email j.d.a.jewell@open.ac.uk (for private questions)
 - Contact any maintainer directly
 

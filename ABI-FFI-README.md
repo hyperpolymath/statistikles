@@ -2,7 +2,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
-# STATISTEASE ABI/FFI Documentation
+# STATISTIKLES ABI/FFI Documentation
 
 ## Overview
 
@@ -28,7 +28,7 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
                   ▼
 ┌─────────────────────────────────────────────┐
 │  C Headers (auto-generated)                 │
-│  generated/abi/statistease.h                │
+│  generated/abi/statistikles.h                │
 └─────────────────┬───────────────────────────┘
                   │
                   │ imported by
@@ -41,7 +41,7 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
 │  - Memory-safe by default                   │
 └─────────────────┬───────────────────────────┘
                   │
-                  │ compiled to libstatistease.so/.a
+                  │ compiled to libstatistikles.so/.a
                   ▼
 ┌─────────────────────────────────────────────┐
 │  Any Language via C ABI                     │
@@ -52,7 +52,7 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
 ## Directory Structure
 
 ```
-statistease/
+statistikles/
 ├── src/
 │   ├── abi/                    # ABI definitions (Idris2)
 │   │   ├── Types.idr           # Core type definitions with proofs
@@ -69,11 +69,11 @@ statistease/
 │       ├── test/
 │       │   └── integration_test.zig
 │       └── include/
-│           └── statistease.h   # C header (optional, can be generated)
+│           └── statistikles.h   # C header (optional, can be generated)
 │
 ├── generated/                  # Auto-generated files
 │   └── abi/
-│       └── statistease.h       # Generated from Idris2 ABI
+│       └── statistikles.h       # Generated from Idris2 ABI
 │
 └── bindings/                   # Language-specific wrappers (optional)
     ├── rust/
@@ -201,7 +201,7 @@ zig build test                    # Run tests
 
 ```bash
 cd src/abi
-idris2 --cg c-header Types.idr -o ../../generated/abi/statistease.h
+idris2 --cg c-header Types.idr -o ../../generated/abi/statistikles.h
 ```
 
 ### Cross-Compile
@@ -224,32 +224,32 @@ zig build -Dtarget=x86_64-windows
 ### From C
 
 ```c
-#include "statistease.h"
+#include "statistikles.h"
 
 int main() {
-    void* handle = statistease_init();
+    void* handle = statistikles_init();
     if (!handle) return 1;
 
-    int result = statistease_process(handle, 42);
+    int result = statistikles_process(handle, 42);
     if (result != 0) {
-        const char* err = statistease_last_error();
+        const char* err = statistikles_last_error();
         fprintf(stderr, "Error: %s\n", err);
     }
 
-    statistease_free(handle);
+    statistikles_free(handle);
     return 0;
 }
 ```
 
 Compile with:
 ```bash
-gcc -o example example.c -lstatistease -L./zig-out/lib
+gcc -o example example.c -lstatistikles -L./zig-out/lib
 ```
 
 ### From Idris2
 
 ```idris
-import STATISTEASE.ABI.Foreign
+import STATISTIKLES.ABI.Foreign
 
 main : IO ()
 main = do
@@ -266,22 +266,22 @@ main = do
 ### From Rust
 
 ```rust
-#[link(name = "statistease")]
+#[link(name = "statistikles")]
 extern "C" {
-    fn statistease_init() -> *mut std::ffi::c_void;
-    fn statistease_free(handle: *mut std::ffi::c_void);
-    fn statistease_process(handle: *mut std::ffi::c_void, input: u32) -> i32;
+    fn statistikles_init() -> *mut std::ffi::c_void;
+    fn statistikles_free(handle: *mut std::ffi::c_void);
+    fn statistikles_process(handle: *mut std::ffi::c_void, input: u32) -> i32;
 }
 
 fn main() {
     unsafe {
-        let handle = statistease_init();
+        let handle = statistikles_init();
         assert!(!handle.is_null());
 
-        let result = statistease_process(handle, 42);
+        let result = statistikles_process(handle, 42);
         assert_eq!(result, 0);
 
-        statistease_free(handle);
+        statistikles_free(handle);
     }
 }
 ```
@@ -289,21 +289,21 @@ fn main() {
 ### From Julia
 
 ```julia
-const libstatistease = "libstatistease"
+const libstatistikles = "libstatistikles"
 
 function init()
-    handle = ccall((:statistease_init, libstatistease), Ptr{Cvoid}, ())
+    handle = ccall((:statistikles_init, libstatistikles), Ptr{Cvoid}, ())
     handle == C_NULL && error("Failed to initialize")
     handle
 end
 
 function process(handle, input)
-    result = ccall((:statistease_process, libstatistease), Cint, (Ptr{Cvoid}, UInt32), handle, input)
+    result = ccall((:statistikles_process, libstatistikles), Cint, (Ptr{Cvoid}, UInt32), handle, input)
     result
 end
 
 function cleanup(handle)
-    ccall((:statistease_free, libstatistease), Cvoid, (Ptr{Cvoid},), handle)
+    ccall((:statistikles_free, libstatistikles), Cvoid, (Ptr{Cvoid},), handle)
 end
 
 # Usage
@@ -357,7 +357,7 @@ When modifying the ABI/FFI:
 
 2. **Generate C header**
    ```bash
-   idris2 --cg c-header src/abi/Types.idr -o generated/abi/statistease.h
+   idris2 --cg c-header src/abi/Types.idr -o generated/abi/statistikles.h
    ```
 
 3. **Update FFI implementation** (`ffi/zig/src/main.zig`)

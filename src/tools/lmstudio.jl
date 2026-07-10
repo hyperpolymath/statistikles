@@ -16,9 +16,9 @@
 # └─────────────────────────────────────────────────────────────────────────┘
 
 # Configuration — override via environment variables
-const BASE_URL = get(ENV, "STATISTEASE_LM_URL", "http://localhost:1234/v1")
-const API_KEY = get(ENV, "STATISTEASE_API_KEY", "lm-studio")
-const MODEL = get(ENV, "STATISTEASE_MODEL", "lmstudio-community/qwen2.5-7b-instruct")
+const BASE_URL = get(ENV, "STATISTIKLES_LM_URL", "http://localhost:1234/v1")
+const API_KEY = get(ENV, "STATISTIKLES_API_KEY", "lm-studio")
+const MODEL = get(ENV, "STATISTIKLES_MODEL", "lmstudio-community/qwen2.5-7b-instruct")
 
 const HEADERS = [
     "Content-Type" => "application/json",

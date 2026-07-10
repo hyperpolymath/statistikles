@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# property_test.jl — Hand-written property-based tests for StatistEase
+# property_test.jl — Hand-written property-based tests for Statistikles
 #
 # Each test exercises a mathematical invariant that must hold for ALL valid
 # inputs, validated against 100 randomly-generated datasets. Properties are
@@ -12,7 +12,7 @@
 
 using Test
 using Statistics
-using StatistEase
+using Statistikles
 import Random
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ end
 
 # ── Property Tests ────────────────────────────────────────────────────────────
 
-@testset "StatistEase Property-Based Tests" begin
+@testset "Statistikles Property-Based Tests" begin
 
     # Set a fixed seed so failing trials are reproducible
     Random.seed!(2026)
@@ -258,4 +258,4 @@ end
         end
     end
 
-end # @testset "StatistEase Property-Based Tests"
+end # @testset "Statistikles Property-Based Tests"

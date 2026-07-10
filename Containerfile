@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# Containerfile for StatistEase
-# Build: podman build -t statistease:latest -f Containerfile .
-# Run:   podman run --rm -it statistease:latest
-# Seal:  selur seal statistease:latest
+# Containerfile for Statistikles
+# Build: podman build -t statistikles:latest -f Containerfile .
+# Run:   podman run --rm -it statistikles:latest
+# Seal:  selur seal statistikles:latest
 
 # --- Build stage ---
 FROM cgr.dev/chainguard/wolfi-base:latest AS build
@@ -30,12 +30,12 @@ FROM cgr.dev/chainguard/static:latest
 # Copy built artifact from build stage
 # TODO: Replace with your binary/artifact path
 # Examples:
-#   COPY --from=build /build/target/release/statistease /usr/local/bin/
-#   COPY --from=build /build/_build/prod/rel/statistease /app/
-#   COPY --from=build /build/zig-out/bin/statistease /usr/local/bin/
+#   COPY --from=build /build/target/release/statistikles /usr/local/bin/
+#   COPY --from=build /build/_build/prod/rel/statistikles /app/
+#   COPY --from=build /build/zig-out/bin/statistikles /usr/local/bin/
 
 # Non-root user (chainguard images default to nonroot)
 USER nonroot
 
 # TODO: Replace with your entrypoint
-# ENTRYPOINT ["/usr/local/bin/statistease"]
+# ENTRYPOINT ["/usr/local/bin/statistikles"]

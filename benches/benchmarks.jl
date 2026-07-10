@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# benchmarks.jl — Performance benchmarks for StatistEase core operations
+# benchmarks.jl — Performance benchmarks for Statistikles core operations
 #
 # Uses BenchmarkTools.jl to measure the throughput and latency of
 # descriptive_stats at three dataset scales, plus a batch computation
@@ -15,13 +15,13 @@
 using BenchmarkTools
 using Random
 using Statistics
-using StatistEase
+using Statistikles
 
 # ── Reproducible random data ──────────────────────────────────────────────────
 Random.seed!(20260101)
 
 println("=" ^ 70)
-println("StatistEase Benchmarks")
+println("Statistikles Benchmarks")
 println("Julia $(VERSION)  |  $(Sys.cpu_info()[1].model)")
 println("=" ^ 70)
 println()

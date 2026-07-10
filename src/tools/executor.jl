@@ -72,7 +72,7 @@ function execute_tool(tool_name::String, arguments::Dict)
             return mle_fit(data, dist)
 
         elseif tool_name == "complexity_analysis"
-            # This is a meta-tool. For now, we only allow profiling StatistEase's own sort.
+            # This is a meta-tool. For now, we only allow profiling Statistikles's own sort.
             return estimate_complexity(sort, n -> rand(n))
 
         elseif tool_name == "p_value_adjustment"

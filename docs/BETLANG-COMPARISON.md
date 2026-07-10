@@ -2,14 +2,14 @@
 SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
-# StatistEase + BetLang Capability Comparison
+# Statistikles + BetLang Capability Comparison
 
 ```
 ┌─────────────────────────────┬──────────────────────┬──────────────────────┬──────────────┐
-│ Capability                  │ BetLang (Racket)     │ StatistEase (Julia)  │ Winner       │
+│ Capability                  │ BetLang (Racket)     │ Statistikles (Julia)  │ Winner       │
 ├─────────────────────────────┼──────────────────────┼──────────────────────┼──────────────┤
-│ Descriptive stats           │ Basic (mean,med,mode)│ 13 measures + power  │ StatistEase  │
-│ Hypothesis testing          │ Chi-sq, KS only      │ 15+ tests (MW,KW,   │ StatistEase  │
+│ Descriptive stats           │ Basic (mean,med,mode)│ 13 measures + power  │ Statistikles  │
+│ Hypothesis testing          │ Chi-sq, KS only      │ 15+ tests (MW,KW,   │ Statistikles  │
 │                             │                      │ Fisher,MANOVA,etc)   │              │
 │ Bayesian inference          │ MCMC,ABC,conjugate,  │ Bootstrap CI, EM     │ BetLang      │
 │                             │ Bayes factors, HPD   │                      │              │
@@ -19,23 +19,23 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 │                             │ PSO,DE,ant colony)   │                      │              │
 │ Uncertainty types           │ 14 number systems    │ Tropical+p-adic+     │ BetLang      │
 │                             │ (fuzzy,interval,etc) │ modular              │              │
-│ Distributions               │ 20+ with sampling    │ 100+ via Distrib.jl  │ StatistEase  │
+│ Distributions               │ 20+ with sampling    │ 100+ via Distrib.jl  │ Statistikles  │
 │ Markov chains / HMM         │ Full implementation  │ None                 │ BetLang      │
 │ Financial risk              │ VaR,options,Dutch     │ None (before bridge) │ BetLang      │
 │                             │ book,risk-of-ruin    │                      │              │
-│ Nonparametric tests         │ None                 │ Full suite (midranks,│ StatistEase  │
+│ Nonparametric tests         │ None                 │ Full suite (midranks,│ Statistikles  │
 │                             │                      │ ties,PERMANOVA)      │              │
-│ Cross-verification          │ None                 │ Aspasia+ECHIDNA      │ StatistEase  │
-│ Formal proofs               │ None                 │ 10 Agda proofs       │ StatistEase  │
-│ Type safety                 │ 14 custom types      │ TypeLL L1-12         │ StatistEase  │
+│ Cross-verification          │ None                 │ Aspasia+ECHIDNA      │ Statistikles  │
+│ Formal proofs               │ None                 │ 10 Agda proofs       │ Statistikles  │
+│ Type safety                 │ 14 custom types      │ TypeLL L1-12         │ Statistikles  │
 │ Game theory                 │ Nash,auctions,PD     │ None                 │ BetLang      │
-│ Effect size classification  │ None                 │ Cohen d/r/η² auto    │ StatistEase  │
-│ Multiple corrections        │ None                 │ Bonf/Holm/Sidak/FDR  │ StatistEase  │
+│ Effect size classification  │ None                 │ Cohen d/r/η² auto    │ Statistikles  │
+│ Multiple corrections        │ None                 │ Bonf/Holm/Sidak/FDR  │ Statistikles  │
 ├─────────────────────────────┼──────────────────────┼──────────────────────┼──────────────┤
 │ INTEGRATION (bridge)        │ Julia backend 20%    │ betlang_bridge.jl    │ COMBINED     │
 │                             │ BetLang.jl exists    │ 442 tests passing    │              │
 └─────────────────────────────┴──────────────────────┴──────────────────────┴──────────────┘
 
-COMBINED POWER: StatistEase uses BetLang for Bayesian/sampling/optimization/uncertainty.
-BetLang uses StatistEase for hypothesis testing/formal verification/cross-verification.
+COMBINED POWER: Statistikles uses BetLang for Bayesian/sampling/optimization/uncertainty.
+BetLang uses Statistikles for hypothesis testing/formal verification/cross-verification.
 ```

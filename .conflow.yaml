@@ -2,7 +2,7 @@
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # conflow pipeline - Full generate → validate → export
 version: "1"
-name: "statistease"
+name: "statistikles"
 
 stages:
   - name: "generate"

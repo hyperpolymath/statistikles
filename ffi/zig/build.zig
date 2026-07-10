@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-// STATISTEASE FFI Build Configuration
+// STATISTIKLES FFI Build Configuration
 
 const std = @import("std");
 
@@ -10,7 +10,7 @@ pub fn build(b: *std.Build) void {
 
     // Shared library (.so, .dylib, .dll)
     const lib = b.addSharedLibrary(.{
-        .name = "statistease",
+        .name = "statistikles",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
@@ -21,7 +21,7 @@ pub fn build(b: *std.Build) void {
 
     // Static library (.a)
     const lib_static = b.addStaticLibrary(.{
-        .name = "statistease",
+        .name = "statistikles",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
@@ -33,8 +33,8 @@ pub fn build(b: *std.Build) void {
 
     // Generate header file for C compatibility
     const header = b.addInstallHeader(
-        b.path("include/statistease.h"),
-        "statistease.h",
+        b.path("include/statistikles.h"),
+        "statistikles.h",
     );
     b.getInstallStep().dependOn(&header.step);
 
@@ -80,7 +80,7 @@ pub fn build(b: *std.Build) void {
 
     // Benchmark (if needed)
     const bench = b.addExecutable(.{
-        .name = "statistease-bench",
+        .name = "statistikles-bench",
         .root_source_file = b.path("bench/bench.zig"),
         .target = target,
         .optimize = .ReleaseFast,

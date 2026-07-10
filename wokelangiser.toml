@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MPL-2.0
-# wokelangiser manifest for statistease
+# wokelangiser manifest for statistikles
 
 [project]
-name = "statistease"
+name = "statistikles"
 
 [consent]
 gdpr = true

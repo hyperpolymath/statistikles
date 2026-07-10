@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // Template: QUICKSTART-DEV.adoc — clone → build → test → PR
-// Replace statistease, {{BUILD_CMD}}, {{TEST_CMD}}, {{LANG_STACK}} with actuals
-= statistease — Quick Start for Developers
+// Replace statistikles, {{BUILD_CMD}}, {{TEST_CMD}}, {{LANG_STACK}} with actuals
+= statistikles — Quick Start for Developers
 :toc:
 :toclevels: 2
 
@@ -30,8 +30,8 @@ nix develop
 
 [source,bash]
 ----
-git clone https://github.com/hyperpolymath/statistease.git
-cd statistease
+git clone https://github.com/hyperpolymath/statistikles.git
+cd statistikles
 just setup-dev
 ----
 
@@ -53,7 +53,7 @@ just setup-dev
 
 [source]
 ----
-statistease/
+statistikles/
 ├── src/                  # Source code
 ├── src/abi/              # Idris2 ABI definitions (if applicable)
 ├── ffi/zig/              # Zig FFI bridge (if applicable)
@@ -108,5 +108,5 @@ Or read `0-AI-MANIFEST.a2ml` and `.claude/CLAUDE.md` directly.
 == Get Help
 
 * **Architecture**: link:EXPLAINME.adoc[EXPLAINME.adoc]
-* **Wiki**: https://github.com/hyperpolymath/statistease/wiki
+* **Wiki**: https://github.com/hyperpolymath/statistikles/wiki
 * **Report issue**: `just help-me`

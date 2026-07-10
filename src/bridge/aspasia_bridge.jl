@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MPL-2.0
-# Aspasia Bridge — Cross-verification interface between StatistEase (Julia)
+# Aspasia Bridge — Cross-verification interface between Statistikles (Julia)
 # and Aspasia (GNU Octave + Prolog).
 #
 # ARCHITECTURE:
-#   StatistEase writes JSON transactions → shared directory
+#   Statistikles writes JSON transactions → shared directory
 #   Aspasia reads transactions, audits independently, writes audit reports
-#   StatistEase reads audit reports and flags disagreements
+#   Statistikles reads audit reports and flags disagreements
 #
 # This is PULL-based, non-blocking. Aspasia is never in the critical path.
 
@@ -17,7 +17,7 @@ using UUIDs
 # Configuration
 # ===========================================================================
 
-const BRIDGE_DIR = get(ENV, "STATISTEASE_BRIDGE_DIR", joinpath(homedir(), ".statistease", "bridge"))
+const BRIDGE_DIR = get(ENV, "STATISTIKLES_BRIDGE_DIR", joinpath(homedir(), ".statistikles", "bridge"))
 const TRANSACTIONS_DIR = joinpath(BRIDGE_DIR, "transactions")
 const AUDITS_DIR = joinpath(BRIDGE_DIR, "audits")
 
@@ -29,7 +29,7 @@ function init_bridge()
 end
 
 # ===========================================================================
-# Transaction Writing (StatistEase → Aspasia)
+# Transaction Writing (Statistikles → Aspasia)
 # ===========================================================================
 
 """
@@ -55,7 +55,7 @@ function write_transaction(test_name::String, input_data::Dict, result::Dict,
         "data_scale" => data_scale,
         "sample_size" => sample_size,
         "alpha" => alpha,
-        "source" => "StatistEase.jl"
+        "source" => "Statistikles.jl"
     )
 
     path = joinpath(TRANSACTIONS_DIR, "$(txn_id).json")
@@ -67,7 +67,7 @@ function write_transaction(test_name::String, input_data::Dict, result::Dict,
 end
 
 # ===========================================================================
-# Audit Reading (Aspasia → StatistEase)
+# Audit Reading (Aspasia → Statistikles)
 # ===========================================================================
 
 """

@@ -2,10 +2,10 @@
 SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
-<!-- TOPOLOGY.md — StatistEase architecture map and completion dashboard -->
+<!-- TOPOLOGY.md — Statistikles architecture map and completion dashboard -->
 <!-- Last updated: 2026-02-20 -->
 
-# StatistEase — Project Topology
+# Statistikles — Project Topology
 
 ## System Architecture
 
@@ -124,7 +124,7 @@ OVERALL:                            ███████░░░  70%    Symbo
 ## Key Dependencies
 
 ```
-LM Studio (local) ──► StatistEase ──► Julia stdlib (Statistics, LinearAlgebra)
+LM Studio (local) ──► Statistikles ──► Julia stdlib (Statistics, LinearAlgebra)
                           │                │
                           │                ├── Distributions.jl
                           │                ├── StatsBase.jl

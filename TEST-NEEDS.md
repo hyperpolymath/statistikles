@@ -2,7 +2,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
-# TEST-NEEDS: statistease
+# TEST-NEEDS: statistikles
 
 ## CRG Grade: C — ACHIEVED 2026-04-04
 
@@ -16,7 +16,7 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 | **Property tests** | yes | test/property_test.jl -- invariants (constant arrays, sort-invariance, power-mean ordering, p-value/correlation bounds) |
 | **Integration tests** | 0 | No dedicated tests for the 8 claimed external integrations |
 | **Benchmarks** | yes | benches/benchmarks.jl (BenchmarkTools; descriptive_stats at 3 scales + batch scenario) |
-| **Agda proofs** | 3 files | proofs/StatistEase/ (Inequalities, RankIdentities, TropicalSemiring) |
+| **Agda proofs** | 3 files | proofs/Statistikles/ (Inequalities, RankIdentities, TropicalSemiring) |
 
 ## What's Missing
 

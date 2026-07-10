@@ -2,9 +2,9 @@
 SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
-# LLM Warmup — statistease (User)
+# LLM Warmup — statistikles (User)
 
-## What is statistease?
+## What is statistikles?
 See README.adoc for overview.
 
 ## Key Commands

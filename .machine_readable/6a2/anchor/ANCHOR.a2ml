@@ -1,7 +1,7 @@
-# ⚓ ANCHOR: statistease
-# This is the canonical authority for the statistease repository.
+# ⚓ ANCHOR: statistikles
+# This is the canonical authority for the statistikles repository.
 
-id: "org.hyperpolymath.statistease"
+id: "org.hyperpolymath.statistikles"
 version: "1.0.0"
 clade: "unknown"
 status: "active"
