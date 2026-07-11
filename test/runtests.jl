@@ -1353,3 +1353,7 @@ include("guardrail_test.jl")
 # Executor router coverage: every LLM-facing tool name in definitions.jl
 # is exercised through execute_tool (or explicitly skipped with a reason)
 include("executor_router_test.jl")
+
+# Chi-square dedicated correctness review: chi_square_test, chi_square_goodness_of_fit,
+# and frequency_table checked against independently-computed ground truth (R / SciPy)
+include("chi_square_validation_test.jl")
