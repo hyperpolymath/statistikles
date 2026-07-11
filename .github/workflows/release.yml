@@ -1,44 +1,101 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# Release workflow — triggered by version tags (v*).
-# Builds artifacts, generates changelog via git-cliff, creates a GitHub Release,
-# and produces SLSA provenance attestations.
+# Release workflow — attaches distributable artifacts to a Statistikles release.
+#
+# Statistikles is released through the Julia General registry via
+# JuliaRegistrator + TagBot (see docs/RELEASING.adoc). TagBot creates the
+# `vX.Y.Z` git tag and the GitHub Release; this workflow then builds a
+# reproducible source tarball, an SPDX SBOM (syft), and SLSA provenance over
+# both, and attaches them to that release.
+#
+# Trigger model
+# -------------
+# TagBot cuts the tag with the default GITHUB_TOKEN, and GitHub deliberately
+# suppresses the downstream `push:` event (recursive-workflow prevention). So
+# the normal maintainer path is to run this workflow manually via
+# `workflow_dispatch`, passing the `vX.Y.Z` tag TagBot created. The `push: tags`
+# trigger is kept for the optional deploy-key setup described in
+# docs/RELEASING.adoc, under which TagBot's tag push fires this workflow
+# automatically. Either way the pipeline stays inert until a real version is
+# registered — nothing here runs on its own.
 name: Release
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing git tag to build the release for (e.g. v0.1.0)'
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Build Artifacts
+    name: Build Source Tarball + SBOM
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      # Real SLSA subjects: sha256sum of the tarball + SBOM, base64-encoded.
+      hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Empty on a tag push (checkout uses the pushed tag); the chosen tag on
+          # a manual dispatch.
+          ref: ${{ inputs.tag }}
 
-      - name: Build
+      - name: Derive version from tag
+        id: meta
         run: |
-          echo "Build your artifacts here"
-          # TODO: Replace with your build commands
-          # Examples:
-          #   cargo build --release
-          #   zig build -Doptimize=ReleaseFast
-          #   gleam build
-          #   mix release
+          TAG="${{ inputs.tag || github.ref_name }}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
-      # TODO: Upload build artifacts if needed
-      # - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      #   with:
-      #     name: release-artifacts
-      #     path: target/release/
+      - name: Generate SPDX SBOM (syft)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: .
+          format: spdx-json
+          output-file: statistikles-${{ steps.meta.outputs.version }}.spdx.json
+          # This workflow uploads the SBOM itself (below) and attaches it to the
+          # release, so the action's own artifact upload is unnecessary.
+          upload-artifact: false
+
+      - name: Build source tarball
+        run: |
+          git archive --format=tar.gz \
+            --prefix="statistikles-${{ steps.meta.outputs.version }}/" \
+            -o "statistikles-${{ steps.meta.outputs.version }}.tar.gz" \
+            HEAD
+
+      - name: Compute SLSA base64-subjects
+        id: hash
+        run: |
+          # slsa-github-generator expects `sha256sum` output, base64 (-w0) encoded.
+          sha256sum \
+            "statistikles-${{ steps.meta.outputs.version }}.tar.gz" \
+            "statistikles-${{ steps.meta.outputs.version }}.spdx.json" \
+            > checksums.txt
+          echo "hashes=$(base64 -w0 checksums.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifacts for the release job
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-artifacts
+          path: |
+            statistikles-*.tar.gz
+            statistikles-*.spdx.json
+          if-no-files-found: error
+          retention-days: 5
 
   changelog:
     name: Generate Changelog
@@ -52,15 +109,18 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          ref: ${{ inputs.tag }}
           fetch-depth: 0
 
       - name: Extract version from tag
         id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Install git-cliff
         run: |
-          curl -sSfL https://github.com/orhun/git-cliff/releases/latest/download/git-cliff-$(uname -m)-unknown-linux-gnu.tar.gz \
+          curl -sSfL "https://github.com/orhun/git-cliff/releases/latest/download/git-cliff-$(uname -m)-unknown-linux-gnu.tar.gz" \
             | tar -xz --strip-components=1 -C /usr/local/bin/ git-cliff-*/git-cliff
 
       - name: Generate changelog for this release
@@ -87,46 +147,46 @@ jobs:
           retention-days: 5
 
   release:
-    name: Create GitHub Release
+    name: Attach Artifacts to GitHub Release
     needs: [build, changelog]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Download build artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-artifacts
+          path: artifacts
 
-      # TODO: Download build artifacts if uploading to the release
-      # - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-      #   with:
-      #     name: release-artifacts
-      #     path: artifacts/
-
-      - name: Create GitHub Release
+      - name: Create or update GitHub Release
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v2
         with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
           body: ${{ needs.changelog.outputs.changelog }}
           draft: false
-          prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          prerelease: ${{ contains(inputs.tag || github.ref_name, '-rc') || contains(inputs.tag || github.ref_name, '-beta') || contains(inputs.tag || github.ref_name, '-alpha') }}
           generate_release_notes: false
-          # TODO: Add artifact files to the release
-          # files: |
-          #   artifacts/*
+          files: |
+            artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   provenance:
     name: SLSA Provenance
-    needs: [build]
+    needs: [build, release]
     permissions:
       actions: read
       id-token: write
       contents: write
-    # SLSA generator must run in a separate, isolated workflow
+    # SLSA generator must run in a separate, isolated (reusable) workflow.
     # See: https://slsa.dev/spec/v1.0/requirements#build-l3
+    # Subjects are the real sha256sums computed by the build job (no longer "").
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
     with:
-      base64-subjects: ""
-      # TODO: Replace with actual artifact hashes
-      # Generate with: sha256sum artifact | base64 -w0
-      # base64-subjects: "${{ needs.build.outputs.hashes }}"
+      base64-subjects: ${{ needs.build.outputs.hashes }}
+      upload-assets: true
+      # Empty on a tag push (generator uses the pushed tag); the chosen tag on a
+      # manual dispatch, as the generic generator requires off-tag runs.
+      upload-tag-name: ${{ inputs.tag }}
