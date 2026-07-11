@@ -88,6 +88,16 @@ function require_probability(v::Real, name::String="value")
 end
 
 """
+    require_nonnegative(x, name::String)
+
+Throw `ArgumentError` unless every element of `x` is `>= 0`.
+"""
+function require_nonnegative(x, name::String)
+    all(v -> v >= 0, x) || throw(ArgumentError("$name must not contain negative values"))
+    return nothing
+end
+
+"""
     require_square(M::AbstractMatrix, name::String="matrix")
 
 Throw `ArgumentError` unless `M` is square.
