@@ -1354,6 +1354,7 @@ include("guardrail_test.jl")
 # is exercised through execute_tool (or explicitly skipped with a reason)
 include("executor_router_test.jl")
 
-# Chi-square dedicated correctness review: chi_square_test, chi_square_goodness_of_fit,
-# and frequency_table checked against independently-computed ground truth (R / SciPy)
-include("chi_square_validation_test.jl")
+# Reference validation (advanced modules): ground-truth assertions for
+# Kruskal-Wallis, multiple linear regression, logistic regression,
+# Kaplan-Meier survival, and fixed/random-effects meta-analysis
+include("reference_validation_advanced_test.jl")
