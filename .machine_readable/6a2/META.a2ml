@@ -6,11 +6,13 @@
 
 [metadata]
 version = "0.1.0"
-last-updated = "2026-02-20"
+last-updated = "2026-07-11"
 
 [project-info]
 type = "library"  # library | binary | monorepo | service | website
-languages = ["julia"]             # e.g. ["rust", "zig", "idris2"]
+# julia is the sole computation language; zig (FFI) and agda (proofs) are
+# experimental surfaces that compile/type-check in CI but do not back the core.
+languages = ["julia", "zig", "agda"]
 license = "MPL-2.0"
 author = "Jonathan D.A. Jewell (hyperpolymath)"
 
