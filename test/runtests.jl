@@ -5,6 +5,7 @@
 using Test
 using Statistics
 using Statistikles
+using Random
 
 @testset "Statistikles Full Test Suite" begin
 
@@ -618,7 +619,11 @@ using Statistikles
         @test r["k_groups"] == 3
         @test r["p_variables"] == 2
 
-        # Same group data: not significant
+        # Same group data: not significant. Seed locally so this randomised
+        # sanity check is deterministic: with only 5 samples/group in 2-D an
+        # unseeded draw can occasionally produce a spurious group difference
+        # (Wilks' Λ ≤ 0.5) and flake. Seed 6 yields Λ ≈ 0.98.
+        Random.seed!(6)
         g_same = randn(10, 2)
         r2 = manova_oneway([g_same[1:5,:], g_same[6:10,:]])
         @test r2["wilks_lambda"] > 0.5  # Close to 1 = no difference
