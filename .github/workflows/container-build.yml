@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Statistikles — Container Build
+#
+# Builds the root Containerfile so it cannot silently rot back into a
+# template stub. Build only — no push, no registry login.
+
+name: Container Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Containerfile'
+      - '.dockerignore'
+      - 'Project.toml'
+      - 'Manifest.toml'
+      - 'src/**'
+      - '.github/workflows/container-build.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Containerfile'
+      - '.dockerignore'
+      - 'Project.toml'
+      - 'Manifest.toml'
+      - 'src/**'
+      - '.github/workflows/container-build.yml'
+  workflow_dispatch:
+
+permissions: read-all
+
+concurrency:
+  group: container-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: docker build .
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Build Containerfile
+        run: docker build -f Containerfile -t statistikles:ci .
+
+      - name: Smoke — run the entrypoint
+        run: |
+          # No LM Studio endpoint is reachable from the runner, so main()
+          # (src/tools/chat.jl) takes its documented offline-demo fallback
+          # and exits 0 — see the Containerfile's ENTRYPOINT comment and
+          # QUICKSTART-USER.adoc "First Run".
+          docker run --rm statistikles:ci | tee /tmp/container-run.log
+          grep -q "Statistikles v0.1.0" /tmp/container-run.log
+          grep -q "Cannot connect to LM Studio" /tmp/container-run.log
+          grep -q "All numbers above were computed by Julia, not an LLM." /tmp/container-run.log

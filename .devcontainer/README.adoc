@@ -5,7 +5,7 @@
 
 == Overview
 
-This dev container uses `cgr.dev/chainguard/wolfi-base` with git, curl, bash, and just pre-installed. Dev container features add git, just, and nickel automatically.
+This dev container uses `cgr.dev/chainguard/wolfi-base` with git, curl, bash, and just pre-installed. Dev container features add git, just, nickel, and Julia 1.10 (via Juliaup) automatically.
 
 == VS Code (Local)
 
@@ -25,4 +25,4 @@ This dev container uses `cgr.dev/chainguard/wolfi-base` with git, curl, bash, an
 
 == Customization
 
-Replace `Statistikles` placeholders in both `devcontainer.json` and `Containerfile` with your actual project name. Run `just deps` to verify the environment after first launch.
+Run `just setup` to verify the environment after first launch (already run automatically by `postCreateCommand`).

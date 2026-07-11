@@ -37,6 +37,8 @@ Before you begin, ensure you have:
 
 == Install
 
+=== Option 1: Native Julia
+
 [source,bash]
 ----
 # Clone and set up
@@ -55,6 +57,23 @@ If you prefer not to use just, the equivalent raw command is:
 ----
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ----
+
+=== Option 2: Container
+
+No local Julia install required — just Podman or Docker:
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/statistikles.git
+cd statistikles
+podman build -t statistikles:latest -f Containerfile .
+podman run --rm -it statistikles:latest
+----
+
+(`docker` works identically in place of `podman`.) This builds the official
+`docker.io/library/julia:1.10` base image with the project instantiated and
+precompiled, then runs it as a non-root user. Expected output matches
+"First Run" below.
 
 == First Run
 

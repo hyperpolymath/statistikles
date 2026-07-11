@@ -18,10 +18,13 @@
       "version": "latest"
     },
     "ghcr.io/jdx/devcontainer-features/just:1": {},
-    "ghcr.io/nickel-lang/devcontainer-feature:0": {}
+    "ghcr.io/nickel-lang/devcontainer-feature:0": {},
+    "ghcr.io/julialang/devcontainer-features/julia:1": {
+      "channel": "1.10"
+    }
   },
 
-  "postCreateCommand": "just deps",
+  "postCreateCommand": "just setup",
 
   "remoteUser": "nonroot",
 
@@ -34,6 +37,7 @@
     "vscode": {
       "extensions": [
         "EditorConfig.EditorConfig",
+        "julialang.language-julia",
         "eamodio.gitlens",
         "streetsidesoftware.code-spell-checker",
         "timonwong.shellcheck",
