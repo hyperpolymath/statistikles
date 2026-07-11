@@ -23,6 +23,6 @@ KULLBACK-LEIBLER DIVERGENCE: Measures how one probability distribution
 differs from a reference distribution.
 """
 function kl_divergence(p::Vector{Float64}, q::Vector{Float64}; base::Real=2)
-    @assert length(p) == length(q) "Distributions must have same support size"
+    require_equal_length(p, q, "p", "q")
     return sum(p[i] * log(base, p[i] / q[i]) for i in 1:length(p) if p[i] > 0)
 end

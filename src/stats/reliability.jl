@@ -78,7 +78,7 @@ end
 BLAND-ALTMAN: Agreement analysis. Bias, 95% limits of agreement, proportional bias.
 """
 function bland_altman(method1::Vector{Float64}, method2::Vector{Float64}; alpha::Float64=0.05)
-    @assert length(method1) == length(method2)
+    require_equal_length(method1, method2, "method1", "method2")
     n = length(method1)
     diffs = method1 .- method2
     means_pair = (method1 .+ method2) ./ 2

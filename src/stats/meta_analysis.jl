@@ -13,7 +13,7 @@ META-ANALYSIS: Synthesizes effect sizes across multiple studies.
 - `model`: "fixed" or "random".
 """
 function meta_analysis(effect_sizes::Vector{Float64}, variances::Vector{Float64}; model::String="random")
-    @assert length(effect_sizes) == length(variances)
+    require_equal_length(effect_sizes, variances, "effect_sizes", "variances")
     k = length(effect_sizes)
     
     # Weights

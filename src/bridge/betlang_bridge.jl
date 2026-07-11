@@ -127,7 +127,8 @@ struct ImpreciseProbability
     lower::Float64
     upper::Float64
     function ImpreciseProbability(lo, hi)
-        @assert 0.0 <= lo <= hi <= 1.0
+        (0.0 <= lo <= hi <= 1.0) || throw(ArgumentError(
+            "ImpreciseProbability bounds must satisfy 0 <= lower <= upper <= 1, got lower=$lo, upper=$hi"))
         new(lo, hi)
     end
 end

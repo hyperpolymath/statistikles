@@ -12,7 +12,7 @@ CLR TRANSFORM: Maps compositional data from the simplex to Euclidean space.
 - `x`: Input composition (must sum to constant, e.g., 1.0).
 """
 function centered_log_ratio(x::Vector{Float64})
-    @assert all(x .> 0) "Compositional data must be positive"
+    require_positive(x, "x")
     g = exp(mean(log.(x))) # Geometric mean
     return log.(x ./ g)
 end
