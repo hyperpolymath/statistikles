@@ -1353,3 +1353,8 @@ include("guardrail_test.jl")
 # Executor router coverage: every LLM-facing tool name in definitions.jl
 # is exercised through execute_tool (or explicitly skipped with a reason)
 include("executor_router_test.jl")
+
+# Reference validation (advanced modules): ground-truth assertions for
+# Kruskal-Wallis, multiple linear regression, logistic regression,
+# Kaplan-Meier survival, and fixed/random-effects meta-analysis
+include("reference_validation_advanced_test.jl")
