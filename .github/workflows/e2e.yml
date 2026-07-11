@@ -3,7 +3,7 @@
 #
 # Statistikles — E2E + Aspect Tests
 #
-# Runs the Julia test suite (478 tests, 10 Agda proofs, 8 integrations).
+# Runs the Julia test suite (693 @test assertions, 10 Agda proofs, 8 integrations).
 
 name: E2E + Aspect
 
