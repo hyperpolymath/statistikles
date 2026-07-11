@@ -14,8 +14,8 @@ model (**Opus / Sonnet / Haiku**) for implementation and for adversarial verific
 - **Wave 2** = everything beyond that (release engineering, packaging, honesty
   reframes, deeper test coverage, observability, polish).
 
-Package 8 of wave 1 (hygiene/security-templates) is **already merged** (PR #33).
-Everything else below is open work.
+All of wave 1 and most of wave 2 are now **merged to `main`**. Only two work orders
+remain open: **W2-6 (observability)** and **W2-7 (prompt-injection delimiting)**.
 
 ## How to run
 
@@ -32,33 +32,35 @@ Everything else below is open work.
 
 ### Wave 1 — basic functioning (do first, in order)
 
-**Status (2026-07-11):** packages 4, 5, and 8 are **MERGED** (PRs #34, #35, #33). The
-five below with a status of OPEN are the remainder — their fleet agents died on a spend
-limit before pushing. Do them next, **W1-1 (P0) first**.
+**Status (2026-07-11):** all eight wave-1 packages are **MERGED** to `main`.
 
 | # | Task | Branch | Impl | Verify | Status |
 |---|------|--------|------|--------|--------|
-| 1 | [Neural boundary guardrail (**P0**)](w1-1-neural-guardrail.md) | `fix/neural-boundary-guardrail` | **opus** | **opus** | **OPEN** |
-| 2 | [Degenerate-input guards + `@assert`→`ArgumentError`](w1-2-stats-degenerate-inputs.md) | `fix/stats-degenerate-inputs` | sonnet | opus | **OPEN** |
-| 3 | [Table-driven router tests + CI coverage](w1-3-executor-router-coverage.md) | `test/executor-router-coverage` | sonnet | sonnet | **OPEN** |
+| 1 | [Neural boundary guardrail (**P0**)](w1-1-neural-guardrail.md) | `fix/neural-boundary-guardrail` | **opus** | **opus** | ✅ #37 |
+| 2 | [Degenerate-input guards + `@assert`→`ArgumentError`](w1-2-stats-degenerate-inputs.md) | `fix/stats-degenerate-inputs` | sonnet | opus | ✅ #40 |
+| 3 | [Table-driven router tests + CI coverage](w1-3-executor-router-coverage.md) | `test/executor-router-coverage` | sonnet | sonnet | ✅ #41 |
 | 4 | [Real install path (Justfile, quickstarts, smoke CI)](w1-4-documented-install-path.md) | `fix/documented-install-path` | sonnet | haiku | ✅ #34 |
 | 5 | [Pin compute half + prune Dependabot + threat model](w1-5-supply-chain-pinning.md) | `fix/supply-chain-pinning` | sonnet | sonnet | ✅ #35 |
-| 6 | [Make Zig FFI compile + `zig build test` CI](w1-6-zig-ffi-compiles.md) | `fix/zig-ffi-compiles` | **opus** | sonnet | **OPEN** |
-| 7 | [Type-checking Agda proofs + `agda --safe` CI](w1-7-agda-proofs-ci.md) | `fix/agda-proofs-ci` | **opus** | sonnet | **OPEN** |
+| 6 | [Make Zig FFI compile + `zig build test` CI](w1-6-zig-ffi-compiles.md) | `fix/zig-ffi-compiles` | **opus** | sonnet | ✅ #38 |
+| 7 | [Type-checking Agda proofs + `agda --safe` CI](w1-7-agda-proofs-ci.md) | `fix/agda-proofs-ci` | **opus** | sonnet | ✅ #42 |
 | 8 | Hygiene / security-templates | `chore/hygiene-security-templates` | haiku | haiku | ✅ #33 |
 
 ### Wave 2 — beyond basic functioning
 
-| # | Task | Branch | Impl | Verify |
-|---|------|--------|------|--------|
-| 1 | [Release: JuliaRegistrator + TagBot + SBOM](w2-1-release-pipeline.md) | `feat/release-registrator-tagbot` | **opus** | **opus** |
-| 2 | [Buildable guix.scm](w2-2-guix-package.md) | `feat/guix-real-package` | **opus** | sonnet |
-| 3 | [Runnable Containerfile + devcontainer](w2-3-containers.md) | `feat/containers-runnable` | sonnet | sonnet |
-| 4 | [Experimental reframe: FFI + proofs docs](w2-4-experimental-reframe.md) | `docs/experimental-reframe` | sonnet | sonnet |
-| 5 | [Extend ground-truth reference validation](w2-5-reference-validation.md) | `test/reference-validation-extension` | sonnet | **opus** |
-| 6 | [Structured logging + audit trail](w2-6-observability.md) | `feat/structured-observability` | sonnet | sonnet |
-| 7 | [Prompt-injection delimiting](w2-7-prompt-injection.md) | `fix/prompt-injection-delimiting` | sonnet | haiku |
-| 8 | [Polish sweep](w2-8-polish-sweep.md) | `chore/polish-sweep` | haiku | haiku |
+**Status (2026-07-11):** six of eight merged; **W2-6** and **W2-7** remain **OPEN**. A
+dedicated chi-square correctness review (Yates-clamp fix + ground-truth tests) also
+landed as **#47**, outside the original wave plan.
+
+| # | Task | Branch | Impl | Verify | Status |
+|---|------|--------|------|--------|--------|
+| 1 | [Release: JuliaRegistrator + TagBot + SBOM](w2-1-release-pipeline.md) | `feat/release-registrator-tagbot` | **opus** | **opus** | ✅ #43 |
+| 2 | [Buildable guix.scm](w2-2-guix-package.md) | `feat/guix-real-package` | **opus** | sonnet | ✅ #39 |
+| 3 | [Runnable Containerfile + devcontainer](w2-3-containers.md) | `feat/containers-runnable` | sonnet | sonnet | ✅ #44 |
+| 4 | [Experimental reframe: FFI + proofs docs](w2-4-experimental-reframe.md) | `docs/experimental-reframe` | sonnet | sonnet | ✅ #48 |
+| 5 | [Extend ground-truth reference validation](w2-5-reference-validation.md) | `test/reference-validation-extension` | sonnet | **opus** | ✅ #46 |
+| 6 | [Structured logging + audit trail](w2-6-observability.md) | `feat/structured-observability` | sonnet | sonnet | **OPEN** |
+| 7 | [Prompt-injection delimiting](w2-7-prompt-injection.md) | `fix/prompt-injection-delimiting` | sonnet | haiku | **OPEN** |
+| 8 | [Polish sweep](w2-8-polish-sweep.md) | `chore/polish-sweep` | haiku | haiku | ✅ #45 |
 
 **Routing rationale.** Opus for design-sensitive, safety-critical, or niche-toolchain
 work (the guarantee guardrail, release engineering, Guix, Zig/Agda, statistical

@@ -134,6 +134,14 @@ The boundary is `src/tools/executor.jl:execute_tool()`. Everything above it is n
 statistical value crosses this boundary in the upward direction without having been
 computed by a verified Julia function.
 
+The guarantee is enforced in code *after* generation, not merely by convention:
+`src/tools/guardrail.jl:validate_numeric_provenance()` audits every numeric literal
+in the LLM's prose and traces it to a recorded tool result. A number that matches no
+tool result is flagged as an orphan — the reply is never silently rewritten; instead
+the model is asked once to restate using only computed values, and any orphans that
+remain are surfaced in a warning block. This behaviour is covered by
+`test/guardrail_test.jl`.
+
 == Experimental surfaces
 
 Two boundaries in this repo are pre-production. Both compile and are CI-checked, but

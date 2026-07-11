@@ -98,6 +98,9 @@ function statistical_assistant_chat()
         lowercase(input) == "offline" && (run_examples(); continue)
 
         # One malformed turn must never kill the session — isolate the turn body.
+        # Every tool call this turn (including any guardrail retry) is logged
+        # and audited under one per-chat-turn correlation id.
+        correlation_id = new_correlation_id()
         try
             push!(messages, Dict{String,Any}("role" => "user", "content" => input))
 
@@ -105,12 +108,13 @@ function statistical_assistant_chat()
             response = call_lm_studio(messages, tools)
 
             if haskey(response, "error")
+                @warn "lm_studio_call_failed" correlation_id=correlation_id error=response["error"]
                 println("Error: $(response["error"])")
                 pop!(messages)
                 continue
             end
 
-            pr = process_tool_calls(response, messages; tools=tools)
+            pr = process_tool_calls(response, messages; tools=tools, correlation_id=correlation_id)
             final = pr.final
 
             content = nothing
@@ -124,11 +128,12 @@ function statistical_assistant_chat()
                 user_numbers = extract_numeric_values(input)
                 content = enforce_numeric_boundary!(
                     content, messages, tools, pr.tool_results,
-                    user_numbers, pr.tool_calls_made)
+                    user_numbers, pr.tool_calls_made; correlation_id=correlation_id)
                 println(content)
                 push!(messages, Dict{String,Any}("role" => "assistant", "content" => content))
             end
         catch e
+            @error "chat_turn_error" correlation_id=correlation_id exception=(e, catch_backtrace())
             println("\n  [turn error] $(sprint(showerror, e)) — continuing.")
             continue
         end
@@ -137,7 +142,8 @@ end
 
 """
     enforce_numeric_boundary!(content, messages, tools, tool_results,
-                              user_numbers, tool_calls_made) -> String
+                              user_numbers, tool_calls_made;
+                              correlation_id=new_correlation_id()) -> String
 
 Run the numeric-provenance guardrail on an assistant reply. If unverified
 numbers remain, do ONE retry asking the model to restate using only numbers
@@ -145,9 +151,14 @@ from the tool results (or, when no tool ran this turn, to compute them or
 refrain). If orphans still persist, return the reply with a clear warning block
 appended. The model's text is NEVER silently rewritten — orphans are flagged,
 never fabricated.
+
+`correlation_id` is forwarded to the retry's `process_tool_calls` call so any
+tool calls it makes are logged/audited under the same per-chat-turn id as the
+original attempt.
 """
 function enforce_numeric_boundary!(content::AbstractString, messages, tools,
-                                   tool_results, user_numbers, tool_calls_made::Bool)
+                                   tool_results, user_numbers, tool_calls_made::Bool;
+                                   correlation_id::AbstractString=new_correlation_id())
     ok, orphans = validate_numeric_provenance(content, tool_results, user_numbers)
     ok && return String(content)
 
@@ -168,7 +179,7 @@ function enforce_numeric_boundary!(content::AbstractString, messages, tools,
     new_content = String(content)
     retry_resp = call_lm_studio(messages, tools)
     if !haskey(retry_resp, "error")
-        pr = process_tool_calls(retry_resp, messages; tools=tools)
+        pr = process_tool_calls(retry_resp, messages; tools=tools, correlation_id=correlation_id)
         append!(tool_results, pr.tool_results)
         if haskey(pr.final, "choices") && !isempty(pr.final["choices"])
             c = get(pr.final["choices"][1]["message"], "content", nothing)
