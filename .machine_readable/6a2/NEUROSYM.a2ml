@@ -8,7 +8,7 @@
 
 [metadata]
 version = "0.1.0"
-last-updated = "2026-02-20"
+last-updated = "2026-07-11"
 
 [architecture]
 kautz-type = 1
@@ -25,6 +25,7 @@ enforcement = [
   "Tool dispatch architecture — LLM can only call predefined Julia functions",
   "System prompt instructs LLM to NEVER compute or estimate",
   "All tool results carry provenance stamps from Julia functions",
+  "Post-generation numeric-provenance audit — src/tools/guardrail.jl:validate_numeric_provenance() traces every numeric literal in the LLM prose to a recorded tool result; orphans are flagged (retry-once-then-warn), never silently rewritten (tested in test/guardrail_test.jl)",
   "Adversarial SLM (planned) independently verifies outputs",
 ]
 

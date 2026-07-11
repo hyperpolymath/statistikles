@@ -40,7 +40,7 @@ These 6 a2ml files MUST exist in `.machine_readable/` directory ONLY:
 ```
 src/
 ├── Statistikles.jl          # Main module (entry point)
-├── stats/                  # Statistical functions (17 modules)
+├── stats/                  # Statistical functions (41 modules — representative subset shown)
 │   ├── descriptive.jl      # Mean, median, SD, quartiles, etc.
 │   ├── inferential.jl      # t-tests, ANOVA, chi-square
 │   ├── correlation_regression.jl  # Pearson, Spearman, OLS, multiple regression
@@ -68,7 +68,7 @@ src/
 │   ├── graphs.jl           # ASCII histogram, boxplot, scatter, bar
 │   └── export.jl           # CSV, JSON, text reports
 └── tools/                  # LM Studio integration
-    ├── definitions.jl      # 25+ tool definitions (OpenAI format)
+    ├── definitions.jl      # 29 LLM tool definitions (OpenAI format)
     ├── executor.jl         # Tool dispatch (neural→symbolic boundary)
     ├── lmstudio.jl         # HTTP client for LM Studio API
     └── chat.jl             # REPL interface with MOLLOCK warnings

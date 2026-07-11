@@ -6,7 +6,7 @@
 
 [metadata]
 version = "0.1.0"
-last-updated = "2026-02-20"
+last-updated = "2026-07-11"
 
 [deployment]
 # method = "gitops"  # gitops | manual | ci-triggered
@@ -19,6 +19,9 @@ last-updated = "2026-02-20"
 # 4. Run `just security` to audit for vulnerabilities
 
 [release-process]
+# Canonical procedure: docs/RELEASING.adoc (JuliaRegistrator + TagBot on the
+# General registry; SPDX SBOM). Automated by .github/workflows/release.yml and
+# TagBot.yml. The manual outline below stays in sync with that document.
 # 1. Update version in STATE.a2ml, META.a2ml, Justfile
 # 2. Run `just quality` (format, lint, test)
 # 3. Run `just validate` (RSR compliance)
