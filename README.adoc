@@ -134,6 +134,21 @@ The boundary is `src/tools/executor.jl:execute_tool()`. Everything above it is n
 statistical value crosses this boundary in the upward direction without having been
 computed by a verified Julia function.
 
+== Experimental surfaces
+
+Two boundaries in this repo are pre-production. Both compile and are CI-checked, but
+neither backs the claims their names might suggest:
+
+* **FFI (`ffi/zig/`)** — *Experimental.* Compiles and is CI-tested, but the exported
+  entry points are placeholders not yet backed by the Julia core; the Idris2 ABI layer
+  is design-only (`src/abi/` does not exist in this repo). Details: `ABI-FFI-README.md`.
+* **Proofs (`proofs/`)** — *Experimental.* Small ℕ-level lemmas type-checked by
+  `agda --safe` in CI; the statistical theorems over ℝ remain open targets. Details:
+  `proofs/README.adoc` (proof catalogue) and `PROOF-NEEDS.md` (open targets).
+
+Neither boundary weakens the Julia statistical core, which is tested and
+reference-validated (see `test/reference_validation_test.jl`).
+
 == License
 
 This project is licensed under the Mozilla Public License, v. 2.0. See the `LICENSE` file for details.

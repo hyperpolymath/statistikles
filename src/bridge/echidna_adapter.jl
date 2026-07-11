@@ -1,8 +1,11 @@
 # SPDX-License-Identifier: MPL-2.0
-# ECHIDNA Adapter — Formal proof dispatch for statistical properties.
+# ECHIDNA Adapter — EXPERIMENTAL / design-only proof-dispatch scaffolding.
 #
-# Dispatches proof obligations to ECHIDNA's 48-prover backend via GraphQL.
-# Statistical identities are encoded as proof terms and verified by:
+# This module defines the *intended* shape of proof-obligation dispatch to
+# ECHIDNA's prover backend via GraphQL; the dispatch itself is not yet wired
+# up (see proofs/README.adoc, "Integration with ECHIDNA (aspirational)"). The
+# statistical identities below are proof *targets*, not statements that are
+# currently formally verified. If/when wired up, the intent is to route to:
 #   - Agda (constructive proofs, strongest guarantee)
 #   - Lean 4 (tactic-based, good for algebraic properties)
 #   - Z3 (SMT, fast for arithmetic bounds)
@@ -19,7 +22,7 @@ const ECHIDNA_GROOVE_URL = get(ENV, "ECHIDNA_GROOVE_URL", "http://localhost:9000
 # Proof Obligation Types
 # ===========================================================================
 
-"""Statistical property that can be formally verified."""
+"""Statistical property targeted for future formal verification (not yet dispatched — see module header)."""
 struct StatProofObligation
     name::String           # e.g. "midrank_sum_identity"
     property::String       # Formal statement in ECHIDNA's input language

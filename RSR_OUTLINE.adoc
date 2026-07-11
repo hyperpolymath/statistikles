@@ -11,6 +11,12 @@ image:https://img.shields.io/badge/RSR-Infrastructure-cd7f32[RSR Infrastructure]
 image:https://img.shields.io/badge/Phase-Maintenance-brightgreen[Phase]
 image:https://img.shields.io/badge/Guix-Primary-purple?logo=gnu[Guix]
 
+NOTE: This file documents the generic RSR *template* that Statistikles was
+bootstrapped from — it is not a status report on this repo. In particular,
+`src/abi/` (Idris2 ABI) below is part of the template's target layout and
+does **not** exist in this repository; see the "Experimental surfaces"
+section of `README.adoc` for Statistikles' actual FFI/proofs status.
+
 == Overview
 
 **The canonical template for RSR (Rhodium Standard Repository) projects.**

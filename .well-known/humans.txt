@@ -10,5 +10,5 @@ From: United Kingdom
 Last update: 2026-02-20
 Standards: RSR (Rhodium Standard Repository)
 License: MPL-2.0 (Palimpsest MPL)
-Components: Idris2 ABI, Zig FFI
+Components: Zig FFI (experimental — placeholder ops); Idris2 ABI (design-only, not present)
 Tools: just, Podman, Guix

@@ -24,3 +24,11 @@ test-count = 632
 test-count-note = "@test assertions across runtests.jl, e2e_test.jl, property_test.jl, reference_validation_test.jl"
 test-failures = 0
 ci-workflows = 14
+
+[experimental-surfaces]
+# Machine-readable mirror of README.adoc's "Experimental surfaces" section.
+# Keep in sync; neither field may claim more than the human-readable docs do.
+ffi-maturity = "experimental"
+ffi-note = "ffi/zig compiles and is CI-tested; entry points are placeholders not yet backed by the Julia core; the Idris2 ABI layer (src/abi/) is design-only and does not exist in this repo"
+proof-maturity = "experimental"
+proof-note = "10 Agda lemmas type-checked by agda --safe in CI, proven over ℕ as discrete proxies; the statistical theorems over ℝ/Float64 remain open targets (see PROOF-NEEDS.md)"

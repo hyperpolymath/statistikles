@@ -2,12 +2,21 @@
 SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
-# PROOF-NEEDS.md
+# PROOF-NEEDS.md — Open Proof Targets
+
+*Status: EXPERIMENTAL.* This file catalogues **open targets** for the Agda
+proof suite in `proofs/` — work not yet done, not a claim of coverage. For the
+proofs that already exist and what they actually prove (ℕ-level lemmas, not
+the ℝ/Float64 statistical theorems), see `proofs/README.adoc`. For the overall
+FFI + proofs status, see the "Experimental surfaces" section of `README.adoc`.
+
 ## Current State
 
 - **LOC**: ~11,900
-- **Languages**: Julia, Agda, Idris2, Zig
-- **Existing ABI proofs**: `src/abi/*.idr` (template-level)
+- **Languages**: Julia, Agda, Zig (Idris2 template ABI removed 2026-03-29 — see
+  "Template ABI Cleanup" below; `src/abi/` does not exist)
+- **Existing ABI proofs**: none — the template-level `src/abi/*.idr` files were
+  removed 2026-03-29 for creating a false impression of formal verification
 - **Existing verification**: 3 Agda proof files in `proofs/Statistikles/`
   - `Inequalities.agda` — statistical inequalities
   - `RankIdentities.agda` — rank-based test identities

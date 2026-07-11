@@ -2,6 +2,9 @@
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Statistikles Formal Proofs (Agda)
 
+See also the "Experimental surfaces" section of `README.adoc` for the
+one-line canonical summary of this boundary alongside the FFI one.
+
 *Status: EXPERIMENTAL.* These modules type-check under `agda --safe` with no
 postulates and no holes — but they are *not yet* proofs of the statistical
 theorems Statistikles relies on. Every lemma below is stated and proven over
