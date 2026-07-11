@@ -101,6 +101,7 @@ include("integrations/quantum_integration.jl")  # QuantumCircuit.jl Bell tests
 include("tools/definitions.jl")  # MCP / Function calling schemas
 include("tools/executor.jl")     # Safe execution sandbox
 include("tools/lmstudio.jl")     # Local LLM connectivity
+include("tools/guardrail.jl")    # Neural-boundary numeric provenance enforcement
 include("tools/chat.jl")         # Interactive session management
 
 export main, run_examples, statistical_assistant_chat,

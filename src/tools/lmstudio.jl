@@ -52,7 +52,8 @@ function call_lm_studio(messages, tools=nothing; stream::Bool=false)
 
     try
         resp = HTTP.request("POST", "$BASE_URL/chat/completions", HEADERS, body;
-                           status_exception=false)
+                           status_exception=false,
+                           connect_timeout=10, readtimeout=120, retry=false)
         if resp.status == 200
             return JSON3.read(String(resp.body), Dict{String,Any})
         else
@@ -64,45 +65,76 @@ function call_lm_studio(messages, tools=nothing; stream::Bool=false)
 end
 
 """
-    process_tool_calls(response, messages) -> Union{Dict, Nothing}
+    process_tool_calls(response, messages; tools=nothing, max_rounds=5)
+        -> (final, tool_results, tool_calls_made)
 
-Process tool calls from the LLM response. Executes symbolic functions
-and returns results to the LLM for interpretation.
+Drive the symbolic tool-call loop. For each round the assistant requests tool
+calls, execute the (verified Julia) functions, feed the results back, and ask
+the model again — up to `max_rounds` (bounded to guard against loops) until a
+reply carries no more tool calls.
+
+Returns a NamedTuple:
+  * `final`           — the last LLM response Dict (the interpretive reply, or a
+                        transport-error Dict if the follow-up call failed).
+  * `tool_results`    — every symbolic result produced this turn, in order, as
+                        native Julia Dicts (fuel for the numeric guardrail).
+  * `tool_calls_made` — whether any tool call was executed at all.
+
+Each individual tool call is wrapped in try/catch: a malformed `tool_call`
+(missing keys, non-JSON `arguments`) yields a clean `Dict("error"=>...)` tool
+message so the model can recover instead of the session throwing. The `tools`
+parameter is forwarded on the follow-up call so the model can chain tools.
 """
-function process_tool_calls(response, messages)
-    if !haskey(response, "choices") || isempty(response["choices"])
-        return nothing
-    end
+function process_tool_calls(response, messages; tools=nothing, max_rounds::Int=5)
+    tool_results = Any[]
+    tool_calls_made = false
+    current = response
 
-    choice = response["choices"][1]
-    message = choice["message"]
+    for _ in 1:max_rounds
+        (haskey(current, "choices") && !isempty(current["choices"])) || break
+        message = current["choices"][1]["message"]
 
-    if haskey(message, "tool_calls") && !isnothing(message["tool_calls"]) && !isempty(message["tool_calls"])
-        # Add assistant's tool call request
+        has_calls = haskey(message, "tool_calls") &&
+                    !isnothing(message["tool_calls"]) &&
+                    !isempty(message["tool_calls"])
+        has_calls || break
+
+        tool_calls_made = true
+
+        # Record the assistant's tool-call request in the transcript.
         push!(messages, Dict{String,Any}(
             "role" => "assistant",
             "tool_calls" => message["tool_calls"]
         ))
 
-        # Execute each tool call (symbolic computation)
+        # Execute each tool call (symbolic computation). A bad call must never
+        # crash the turn — it becomes an error result the model can react to.
         for tool_call in message["tool_calls"]
-            fn_name = tool_call["function"]["name"]
-            args_str = tool_call["function"]["arguments"]
-            args = JSON3.read(args_str, Dict{String,Any})
+            result = nothing
+            try
+                fn_name = tool_call["function"]["name"]
+                args = JSON3.read(tool_call["function"]["arguments"], Dict{String,Any})
+                println("\n  [symbolic] executing: $fn_name")
+                result = execute_tool(fn_name, args)
+            catch e
+                result = Dict{String,Any}("error" => "Malformed tool call: $(string(e))")
+            end
+            push!(tool_results, result)
 
-            println("\n  [symbolic] executing: $fn_name")
-            result = execute_tool(fn_name, args)
-
-            push!(messages, Dict{String,Any}(
+            tool_msg = Dict{String,Any}(
                 "role" => "tool",
-                "content" => JSON3.write(result),
-                "tool_call_id" => tool_call["id"]
-            ))
+                "content" => JSON3.write(result)
+            )
+            if tool_call isa AbstractDict && haskey(tool_call, "id")
+                tool_msg["tool_call_id"] = tool_call["id"]
+            end
+            push!(messages, tool_msg)
         end
 
-        # Get final response (LLM interprets the symbolic results)
-        return call_lm_studio(messages)
+        # Interpret results — forward `tools` so the model may chain further.
+        current = call_lm_studio(messages, tools)
+        haskey(current, "error") && break
     end
 
-    return response
+    return (final = current, tool_results = tool_results, tool_calls_made = tool_calls_made)
 end

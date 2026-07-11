@@ -1341,3 +1341,7 @@ include("property_test.jl")
 # Reference validation: the trusted symbolic layer checked against
 # hand-derived / independently computed ground-truth values
 include("reference_validation_test.jl")
+
+# Neural-boundary guardrail: enforcement of the no-mollocks guarantee —
+# numeric provenance auditing, malformed-tool-call recovery, executor guards
+include("guardrail_test.jl")
