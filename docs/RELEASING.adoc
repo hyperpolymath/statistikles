@@ -1,0 +1,256 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Releasing statistikles
+:toc:
+:toclevels: 3
+
+This is the complete, self-contained maintainer runbook for cutting a
+statistikles release. It assumes no prior knowledge of the Julia registry
+machinery — follow it top to bottom and you need no external lookups.
+
+== Release model in one paragraph
+
+statistikles is released to the *Julia General registry* using
+*JuliaRegistrator* (which opens the registry pull request) and *TagBot* (which
+turns a merged registry PR into a GitHub tag + release). A separate *Release*
+workflow then builds a source tarball, an SPDX SBOM, and SLSA provenance and
+attaches them to that release. You never create tags by hand — Registrator and
+TagBot own the tag. `version` in `Project.toml` is the single source of truth.
+
+.The moving parts
+[cols="1,3",options="header"]
+|===
+| Piece | Responsibility
+
+| `Project.toml` `version`
+| The version being released. You bump this; everything else follows.
+
+| JuliaRegistrator (GitHub App / `@JuliaRegistrator` bot)
+| Opens a PR against `JuliaRegistries/General` registering the new version.
+
+| General registry AutoMerge
+| Merges that PR automatically once its guideline checks pass.
+
+| `.github/workflows/TagBot.yml`
+| Reacts to the merged registry PR and creates the `vX.Y.Z` git tag +
+  GitHub Release.
+
+| `.github/workflows/release.yml`
+| Builds + attaches the source tarball, SPDX SBOM, and SLSA provenance to the
+  release.
+|===
+
+== One-time setup (first release only)
+
+. *Install the Registrator GitHub App.* Visit
+  https://github.com/apps/juliateam-registrator and install it on the
+  `hyperpolymath/statistikles` repository (or the whole org). This lets the
+  `@JuliaRegistrator` bot see your registration comments. (Alternatively, any
+  registered Julia user can trigger registration by commenting — the app just
+  makes it frictionless.)
+. *Confirm `Project.toml` is registry-ready* (see
+  <<automerge,AutoMerge requirements>>). For statistikles this is already true:
+  a `name`, a stable `uuid`, and a complete `[compat]` block are present.
+. *No secrets are required.* TagBot runs on the default `GITHUB_TOKEN`; there is
+  no Documenter site, so no SSH deploy key is needed. (An optional deploy-key
+  upgrade for full automation is described in <<autotrigger>>.)
+
+== Cutting a release: step by step
+
+=== 1. Bump the version
+
+Edit `Project.toml` and raise `version` following semver:
+
+[source,toml]
+----
+version = "0.1.0"   # -> e.g. "0.1.1" (patch), "0.2.0" (minor), "1.0.0" (major)
+----
+
+While pre-1.0, a breaking change bumps the *minor* (`0.1.x` -> `0.2.0`) and a
+non-breaking change bumps the *patch* (`0.1.0` -> `0.1.1`); this is the
+convention the General registry's AutoMerge enforces for `0.x` packages.
+
+=== 2. Keep `[compat]` complete
+
+AutoMerge refuses a release unless *every* non-stdlib dependency has a
+`[compat]` entry, and it wants an upper bound (not a bare `>=`). The current
+block already satisfies this — when you add or update a dependency, add a
+matching `[compat]` line in the same commit. Example of the required shape:
+
+[source,toml]
+----
+[compat]
+CSV = "0.10.16"
+DataFrames = "1.8.1"
+Distributions = "0.25.123"
+HTTP = "1.10.19"
+JSON3 = "1.14.3"
+StatsBase = "0.34.10"
+Statistics = "1"      # added in wave 1; required even though it is now a stdlib
+julia = "1.10"
+----
+
+NOTE: Standard libraries shipped with Julia (`Dates`, `LinearAlgebra`,
+`Printf`, `Random`, `UUIDs`, and `Statistics` on Julia >= 1.10) still take a
+`[compat]` entry of `"1"`. Keeping them listed is harmless and keeps AutoMerge
+quiet.
+
+=== 3. Merge to main (green)
+
+Open a PR with the version bump and merge it into `main`. The Base ruleset
+requires the *"E2E — Julia Test Suite"* status check, so the PR cannot merge
+red. The commit you register in the next step *must be on `main`*.
+
+=== 4. Trigger registration
+
+On the *merge commit on `main`* (or on the merged PR), post a comment:
+
+----
+@JuliaRegistrator register
+----
+
+To register with release notes, add them under the trigger line:
+
+----
+@JuliaRegistrator register
+
+Release notes:
+## Highlights
+- ...
+----
+
+Within a minute the bot replies with a link to the opened
+`JuliaRegistries/General` pull request.
+
+=== 5. Let AutoMerge do its work
+
+The registry PR runs AutoMerge's guideline checks (see <<automerge>>). When
+they pass it merges on its own — no action needed. A *brand-new package's first
+registration* additionally sits in a *3-day waiting period* before AutoMerge
+will merge it; subsequent releases merge in minutes. If a check fails, the PR
+comment explains exactly what to fix; correct it in the repo and re-comment
+`@JuliaRegistrator register`.
+
+=== 6. TagBot cuts the release
+
+Once the registry PR merges, `JuliaTagBot` comments on this repository, which
+fires `.github/workflows/TagBot.yml`. TagBot creates the `vX.Y.Z` git tag and a
+GitHub Release. You can also run TagBot manually from *Actions -> TagBot -> Run
+workflow* if you ever need to backfill.
+
+=== 7. Attach artifacts (tarball + SBOM + provenance)
+
+[[autotrigger]]
+Because TagBot creates the tag using the default `GITHUB_TOKEN`, GitHub's
+recursive-workflow prevention *suppresses the tag-push event*, so
+`release.yml` does **not** start on its own. Finish the release one of two ways:
+
+*Default (no secrets): run it manually.*
+
+. Go to *Actions -> Release -> Run workflow*.
+. Set *tag* to the `vX.Y.Z` TagBot just created and run it.
+
+This builds the source tarball, generates the SPDX SBOM with syft, computes the
+SLSA subjects, and attaches the tarball, the `*.spdx.json` SBOM, and the signed
+`*.intoto.jsonl` provenance to the existing release.
+
+*Optional (full automation): give TagBot a deploy key.* If you would rather the
+tarball/SBOM/provenance attach automatically the moment the tag is created, add
+an SSH deploy key so TagBot pushes the tag as a real actor (a `GITHUB_TOKEN`
+push cannot trigger downstream workflows; a deploy-key push can):
+
+. Generate a keypair and add the *public* key as a repo *Deploy key* with write
+  access, and the *private* key as the `DOCUMENTER_KEY` repository secret.
+. In `.github/workflows/TagBot.yml`, add under the TagBot step's `with:`:
++
+[source,yaml]
+----
+          ssh: ${{ secrets.DOCUMENTER_KEY }}
+----
+
+With that in place, TagBot's tag push fires `release.yml` automatically and step
+7 needs no manual run.
+
+== What ends up on the release
+
+[cols="1,3",options="header"]
+|===
+| Asset | Produced by
+
+| `statistikles-<version>.tar.gz`
+| `git archive` of the tag (source distribution).
+
+| `statistikles-<version>.spdx.json`
+| `anchore/sbom-action` (syft), SPDX 2.3 JSON SBOM.
+
+| `<artifact>.intoto.jsonl`
+| `slsa-github-generator` SLSA v1 provenance over the two files above.
+
+| Release notes body
+| `git-cliff` changelog for the tag.
+|===
+
+The SLSA job receives *real* subjects: the build job runs
+`sha256sum <tarball> <sbom> | base64 -w0` and hands the result to the generator
+as `base64-subjects`. (The previous template passed an empty string, which made
+the generator error on every `v*` tag — that is fixed.)
+
+[[automerge]]
+== First-registration caveats (AutoMerge requirements)
+
+The General registry AutoMerges a *new package* only when all of these hold.
+Confirm them before the first `@JuliaRegistrator register`:
+
+* *Name.* At least 5 characters, starts with a letter, not confusingly similar
+  to an existing package, and not ending in a discouraged suffix. `Statistikles`
+  (12 chars) is fine.
+* *UUID.* `Project.toml` has a fixed `uuid` (`cc532b54-de7e-466e-8dd9-45d18a432455`).
+  Never change it between releases.
+* *`[compat]` completeness.* Every non-stdlib dependency and `julia` has a
+  `[compat]` entry with an upper bound. Already satisfied (see step 2).
+* *Version rule.* First registration should be a normal starting version
+  (`0.1.0` here). Later versions must increase and follow the `0.x` breaking
+  rule from step 1.
+* *Standalone, loadable source.* The registered commit is on `main`, the
+  package loads (`julia --project=. -e 'using Statistikles'`), and the repo is
+  public.
+* *New-package waiting period.* The very first version waits *3 days* before
+  AutoMerge; this is normal and needs no action.
+
+If AutoMerge declines, its PR comment lists the precise guideline that failed —
+fix it in-repo and re-comment `@JuliaRegistrator register`.
+
+== First release checklist
+
+* [ ] `version` bumped in `Project.toml` (semver; `0.x` breaking-change rule).
+* [ ] `[compat]` complete for every dependency + `julia`.
+* [ ] PR merged to `main` with *"E2E — Julia Test Suite"* green.
+* [ ] Registrator GitHub App installed on the repo (one-time).
+* [ ] `@JuliaRegistrator register` commented on the merge commit.
+* [ ] Registry PR AutoMerged (allow the 3-day wait on the first package).
+* [ ] TagBot created the `vX.Y.Z` tag + GitHub Release.
+* [ ] *Release* workflow run (Actions -> Release -> tag = `vX.Y.Z`) so the
+  tarball, SBOM, and SLSA provenance are attached.
+
+== Troubleshooting
+
+Registrator bot never replied::
+  The Registrator app is not installed, or you commented on a commit not on the
+  default branch. Install the app and comment on a `main` commit.
+
+Registry PR did not AutoMerge::
+  Read the PR's AutoMerge comment — it names the failing guideline (usually a
+  missing `[compat]` bound or the 3-day new-package wait). Fix and re-register.
+
+TagBot did not run::
+  Confirm the registry PR actually merged, then run *Actions -> TagBot -> Run
+  workflow* manually.
+
+Release has notes but no tarball/SBOM/provenance::
+  Expected with the default token flow — run *Actions -> Release -> Run
+  workflow* with the tag, or adopt the deploy-key upgrade in step 7.
+
+== Out of scope
+
+Container image releases and the `guix.scm` package are tracked separately and
+are not part of this registry release flow.
