@@ -1345,3 +1345,7 @@ include("reference_validation_test.jl")
 # Degenerate-input guards: no NaN/Inf leaks on n=1/2/3/constant/zero-variance
 # input, and validation @assert -> ArgumentError conversions
 include("degenerate_input_test.jl")
+
+# Neural-boundary guardrail: enforcement of the no-mollocks guarantee —
+# numeric provenance auditing, malformed-tool-call recovery, executor guards
+include("guardrail_test.jl")
