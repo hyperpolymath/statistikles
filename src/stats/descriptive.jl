@@ -35,17 +35,49 @@ function descriptive_stats(data::Vector{Float64})
 
     # SKEWNESS & KURTOSIS: (Implementation of moments)
     # n / ((n-1)(n-2)) * sum(((x-m)/s)^3)
-    z = (clean_data .- m) ./ s
-    skew = s == 0 ? 0.0 : (n / ((n - 1) * (n - 2))) * sum(z .^ 3)
+    # DEGENERATE GUARD: the (n-1)(n-2) / (n-2)(n-3) denominators divide by
+    # zero below n=3 / n=4 respectively — return `nothing` (JSON null) plus
+    # a note rather than leaking NaN/Inf.
+    skew_note = n < 3 ? "skewness requires at least 3 observations" : nothing
+    kurt_note = n < 4 ? "kurtosis requires at least 4 observations" : nothing
+    skew = if n < 3
+        nothing
+    elseif s == 0
+        0.0
+    else
+        z = (clean_data .- m) ./ s
+        (n / ((n - 1) * (n - 2))) * sum(z .^ 3)
+    end
     # [n(n+1)/((n-1)(n-2)(n-3)) * sum(z^4)] - [3(n-1)^2/((n-2)(n-3))]
-    kurt = s == 0 ? 0.0 : (n * (n + 1) / ((n - 1) * (n - 2) * (n - 3))) * sum(z .^ 4) - 
-           (3 * (n - 1)^2 / ((n - 2) * (n - 3)))
+    kurt = if n < 4
+        nothing
+    elseif s == 0
+        0.0
+    else
+        z = (clean_data .- m) ./ s
+        (n * (n + 1) / ((n - 1) * (n - 2) * (n - 3))) * sum(z .^ 4) -
+            (3 * (n - 1)^2 / ((n - 2) * (n - 3)))
+    end
 
     # ADVANCED MEANS:
     # Harmonic: n / sum(1/x)
     # Geometric: exp(sum(log(x))/n)
-    h_mean = any(clean_data .== 0) ? 0.0 : n / sum(1.0 ./ clean_data)
-    g_mean = any(clean_data .<= 0) ? NaN : exp(sum(log.(clean_data)) / n)
+    # DEGENERATE GUARD: undefined (not 0.0 / NaN sentinels) when data
+    # contains a zero (harmonic) or a non-positive value (geometric). Mixed
+    # positive/negative data can also make sum(1/x) cancel to exactly zero,
+    # which would otherwise leak Inf through n / 0.0 — guard that too.
+    has_zero = any(clean_data .== 0)
+    has_nonpositive = any(clean_data .<= 0)
+    h_mean, h_mean_note = if has_zero
+        (nothing, "harmonic mean undefined: data contains zero")
+    else
+        sum_recip = sum(1.0 ./ clean_data)
+        sum_recip == 0 ?
+            (nothing, "harmonic mean undefined: reciprocals sum to zero") :
+            (n / sum_recip, nothing)
+    end
+    g_mean = has_nonpositive ? nothing : exp(sum(log.(clean_data)) / n)
+    g_mean_note = has_nonpositive ? "geometric mean undefined: data contains non-positive values" : nothing
 
     # MODE: Most frequent value(s)
     mode_val = StatsBase.mode(clean_data)
@@ -76,7 +108,18 @@ function descriptive_stats(data::Vector{Float64})
     mad_val = median(abs.(clean_data .- med))
 
     # COEFFICIENT OF VARIATION
-    cv = m != 0 ? s / abs(m) * 100.0 : Inf
+    # DEGENERATE GUARD: undefined (not the Inf sentinel) when the mean is
+    # exactly zero.
+    cv = m != 0 ? s / abs(m) * 100.0 : nothing
+    cv_note = m != 0 ? nothing : "coefficient of variation undefined: mean is zero"
+
+    normality_hint = if skew === nothing || kurt === nothing
+        "Insufficient data for shape assessment"
+    elseif abs(skew) < 2 && abs(kurt) < 7
+        "Approximately normal"
+    else
+        "Possibly non-normal"
+    end
 
     return Dict{String,Any}(
         "n" => n,
@@ -84,7 +127,9 @@ function descriptive_stats(data::Vector{Float64})
         "median" => med,
         "mode" => mode_val,
         "harmonic_mean" => h_mean,
+        "harmonic_mean_note" => h_mean_note,
         "geometric_mean" => g_mean,
+        "geometric_mean_note" => g_mean_note,
         "trimmed_mean" => trimmed_mean,
         "winsorized_mean" => winsorized_mean,
         "quadratic_mean" => quadratic_mean,
@@ -93,8 +138,11 @@ function descriptive_stats(data::Vector{Float64})
         "variance" => v,
         "mad" => mad_val,
         "cv" => cv,
+        "cv_note" => cv_note,
         "skewness" => skew,
+        "skewness_note" => skew_note,
         "kurtosis" => kurt,
+        "kurtosis_note" => kurt_note,
         "q1" => q1,
         "q3" => q3,
         "iqr" => iqr_val,
@@ -102,8 +150,7 @@ function descriptive_stats(data::Vector{Float64})
         "max" => sorted[end],
         "range" => sorted[end] - sorted[1],
         "outlier_fences" => [q1 - 1.5 * iqr_val, q3 + 1.5 * iqr_val],
-        "normality_hint" => abs(skew) < 2 && abs(kurt) < 7 ?
-                            "Approximately normal" : "Possibly non-normal"
+        "normality_hint" => normality_hint
     )
 end
 
@@ -129,7 +176,7 @@ end
 WEIGHTED STATISTICS: Mean, variance, and standard deviation with weights.
 """
 function weighted_stats(data::Vector{Float64}, weights::Vector{Float64})
-    @assert length(data) == length(weights) "Data and weights must have equal length"
+    require_equal_length(data, weights, "data", "weights")
     w_sum = sum(weights)
     w_mean = sum(data .* weights) / w_sum
     w_var = sum(weights .* (data .- w_mean) .^ 2) / w_sum
@@ -144,9 +191,29 @@ end
 """
     frequency_table(data::Vector{String}) -> Dict
 
-CATEGORICAL ANALYSIS: Computes frequencies and relative percentages 
+CATEGORICAL ANALYSIS: Computes frequencies and relative percentages
 for discrete data sets.
 """
 function frequency_table(data::Vector{String})
-    # ... [Implementation using countmap]
+    n = length(data)
+    n == 0 && return Dict{String,Any}("error" => "Need at least 1 observation")
+
+    counts = StatsBase.countmap(data)
+    categories = sort(collect(keys(counts)))
+    freqs = [counts[c] for c in categories]
+    rel_freqs = freqs ./ n .* 100.0
+    cum_freqs = cumsum(freqs)
+    cum_rel_freqs = cumsum(rel_freqs)
+
+    return Dict{String,Any}(
+        "categories" => categories,
+        "frequencies" => freqs,
+        "relative_frequencies" => rel_freqs,
+        "cumulative_frequencies" => cum_freqs,
+        "cumulative_relative_frequencies" => cum_rel_freqs,
+        "n" => n,
+        "n_categories" => length(categories),
+        "mode" => categories[argmax(freqs)],
+        "test_type" => "Frequency table (categorical)"
+    )
 end

@@ -675,8 +675,8 @@ using Statistikles
     @testset "TypeLL Level 4: Probability" begin
         p = Probability(0.05)
         @test p.value == 0.05
-        @test_throws AssertionError Probability(-0.1)
-        @test_throws AssertionError Probability(1.5)
+        @test_throws ArgumentError Probability(-0.1)
+        @test_throws ArgumentError Probability(1.5)
     end
 
     @testset "TypeLL Level 4: EffectSize" begin
@@ -794,8 +794,8 @@ using Statistikles
         @test_throws DomainError kruskal_wallis([[1.0, 2.0]])
 
         # Probability bounds
-        @test_throws AssertionError Probability(-0.01)
-        @test_throws AssertionError Probability(1.01)
+        @test_throws ArgumentError Probability(-0.01)
+        @test_throws ArgumentError Probability(1.01)
         @test Probability(0.0).value == 0.0
         @test Probability(1.0).value == 1.0
     end
@@ -1170,8 +1170,8 @@ using Statistikles
         c = complement(p)
         @test isapprox(c.lower, 0.3, atol=1e-10)
         @test isapprox(c.upper, 0.7, atol=1e-10)
-        @test_throws AssertionError ImpreciseProbability(-0.1, 0.5)
-        @test_throws AssertionError ImpreciseProbability(0.5, 1.5)
+        @test_throws ArgumentError ImpreciseProbability(-0.1, 0.5)
+        @test_throws ArgumentError ImpreciseProbability(0.5, 1.5)
     end
 
     @testset "BetLang: Sampling methods" begin
@@ -1342,6 +1342,14 @@ include("property_test.jl")
 # hand-derived / independently computed ground-truth values
 include("reference_validation_test.jl")
 
+# Degenerate-input guards: no NaN/Inf leaks on n=1/2/3/constant/zero-variance
+# input, and validation @assert -> ArgumentError conversions
+include("degenerate_input_test.jl")
+
 # Neural-boundary guardrail: enforcement of the no-mollocks guarantee —
 # numeric provenance auditing, malformed-tool-call recovery, executor guards
 include("guardrail_test.jl")
+
+# Executor router coverage: every LLM-facing tool name in definitions.jl
+# is exercised through execute_tool (or explicitly skipped with a reason)
+include("executor_router_test.jl")

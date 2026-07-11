@@ -52,7 +52,8 @@ Used for shortest-path problems and scheduling.
 function tropical_matrix_multiply(A::Matrix{Float64}, B::Matrix{Float64})
     m, n = size(A)
     n2, p = size(B)
-    @assert n == n2 "Inner dimensions must match"
+    n == n2 || throw(ArgumentError(
+        "Inner dimensions must match for tropical matrix multiply: A is $(m)×$(n), B is $(n2)×$(p)"))
     C = fill(Inf, m, p)
     for i in 1:m, j in 1:p
         for k in 1:n
@@ -69,7 +70,7 @@ TROPICAL EIGENVALUE: min cycle mean of the directed graph represented by A.
 """
 function tropical_eigenvalue(A::Matrix{Float64})
     n = size(A, 1)
-    @assert size(A, 1) == size(A, 2) "Matrix must be square"
+    require_square(A, "A")
     # Karp's algorithm for minimum cycle mean
     d = fill(Inf, n + 1, n)
     d[1, 1] = 0.0
@@ -103,7 +104,7 @@ S = E(0,0) - E(0,1) + E(1,0) + E(1,1). Classical bound: |S| ≤ 2.
 """
 function bell_test_chsh(correlations::Vector{Float64})
     # S = E(0,0) - E(0,1) + E(1,0) + E(1,1)
-    @assert length(correlations) == 4
+    require_length(correlations, 4, "correlations")
     S = correlations[1] - correlations[2] + correlations[3] + correlations[4]
     return S
 end
