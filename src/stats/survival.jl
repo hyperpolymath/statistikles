@@ -14,7 +14,7 @@ survival function from lifetime data.
 """
 function kaplan_meier(times::Vector{Float64}, events::Vector{Bool})
     n = length(times)
-    @assert n == length(events)
+    require_equal_length(times, events, "times", "events")
     
     # Sort by time
     idx = sortperm(times)
@@ -56,7 +56,8 @@ LOG-RANK TEST: Compares the survival distributions of two or more groups.
 """
 function log_rank_test(times::Vector{Float64}, events::Vector{Bool}, groups::Vector; alpha::Float64=0.05)
     unique_groups = unique(groups)
-    @assert length(unique_groups) == 2 "Log-rank test currently supports 2 groups"
+    length(unique_groups) == 2 || throw(ArgumentError(
+        "Log-rank test currently supports exactly 2 groups, got $(length(unique_groups))"))
     
     g1_idx = findall(==(unique_groups[1]), groups)
     g2_idx = findall(==(unique_groups[2]), groups)

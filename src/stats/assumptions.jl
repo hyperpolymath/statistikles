@@ -3,9 +3,42 @@
 
 function test_normality(data::Vector{Float64})
     n = length(data)
+
+    # DEGENERATE GUARD: the Jarque-Bera statistic needs both skewness
+    # (n >= 3) and kurtosis (n >= 4); below that the moment formulas
+    # divide by zero.
+    if n < 4
+        return Dict{String,Any}(
+            "skewness" => nothing, "kurtosis" => nothing,
+            "jarque_bera" => nothing, "JB_p_value" => nothing,
+            "KS_statistic" => nothing, "n" => n,
+            "normal_skew" => nothing, "normal_kurtosis" => nothing,
+            "overall_assessment" => nothing,
+            "recommendations" => "Insufficient data (need at least 4 observations) to assess normality",
+            "note" => "Skewness/kurtosis-based normality test requires at least 4 observations"
+        )
+    end
+
     sorted = sort(data)
     m = mean(data)
     s = std(data)
+
+    # DEGENERATE GUARD: zero variance makes z-scores 0/0 and the Jarque-Bera
+    # inputs undefined.
+    if s == 0.0
+        return Dict{String,Any}(
+            "skewness" => nothing, "kurtosis" => nothing,
+            "jarque_bera" => nothing, "JB_p_value" => nothing,
+            "KS_statistic" => 0.0, "n" => n,
+            "normal_skew" => nothing, "normal_kurtosis" => nothing,
+            "overall_assessment" => "Data is constant; normality is not meaningfully defined",
+            "recommendations" => n < 30 ?
+                "Small sample — consider non-parametric alternatives" :
+                "Large sample — parametric tests may be robust to mild violations",
+            "note" => "Skewness/kurtosis undefined: zero variance in data"
+        )
+    end
+
     z_scores = (data .- m) ./ s
     skew = (n / ((n - 1) * (n - 2))) * sum(z_scores .^ 3)
     kurt = ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) * sum(z_scores .^ 4) -
@@ -26,7 +59,8 @@ function test_normality(data::Vector{Float64})
             "Data may violate normality assumption",
         "recommendations" => n < 30 ?
             "Small sample — consider non-parametric alternatives" :
-            "Large sample — parametric tests may be robust to mild violations"
+            "Large sample — parametric tests may be robust to mild violations",
+        "note" => nothing
     )
 end
 

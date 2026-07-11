@@ -273,7 +273,7 @@ Extension of McNemar's test for k×k tables. Tests marginal homogeneity.
 """
 function stuart_maxwell_test(matrix::Matrix{Int}; alpha::Float64=0.05)
     k = size(matrix, 1)
-    @assert size(matrix, 1) == size(matrix, 2) "Matrix must be square"
+    require_square(matrix, "matrix")
     d = sum(matrix, dims=2)[:] .- sum(matrix, dims=1)[:]
     V = zeros(k, k)
     for i in 1:k, j in 1:k
@@ -311,12 +311,12 @@ function permanova(distance_matrix::Matrix{Float64},
                    n_permutations::Int=999,
                    alpha::Float64=0.05)
     N = size(distance_matrix, 1)
-    @assert size(distance_matrix) == (N, N) "Distance matrix must be square"
-    @assert length(group_labels) == N "Group labels must match matrix dimension"
+    require_dims_match(distance_matrix, N, "distance_matrix")
+    require_length(group_labels, N, "group_labels")
 
     unique_groups = unique(group_labels)
     k = length(unique_groups)
-    @assert k >= 2 "At least two groups are required"
+    require_at_least(k, 2, "number of distinct groups")
 
     D2 = distance_matrix .^ 2
     SS_T = sum(D2) / (2 * N)
@@ -385,7 +385,7 @@ function permanova_multi(distance_matrix::Matrix{Float64},
                          n_permutations::Int=999,
                          alpha::Float64=0.05)
     N = size(distance_matrix, 1)
-    @assert size(distance_matrix) == (N, N) "Distance matrix must be square"
+    require_dims_match(distance_matrix, N, "distance_matrix")
 
     D2 = distance_matrix .^ 2
     SS_T = sum(D2) / (2 * N)
@@ -396,7 +396,7 @@ function permanova_multi(distance_matrix::Matrix{Float64},
     SS_explained = 0.0
 
     for (fname, flabels) in factors
-        @assert length(flabels) == N "Factor '$fname' labels must match matrix dimension"
+        require_length(flabels, N, "factor '$fname' labels")
 
         unique_levels = unique(flabels)
         k = length(unique_levels)

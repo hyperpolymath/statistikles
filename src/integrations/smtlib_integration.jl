@@ -79,7 +79,7 @@ end
 Verify that p-value correction is monotone: adjusted ≥ raw for all i.
 """
 function smt_verify_correction_monotone(raw_p::Vector{Float64}, adj_p::Vector{Float64})
-    @assert length(raw_p) == length(adj_p)
+    require_equal_length(raw_p, adj_p, "raw_p", "adj_p")
     violations = findall(adj_p .< raw_p .- 1e-15)
     return Dict{String,Any}(
         "monotone" => isempty(violations),
