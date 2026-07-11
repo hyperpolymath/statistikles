@@ -38,9 +38,16 @@ repository plus `Project.toml`, consumed through Julia's `Pkg`. There is no
 install step beyond `just setup` — the project environment lives inside the
 checkout, and compiled artifacts live in the user's Julia depot (`~/.julia`).
 
-Container (`Containerfile`) and Guix (`guix.scm`) packaging surfaces exist in
-the repository but are not yet functional — do not base a distribution package
-on them until they are completed.
+The Guix package (`guix.scm`) builds: it installs the source tree plus a
+`bin/statistikles` launcher and verifies manifest integrity offline (parses
+`Project.toml`/`Manifest.toml` and runs `Pkg.status()`). It does *not* recompile
+the full Julia dependency closure from source — the closure is instantiated once
+from the pinned `Manifest.toml` into a writable depot on first use (see the
+header comment in `guix.scm` for the rationale and the exact command).
+
+The container (`Containerfile`) packaging surface exists in the repository but is
+not yet functional — do not base a container distribution on it until it is
+completed.
 
 == Configuration
 
