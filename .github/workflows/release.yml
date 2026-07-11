@@ -119,9 +119,22 @@ jobs:
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Install git-cliff
+        env:
+          # git-cliff release assets are version-stamped (e.g.
+          # git-cliff-2.13.1-x86_64-unknown-linux-gnu.tar.gz), so the versionless
+          # `releases/latest/download/...` path returns HTTP 404 and, under the
+          # default `bash -eo pipefail` shell, fails this step -> fails the
+          # changelog job -> skips `release` (needs: [build, changelog]). Pin an
+          # explicit version and build the real, versioned asset URL. Bump this
+          # value to adopt a newer git-cliff.
+          GIT_CLIFF_VERSION: '2.13.1'
         run: |
-          curl -sSfL "https://github.com/orhun/git-cliff/releases/latest/download/git-cliff-$(uname -m)-unknown-linux-gnu.tar.gz" \
-            | tar -xz --strip-components=1 -C /usr/local/bin/ git-cliff-*/git-cliff
+          ARCH="$(uname -m)"
+          curl -sSfL \
+            "https://github.com/orhun/git-cliff/releases/download/v${GIT_CLIFF_VERSION}/git-cliff-${GIT_CLIFF_VERSION}-${ARCH}-unknown-linux-gnu.tar.gz" \
+            | tar -xz --strip-components=1 -C /usr/local/bin/ "git-cliff-${GIT_CLIFF_VERSION}/git-cliff"
+          # Fail fast (and visibly) if the binary did not land or cannot run.
+          git-cliff --version
 
       - name: Generate changelog for this release
         id: cliff
@@ -161,7 +174,7 @@ jobs:
           path: artifacts
 
       - name: Create or update GitHub Release
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v2
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           body: ${{ needs.changelog.outputs.changelog }}
