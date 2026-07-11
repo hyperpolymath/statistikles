@@ -30,6 +30,7 @@ using Dates
 using Printf
 using Random
 using UUIDs
+using Logging
 
 # --- SYMBOLIC KERNEL: Verified Statistical Methods ---
 include("stats/validation.jl")       # Shared ArgumentError input-validation helpers
@@ -99,11 +100,20 @@ include("integrations/zeroprob_integration.jl") # ZeroProb.jl zero-inflated mode
 include("integrations/quantum_integration.jl")  # QuantumCircuit.jl Bell tests
 
 # --- INTERFACE LAYER: LLM Integration ---
+include("tools/observability.jl") # Structured logging, correlation ids, audit-trail wiring
 include("tools/definitions.jl")  # MCP / Function calling schemas
 include("tools/executor.jl")     # Safe execution sandbox
 include("tools/lmstudio.jl")     # Local LLM connectivity
 include("tools/guardrail.jl")    # Neural-boundary numeric provenance enforcement
 include("tools/chat.jl")         # Interactive session management
+
+# Install the stderr-backed structured logger on every package load (not just
+# at precompile time), so STATISTIKLES_LOG_LEVEL is honoured even from a
+# precompiled image — unlike `const`s such as lmstudio.jl's BASE_URL, code in
+# __init__ re-runs each time `using Statistikles` happens.
+function __init__()
+    configure_logging!()
+end
 
 export main, run_examples, statistical_assistant_chat,
        # Descriptive

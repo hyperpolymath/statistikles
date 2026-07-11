@@ -86,6 +86,15 @@ variables (no config file):
 * `STATISTIKLES_LM_URL` — OpenAI-compatible endpoint (default `http://localhost:1234/v1`)
 * `STATISTIKLES_API_KEY` — API key if the endpoint requires one
 * `STATISTIKLES_MODEL` — model identifier
+* `STATISTIKLES_LOG_LEVEL` — structured-logging verbosity: `Debug`/`Info`/`Warn`/`Error`
+  (default `Info`). Logs go to stderr only — REPL prompts and answers stay on stdout
+  and are never interleaved with log lines. Unlike `STATISTIKLES_LM_URL` above, this
+  one is *not* baked into a precompile cache — it is re-read every time the package
+  loads (`__init__`), so it works from a precompiled image or container too.
+* `STATISTIKLES_AUDIT_PERSIST` — set to `true`/`1`/`yes`/`on` to actually persist
+  tool-call audit records to VeriSimDB (`STATISTIKLES_VERISIMDB_PORT`, default 8096).
+  Off by default: audit records are always constructed, never persisted, unless
+  explicitly opted in — no runtime or test dependency on a live VeriSimDB backend.
 
 == Health Checks
 

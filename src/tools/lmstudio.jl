@@ -65,8 +65,9 @@ function call_lm_studio(messages, tools=nothing; stream::Bool=false)
 end
 
 """
-    process_tool_calls(response, messages; tools=nothing, max_rounds=5)
-        -> (final, tool_results, tool_calls_made)
+    process_tool_calls(response, messages; tools=nothing, max_rounds=5,
+                       correlation_id=new_correlation_id())
+        -> (final, tool_results, tool_calls_made, correlation_id)
 
 Drive the symbolic tool-call loop. For each round the assistant requests tool
 calls, execute the (verified Julia) functions, feed the results back, and ask
@@ -79,13 +80,22 @@ Returns a NamedTuple:
   * `tool_results`    — every symbolic result produced this turn, in order, as
                         native Julia Dicts (fuel for the numeric guardrail).
   * `tool_calls_made` — whether any tool call was executed at all.
+  * `correlation_id`  — the per-chat-turn id every tool call in this run was
+                        logged and audited under (caller-supplied, or a fresh
+                        one minted when omitted).
 
 Each individual tool call is wrapped in try/catch: a malformed `tool_call`
 (missing keys, non-JSON `arguments`) yields a clean `Dict("error"=>...)` tool
 message so the model can recover instead of the session throwing. The `tools`
 parameter is forwarded on the follow-up call so the model can chain tools.
+
+Every tool call is timed and emits one structured log record
+(`log_tool_call`) plus an audit-trail record (`record_audit!`, pluggable and
+no-op-safe unless `STATISTIKLES_AUDIT_PERSIST=true`) — see
+`tools/observability.jl`. Neither logs nor persists raw arguments/results.
 """
-function process_tool_calls(response, messages; tools=nothing, max_rounds::Int=5)
+function process_tool_calls(response, messages; tools=nothing, max_rounds::Int=5,
+                            correlation_id::AbstractString=new_correlation_id())
     tool_results = Any[]
     tool_calls_made = false
     current = response
@@ -111,15 +121,22 @@ function process_tool_calls(response, messages; tools=nothing, max_rounds::Int=5
         # crash the turn — it becomes an error result the model can react to.
         for tool_call in message["tool_calls"]
             result = nothing
+            fn_name = "unknown"
+            args = Dict{String,Any}()
+            tc_id = tool_call_identifier(tool_call)
+            t0 = time()
             try
                 fn_name = tool_call["function"]["name"]
                 args = JSON3.read(tool_call["function"]["arguments"], Dict{String,Any})
-                println("\n  [symbolic] executing: $fn_name")
                 result = execute_tool(fn_name, args)
             catch e
                 result = Dict{String,Any}("error" => "Malformed tool call: $(string(e))")
             end
+            duration_s = time() - t0
             push!(tool_results, result)
+
+            log_tool_call(correlation_id, tc_id, fn_name, args, result, duration_s)
+            record_audit!(correlation_id, tc_id, fn_name, args, result; duration_s=duration_s)
 
             tool_msg = Dict{String,Any}(
                 "role" => "tool",
@@ -136,5 +153,6 @@ function process_tool_calls(response, messages; tools=nothing, max_rounds::Int=5
         haskey(current, "error") && break
     end
 
-    return (final = current, tool_results = tool_results, tool_calls_made = tool_calls_made)
+    return (final = current, tool_results = tool_results, tool_calls_made = tool_calls_made,
+            correlation_id = correlation_id)
 end

@@ -1358,3 +1358,7 @@ include("executor_router_test.jl")
 # Kruskal-Wallis, multiple linear regression, logistic regression,
 # Kaplan-Meier survival, and fixed/random-effects meta-analysis
 include("reference_validation_advanced_test.jl")
+
+# Observability: correlation ids, structured logging, and the (pluggable,
+# no-op-safe) VeriSimDB audit-trail wiring for the tool-execution runtime path
+include("observability_test.jl")
