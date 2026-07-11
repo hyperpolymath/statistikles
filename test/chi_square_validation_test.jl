@@ -41,6 +41,17 @@
 #   6. Added an optional, explicitly-off-by-default Yates' continuity
 #      correction for 2x2 tables (`yates_correction=true`), verified
 #      against R's `chisq.test(..., correct=TRUE)`.
+#   7. [Adversarial-review follow-up] The initial Yates implementation
+#      computed `(abs(O-E) - 0.5)^2 / E` with no `max(0.0, ...)` clamp, so
+#      any cell with `|O-E| < 0.5` squared a *negative* correction into a
+#      *positive* one, inflating chi2 instead of correcting it downward —
+#      confirmed to disagree with both R's `chisq.test(correct=TRUE)` and
+#      SciPy's `chi2_contingency(correction=True)` on
+#      `observed=[[10,10],[10,11]]` (buggy chi2 ≈ 0.0256 vs ground truth
+#      0.0). Fixed to `max(0.0, abs(O-E) - 0.5)^2 / E`; regression test
+#      added below ("near-independence" Yates case) since the original
+#      Yates test only used `[[8,12],[15,5]]` where `|O-E|=3.5`, which
+#      cannot distinguish the correct formula from the buggy one.
 #
 # `frequency_table` (src/stats/descriptive.jl) was reviewed and found
 # mathematically correct as-is: category counts, relative/cumulative
@@ -102,6 +113,35 @@ using Statistikles
         @test r["df"] == 1
         @test isapprox(r["p_value"], 0.0549743287216943; atol = 1e-9)
         @test r["significant"] == false  # p > 0.05 (correction pulls it back from significance)
+        @test occursin("Yates", r["test_type"])
+    end
+
+    @testset "Independence (2x2, Yates-corrected, near-independence) vs R / SciPy — regression for missing clamp" begin
+        # This case specifically guards the Yates continuity-correction clamp:
+        # every cell's |O-E| = 0.2439 < 0.5, so the *correct* formula
+        # max(0, |O-E| - 0.5)^2 / E must clamp every term to zero, giving
+        # chi2 = 0.0 exactly. An earlier version of chi_square_test omitted
+        # the clamp (computed (|O-E| - 0.5)^2 / E directly), which squares a
+        # small negative number into a *positive* contribution instead of
+        # zero, inflating chi2 to ~0.0256 and deflating the p-value — enough
+        # to flip a significance decision near alpha in general, though not
+        # for this particular alpha=0.05 case. The previous Yates test above
+        # ([[8,12],[15,5]], |O-E|=3.5) does NOT exercise the clamp, since
+        # both the correct and buggy formulas agree once |O-E| > 0.5.
+        #
+        # obs3 <- matrix(c(10,10,10,11), nrow=2, byrow=TRUE)
+        # R 4.5.0:     chisq.test(obs3, correct=TRUE)
+        #              X-squared = 0, df = 1, p-value = 1
+        # SciPy 1.15.3: chi2_contingency(obs3, correction=True)
+        #              chi2 = 0.0, p = 1.0, dof = 1
+        #              expected = [[9.75609756, 10.24390244],
+        #                          [10.24390244, 10.75609756]]
+        observed = [10 10; 10 11]
+        r = Statistikles.chi_square_test(observed; yates_correction = true)
+        @test isapprox(r["chi_squared"], 0.0; atol = 1e-9)
+        @test r["df"] == 1
+        @test isapprox(r["p_value"], 1.0; atol = 1e-9)
+        @test r["significant"] == false
         @test occursin("Yates", r["test_type"])
     end
 

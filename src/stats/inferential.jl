@@ -151,8 +151,12 @@ independent in an r×c contingency table of observed frequencies.
   unlike `1 - cdf(...)` which underflows to exactly 0.0 in the far tail).
 - EFFECT SIZE: Reports Cramér's V = `√(χ² / (n·(min(r,c)-1)))`.
 - YATES' CONTINUITY CORRECTION: optional (`yates_correction=true`), valid only
-  for 2×2 tables: `χ² = Σ (|O-E| - 0.5)² / E`. Off by default to preserve the
-  standard (uncorrected) Pearson statistic; matches R's `chisq.test(correct=TRUE)`.
+  for 2×2 tables: `χ² = Σ (max(0, |O-E| - 0.5))² / E`. The `max(0, ...)` clamp
+  matters whenever every cell's `|O-E| < 0.5` (near-independence tables): without
+  it the unclamped formula can *inflate* χ² instead of correcting it downward.
+  Off by default to preserve the standard (uncorrected) Pearson statistic;
+  matches R's `chisq.test(correct=TRUE)` and SciPy's
+  `chi2_contingency(correction=True)`.
 - DEGENERATE GUARDS: throws `ArgumentError` for a malformed table (fewer than
   2 rows/columns, negative counts, zero total observations — none of these
   describe a valid r×c contingency table). Returns `nothing`+`"note"` (never
@@ -199,7 +203,12 @@ function chi_square_test(observed::Matrix{Int}; alpha::Float64=0.05,
     expected = [row_sums[i] * col_sums[j] / n for i in 1:r, j in 1:c]
 
     chi2 = if yates_correction
-        sum((abs(observed[i, j] - expected[i, j]) - 0.5)^2 / expected[i, j]
+        # Clamp each cell's correction to a minimum of 0: without
+        # `max(0.0, ...)`, a cell with |O-E| < 0.5 would square a *negative*
+        # number, inflating χ² instead of correcting it downward (e.g.
+        # observed=[10 10; 10 11] has |O-E|=0.2439 in every cell and must
+        # yield χ²=0.0, not 0.0256 — see test/chi_square_validation_test.jl).
+        sum((max(0.0, abs(observed[i, j] - expected[i, j]) - 0.5))^2 / expected[i, j]
             for i in 1:r, j in 1:c)
     else
         sum((observed[i, j] - expected[i, j])^2 / expected[i, j] for i in 1:r, j in 1:c)
