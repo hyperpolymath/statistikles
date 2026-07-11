@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Statistikles — Zig FFI Build + Test
+#
+# The C-ABI FFI in ffi/zig is EXPERIMENTAL (placeholder ops, not yet backed by
+# the Julia core), but it must compile and its memory-safety tests must pass so
+# it cannot silently rot. Builds and tests against Zig 0.13.0 — the version the
+# FFI's build.zig / source dialect targets.
+
+name: Zig FFI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ffi/zig/**'
+      - '.github/workflows/zig.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ffi/zig/**'
+      - '.github/workflows/zig.yml'
+  workflow_dispatch:
+
+permissions: read-all
+
+concurrency:
+  group: zig-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zig-ffi:
+    name: Zig FFI — build + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Setup Zig 0.13.0
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29  # v2.2.1
+        with:
+          version: 0.13.0
+
+      - name: Build + test FFI
+        working-directory: ffi/zig
+        run: zig build test --summary all

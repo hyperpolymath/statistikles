@@ -18,11 +18,35 @@ WELCH'S T-TEST: Compares the means of two independent samples.
 function t_test_independent(group1::Vector{Float64}, group2::Vector{Float64};
                            alpha::Float64=0.05)
     n1, n2 = length(group1), length(group2)
+
+    # DEGENERATE GUARD: below n=2 per group, the Welch-Satterthwaite df
+    # formula divides by (n-1) == 0.
+    if n1 < 2 || n2 < 2
+        return Dict{String,Any}(
+            "t_stat" => nothing, "df" => nothing, "p_value" => nothing,
+            "significant" => false, "cohens_d" => nothing,
+            "effect_size_interpretation" => nothing,
+            "note" => "t-test requires at least 2 observations per group"
+        )
+    end
+
     m1, m2 = mean(group1), mean(group2)
     s1, s2 = var(group1), var(group2)
 
     # Welch-Satterthwaite Degrees of Freedom calculation.
     se = sqrt(s1 / n1 + s2 / n2)
+
+    # DEGENERATE GUARD: se == 0 only when both groups have zero variance,
+    # which makes t_stat an Inf (differing means) or NaN (equal means).
+    if se == 0.0
+        return Dict{String,Any}(
+            "t_stat" => nothing, "df" => nothing, "p_value" => nothing,
+            "significant" => false, "cohens_d" => 0.0,
+            "effect_size_interpretation" => "negligible",
+            "note" => "t-statistic undefined: zero variance in both groups"
+        )
+    end
+
     t_stat = (m1 - m2) / se
     df = (s1 / n1 + s2 / n2)^2 / ((s1 / n1)^2 / (n1 - 1) + (s2 / n2)^2 / (n2 - 1))
 
@@ -43,7 +67,8 @@ function t_test_independent(group1::Vector{Float64}, group2::Vector{Float64};
         "p_value" => p_two,
         "significant" => p_two < alpha,
         "cohens_d" => cohens_d,
-        "effect_size_interpretation" => effect_interp
+        "effect_size_interpretation" => effect_interp,
+        "note" => nothing
     )
 end
 
@@ -80,9 +105,19 @@ function one_way_anova(groups::Vector{Vector{Float64}}; alpha::Float64=0.05)
     ms_within = ss_within / df_within
 
     # Degenerate case: zero within-group variance.
+    # DEGENERATE GUARD: with nonzero between-group variance the F-ratio is
+    # mathematically infinite — report `nothing` (JSON null) with a note
+    # rather than leaking Inf; p_value stays the legitimate, finite 0.0.
+    note = nothing
     if ms_within == 0.0
-        f_stat = ss_between == 0.0 ? 0.0 : Inf
-        p_value = ss_between == 0.0 ? 1.0 : 0.0
+        if ss_between == 0.0
+            f_stat = 0.0
+            p_value = 1.0
+        else
+            f_stat = nothing
+            p_value = 0.0
+            note = "F statistic undefined (infinite): zero within-group variance with nonzero between-group variance"
+        end
     else
         f_stat = ms_between / ms_within
         p_value = 1 - cdf(FDist(df_between, df_within), f_stat)
@@ -100,6 +135,73 @@ function one_way_anova(groups::Vector{Vector{Float64}}; alpha::Float64=0.05)
         "grand_mean" => grand_mean,
         "p_value" => p_value,
         "significant" => p_value < alpha,
-        "test_type" => "One-way ANOVA (independent groups)"
+        "test_type" => "One-way ANOVA (independent groups)",
+        "note" => note
+    )
+end
+
+"""
+    chi_square_test(observed::Matrix{Int}; alpha=0.05) -> Dict
+
+CHI-SQUARE TEST OF INDEPENDENCE: Tests whether two categorical variables are
+independent in an r×c contingency table of observed frequencies.
+- EFFECT SIZE: Reports Cramér's V.
+- OUTPUT: chi-squared statistic, df = (r-1)(c-1), and p-value from the
+  chi-squared distribution.
+"""
+function chi_square_test(observed::Matrix{Int}; alpha::Float64=0.05)
+    r, c = size(observed)
+    n = sum(observed)
+    row_sums = sum(observed, dims=2)
+    col_sums = sum(observed, dims=1)
+
+    chi2 = 0.0
+    for i in 1:r, j in 1:c
+        expected = row_sums[i] * col_sums[j] / n
+        if expected > 0
+            chi2 += (observed[i, j] - expected)^2 / expected
+        end
+    end
+    df = (r - 1) * (c - 1)
+    p_value = 1 - cdf(Chisq(df), chi2)
+
+    return Dict{String,Any}(
+        "chi_squared" => chi2,
+        "df" => df,
+        "p_value" => p_value,
+        "significant" => p_value < alpha,
+        "cramers_v" => sqrt(chi2 / (n * (min(r, c) - 1))),
+        "n" => n,
+        "test_type" => "Chi-square test of independence"
+    )
+end
+
+"""
+    chi_square_goodness_of_fit(observed, expected_proportions=nothing; alpha=0.05) -> Dict
+
+CHI-SQUARE GOODNESS-OF-FIT: Tests whether observed category counts match an
+expected distribution. Defaults to a uniform distribution across categories
+when `expected_proportions` is not supplied.
+"""
+function chi_square_goodness_of_fit(observed::Vector{Int},
+                                    expected_proportions::Union{Vector{Float64},Nothing}=nothing;
+                                    alpha::Float64=0.05)
+    k = length(observed)
+    n = sum(observed)
+    props = isnothing(expected_proportions) ? fill(1.0 / k, k) : expected_proportions
+    expected = n .* props
+
+    chi2 = sum((observed .- expected) .^ 2 ./ expected)
+    df = k - 1
+    p_value = 1 - cdf(Chisq(df), chi2)
+
+    return Dict{String,Any}(
+        "chi_squared" => chi2,
+        "df" => df,
+        "p_value" => p_value,
+        "significant" => p_value < alpha,
+        "expected" => expected,
+        "n" => n,
+        "test_type" => "Chi-square goodness-of-fit"
     )
 end

@@ -32,6 +32,7 @@ using Random
 using UUIDs
 
 # --- SYMBOLIC KERNEL: Verified Statistical Methods ---
+include("stats/validation.jl")       # Shared ArgumentError input-validation helpers
 include("stats/descriptive.jl")      # Mean, Median, Variance, Skewness
 include("stats/inferential.jl")      # T-Tests, ANOVA, Chi-Square
 include("stats/correlation_regression.jl")
