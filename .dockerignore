@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MPL-2.0
+# Build-context excludes for `docker build`/`podman build` (Containerfile,
+# .devcontainer/Containerfile). Podman falls back to this file when no
+# .containerignore is present.
+
+.git/
+.github/
+.devcontainer/
+docs/
+proofs/
+ffi/
+benches/
+examples/
+generated/
+.claude/
+node_modules/
+*.log
+/tmp/

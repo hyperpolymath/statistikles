@@ -45,9 +45,38 @@ the full Julia dependency closure from source — the closure is instantiated on
 from the pinned `Manifest.toml` into a writable depot on first use (see the
 header comment in `guix.scm` for the rationale and the exact command).
 
-The container (`Containerfile`) packaging surface exists in the repository but is
-not yet functional — do not base a container distribution on it until it is
-completed.
+The `Containerfile` also builds a runnable image (see "Container" below).
+
+== Container
+
+[source,bash]
+----
+podman build -t statistikles:latest -f Containerfile .
+podman run --rm -it statistikles:latest
+----
+
+(`docker` works identically in place of `podman`.) The image is built from
+the official `docker.io/library/julia:1.10` base (pinned by digest in the
+Containerfile), runs as a non-root user, and its `ENTRYPOINT` is the same
+`main()` entry point as `just run`. With no LLM endpoint reachable from the
+container it falls back to the offline `run_examples()` demo and exits 0 —
+see "First Run" in QUICKSTART-USER.adoc for the exact expected output. To
+reach a host-side LM Studio instance at the default address instead:
+
+[source,bash]
+----
+podman run --rm -it --network=host statistikles:latest
+----
+
+NOTE: `STATISTIKLES_LM_URL` set at `podman run` time has **no effect** on a
+precompiled image or a precompiled native install — verified by testing both.
+`Pkg.precompile()` evaluates and caches `BASE_URL` (`src/tools/lmstudio.jl`)
+into the package's precompile image at the time it runs; loading the package
+afterwards deserializes that cache rather than re-reading `ENV`. This is not
+container-specific — the same applies to `just build && just run` natively.
+To point a built image at a non-default endpoint, set `STATISTIKLES_LM_URL`
+as a build-time `ENV` *before* the `Pkg.precompile()` step in the
+Containerfile and rebuild.
 
 == Configuration
 
