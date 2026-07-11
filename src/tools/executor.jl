@@ -497,6 +497,9 @@ function execute_tool(tool_name::String, arguments::Dict)
         if get(ENV, "STATISTIKLES_DEBUG", "") != ""
             err["trace"] = sprint(showerror, e, catch_backtrace())
         end
+        # Structured breadcrumb (Debug level — off by default, opt in with
+        # STATISTIKLES_LOG_LEVEL=Debug). Never the raw arguments.
+        @debug "tool_execution_exception" tool=tool_name arg_hash=hash_arguments(arguments) error=string(e)
         return err
     end
 end
