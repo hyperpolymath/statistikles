@@ -174,6 +174,17 @@ end
         assert_finite_and_serialisable(r)
     end
 
+    @testset "partial_correlation: constant x, n>=4 (zero variance, not the n<4 path)" begin
+        # Statistics.cor() returns NaN (not an error) on a zero-variance
+        # vector; this must not leak into r_xy/r_xz/r_yz.
+        r = partial_correlation(fill(2.0, 5), [1.0, 2.0, 3.0, 4.0, 5.0], [2.0, 1.0, 4.0, 3.0, 5.0])
+        @test r["r_xy"] === nothing
+        @test r["r_xz"] === nothing
+        @test r["r_partial"] === nothing
+        @test r["note"] !== nothing
+        assert_finite_and_serialisable(r)
+    end
+
     @testset "partial_correlation: mismatched lengths throw ArgumentError" begin
         @test_throws ArgumentError partial_correlation(
             [1.0, 2.0, 3.0, 4.0], [1.0, 2.0], [1.0, 2.0, 3.0, 4.0])

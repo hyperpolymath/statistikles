@@ -286,13 +286,31 @@ function partial_correlation(x::Vector{Float64}, y::Vector{Float64}, z::Vector{F
         )
     end
 
-    r_xy = cor(x, y)
-    r_xz = cor(x, z)
-    r_yz = cor(y, z)
+    # DEGENERATE GUARD: Statistics.cor() returns NaN (not an error) for a
+    # constant/zero-variance input, which would otherwise leak straight into
+    # r_xy/r_xz/r_yz. Compute each pairwise correlation the same guarded way
+    # pearson_correlation does (den == 0 => nothing) so no NaN can enter the
+    # partial-correlation formula below.
+    safe_cor(a::Vector{Float64}, b::Vector{Float64}) = begin
+        ma, mb = mean(a), mean(b)
+        den = sqrt(sum((a .- ma) .^ 2) * sum((b .- mb) .^ 2))
+        den > 0 ? sum((a .- ma) .* (b .- mb)) / den : nothing
+    end
+
+    r_xy = safe_cor(x, y)
+    r_xz = safe_cor(x, z)
+    r_yz = safe_cor(y, z)
 
     # Partial r formula: r_xy.z = (r_xy - r_xz * r_yz) / sqrt((1 - r_xz²)(1 - r_yz²))
-    denom = sqrt((1 - r_xz^2) * (1 - r_yz^2))
-    r_partial = denom > 0 ? (r_xy - r_xz * r_yz) / denom : nothing
+    # DEGENERATE GUARD: undefined if any pairwise correlation above is
+    # undefined (zero variance in x, y, or z), or if the residual variance
+    # denominator is zero.
+    r_partial = if r_xy === nothing || r_xz === nothing || r_yz === nothing
+        nothing
+    else
+        denom = sqrt((1 - r_xz^2) * (1 - r_yz^2))
+        denom > 0 ? (r_xy - r_xz * r_yz) / denom : nothing
+    end
 
     # Significance test. DEGENERATE GUARD: needs df > 0 and a non-perfect
     # partial correlation (1 - r_partial^2 > 0).
@@ -301,7 +319,9 @@ function partial_correlation(x::Vector{Float64}, y::Vector{Float64}, z::Vector{F
              r_partial * sqrt(df / (1 - r_partial^2)) : nothing
     p_val = t_stat === nothing ? nothing : 2 * (1 - cdf(TDist(df), abs(t_stat)))
 
-    note = if r_partial === nothing
+    note = if r_xy === nothing || r_xz === nothing || r_yz === nothing
+        "Partial correlation undefined: zero variance in x, y, or z (constant input)"
+    elseif r_partial === nothing
         "Partial correlation undefined: zero residual variance after controlling for z"
     elseif t_stat === nothing
         "Significance test undefined: perfect partial correlation or insufficient degrees of freedom"
