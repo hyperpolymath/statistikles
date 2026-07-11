@@ -63,9 +63,16 @@ NEUROSYM.a2ml, or PLAYBOOK.a2ml in the repository root.
 
 ## ABI/FFI Standard
 
-- ABI definitions: **Idris2** with dependent types (`src/abi/`).
-- FFI implementation: **Zig** with C ABI compatibility (`ffi/zig/`).
-- Generated C headers: `generated/abi/`.
+Target design (Hyperpolymath RSR standard) — see README.adoc's "Experimental
+surfaces" section for current status:
+
+- ABI definitions: **Idris2** with dependent types (`src/abi/`) — **not present
+  in this repo**; design-only. Do not assume `src/abi/` exists.
+- FFI implementation: **Zig** with C ABI compatibility (`ffi/zig/`) — real and
+  CI-tested, but EXPERIMENTAL: exported ops are placeholders, not yet backed
+  by the Julia core.
+- Generated C headers: `generated/abi/` — not present; no generation pipeline
+  exists yet.
 
 ## Build System
 
