@@ -1,0 +1,115 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# agda.yml — Type-check the EXPERIMENTAL Agda proofs under proofs/.
+#
+# Every proofs/**/*.agda module must pass `agda --safe` (no weakening of --safe),
+# no module may go unchecked (a new .agda file that is not registered fails the
+# job), and no `postulate` is permitted (the proofs are constructive).
+name: Agda Proofs
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'proofs/**'
+      - '.github/workflows/agda.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'proofs/**'
+      - '.github/workflows/agda.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agda-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  agda-safe:
+    name: agda --safe (proofs/)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Install Agda + agda-stdlib (apt)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends agda agda-stdlib
+          agda --version
+
+      - name: Configure agda-stdlib library
+        run: |
+          set -euo pipefail
+          # Some distributions ship a standard-library.agda-lib inside the package;
+          # prefer it when one is present.
+          LIB="$(dpkg -L agda-stdlib | grep -E '/standard-library\.agda-lib$' | head -1 || true)"
+          if [ -z "${LIB:-}" ]; then
+            # The Debian/Ubuntu agda-stdlib package (apt, ubuntu-latest) ships the
+            # library sources but NO .agda-lib file anywhere on the filesystem, so
+            # synthesise one against the installed source root (the directory that
+            # directly contains Data/, Relation/, ...). Detect that root from the
+            # package contents rather than hard-coding a path.
+            SRC="$(dpkg -L agda-stdlib | grep -E '/Data/Nat/Base\.agda$' | head -1 || true)"
+            if [ -z "${SRC:-}" ]; then
+              echo "::error::agda-stdlib is installed but neither a packaged .agda-lib nor Data/Nat/Base.agda was found; cannot configure the standard library"
+              dpkg -L agda-stdlib | sed -n '1,40p'
+              exit 1
+            fi
+            ROOT="${SRC%/Data/Nat/Base.agda}"
+            LIB="$ROOT/standard-library.agda-lib"
+            echo "No packaged .agda-lib; synthesising $LIB (source root: $ROOT)"
+            printf 'name: standard-library\ninclude: .\n' | sudo tee "$LIB" >/dev/null
+          fi
+          echo "Using stdlib library file: $LIB"
+          # Agda writes .agdai interface files next to the sources; the package tree
+          # is root-owned, so make it writable for the (non-root) runner user before
+          # the first type-check refreshes the interface build cache.
+          sudo chmod -R a+rwX "$(dirname "$LIB")"
+          mkdir -p "$HOME/.agda"
+          echo "$LIB" > "$HOME/.agda/libraries"
+          echo "standard-library" > "$HOME/.agda/defaults"
+
+      - name: Reject postulates in proofs/
+        run: |
+          if grep -rnw --include='*.agda' 'postulate' proofs/; then
+            echo "::error::proofs/ must contain no 'postulate' — the experimental proofs are constructive"
+            exit 1
+          fi
+          echo "PASS: no postulates under proofs/"
+
+      - name: Type-check every module (agda --safe) + guard unchecked files
+        run: |
+          set -euo pipefail
+          # Explicit registry of modules that MUST be type-checked. Adding a new
+          # proofs/**/*.agda file WITHOUT registering it here fails this job.
+          EXPECTED_SORTED="$(printf '%s\n' \
+            'Statistikles/Inequalities.agda' \
+            'Statistikles/RankIdentities.agda' \
+            'Statistikles/TropicalSemiring.agda' | sort)"
+          FOUND_SORTED="$(cd proofs && find . -name '*.agda' -type f | sed 's|^\./||' | sort)"
+          if [ "$EXPECTED_SORTED" != "$FOUND_SORTED" ]; then
+            echo "::error::proofs/ module set does not match the registry in agda.yml."
+            echo "--- registered in workflow ---"; printf '%s\n' "$EXPECTED_SORTED"
+            echo "--- found under proofs/ ------"; printf '%s\n' "$FOUND_SORTED"
+            echo "Register any new module in the EXPECTED_SORTED list in .github/workflows/agda.yml."
+            exit 1
+          fi
+          cd proofs
+          rc=0
+          while IFS= read -r mod; do
+            [ -z "$mod" ] && continue
+            echo "== agda --safe $mod =="
+            if ! agda --safe "$mod"; then
+              echo "::error file=proofs/$mod::agda --safe failed for $mod"
+              rc=1
+            fi
+          done <<< "$FOUND_SORTED"
+          if [ "$rc" -eq 0 ]; then echo "PASS: all proof modules type-check under --safe"; fi
+          exit $rc
