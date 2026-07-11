@@ -98,12 +98,78 @@
         @test r["significant"] == false
     end
 
+    @testset "Frequency table vs reference" begin
+        data = ["a", "b", "a", "c", "b", "a"]
+        r = frequency_table(data)
+        # Hand count: a×3, b×2, c×1 (n=6); categories sort alphabetically
+        @test r["categories"] == ["a", "b", "c"]
+        @test r["frequencies"] == [3, 2, 1]
+        @test isapprox(r["relative_frequencies"], [50.0, 100 / 3, 100 / 6]; atol = 1e-9)
+        @test r["cumulative_frequencies"] == [3, 5, 6]
+        @test isapprox(r["cumulative_relative_frequencies"], [50.0, 250 / 3, 100.0]; atol = 1e-9)
+        @test r["n"] == 6
+        @test r["n_categories"] == 3
+        @test r["mode"] == "a"
+    end
+
+    @testset "Chi-square test of independence vs reference" begin
+        # 2×3 table engineered so every expected cell is exactly 4: row sums
+        # = [12, 12], col sums = [8, 8, 8], n = 24 ⇒ expected[i,j] = 12·8/24 = 4.
+        # Deviations from 4 are [+2,-2,0 / -2,+2,0] ⇒ χ² = (4+4+0+4+4+0)/4 = 4.0 exactly.
+        observed = [6 2 4; 2 6 4]
+        r = Statistikles.chi_square_test(observed)
+        @test r["chi_squared"] == 4.0
+        @test r["df"] == 2
+        # df=2 has a closed-form chi-square survival function: P(χ²₂ > x) = e^(-x/2)
+        # (independent of the library's own Distributions.cdf call path).
+        @test isapprox(r["p_value"], exp(-2.0); atol = 1e-12)
+        @test r["significant"] == false
+        # Cramér's V = √(χ² / (n·(min(r,c)-1))) = √(4/(24·1)) = √(1/6)
+        @test isapprox(r["cramers_v"], sqrt(1 / 6); atol = 1e-12)
+        @test r["n"] == 24
+    end
+
+    @testset "Chi-square goodness-of-fit vs reference" begin
+        # k=3 categories, uniform expected proportions, n=24 ⇒ expected=8 each.
+        # Deviations [+4,-4,0] ⇒ χ² = (16+16+0)/8 = 4.0 exactly (df=2, same
+        # closed-form survival function as the independence case above).
+        observed = [12, 4, 8]
+        r = Statistikles.chi_square_goodness_of_fit(observed)
+        @test r["chi_squared"] == 4.0
+        @test r["df"] == 2
+        @test isapprox(r["p_value"], exp(-2.0); atol = 1e-12)
+        @test r["significant"] == false
+        @test r["expected"] == [8.0, 8.0, 8.0]
+        @test r["n"] == 24
+    end
+
     @testset "Executor dispatch: anova tool" begin
         direct = one_way_anova([[1.0, 2.0, 3.0], [2.0, 3.0, 4.0], [3.0, 4.0, 5.0]])
         via_tool = Statistikles.execute_tool("anova",
             Dict{String,Any}("groups" => [[1.0, 2.0, 3.0], [2.0, 3.0, 4.0], [3.0, 4.0, 5.0]]))
         @test isapprox(via_tool["F_statistic"], direct["F_statistic"]; atol = 1e-12)
         @test isapprox(via_tool["p_value"], direct["p_value"]; atol = 1e-12)
+    end
+
+    @testset "Executor dispatch: frequency_analysis tool" begin
+        data = ["a", "b", "a", "c", "b", "a"]
+        direct = frequency_table(data)
+        via_tool = Statistikles.execute_tool("frequency_analysis",
+            Dict{String,Any}("data" => data))
+        @test via_tool["frequencies"] == direct["frequencies"]
+        @test via_tool["categories"] == direct["categories"]
+        @test via_tool["mode"] == direct["mode"]
+    end
+
+    @testset "Executor dispatch: chi_square tool" begin
+        observed_rows = [[6, 2, 4], [2, 6, 4]]
+        direct = Statistikles.chi_square_test([6 2 4; 2 6 4])
+        via_tool = Statistikles.execute_tool("chi_square",
+            Dict{String,Any}("type" => "independence", "observed" => observed_rows))
+        @test isapprox(via_tool["chi_squared"], direct["chi_squared"]; atol = 1e-12)
+        @test isapprox(via_tool["df"], direct["df"]; atol = 1e-12)
+        @test isapprox(via_tool["p_value"], direct["p_value"]; atol = 1e-12)
+        @test isapprox(via_tool["cramers_v"], direct["cramers_v"]; atol = 1e-12)
     end
 
 end

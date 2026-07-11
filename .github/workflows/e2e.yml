@@ -43,8 +43,43 @@ jobs:
       - name: Julia cache
         uses: julia-actions/cache@a45e8fa8be21c18a06b7177052533149e61e9b38  # v3.1.0
 
-      - name: Run Julia tests
-        run: julia --project=. -e 'using Pkg; Pkg.test()'
+      - name: Run Julia tests (with coverage)
+        run: julia --project=. -e 'using Pkg; Pkg.test(coverage=true)'
+
+      - name: Process coverage → lcov
+        uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38  # v1.2.2
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          if [ -f lcov.info ]; then
+            TOTAL=$(grep -c '^DA:' lcov.info || true)
+            HIT=$(awk -F'[:,]' '/^DA:/ && $3 > 0 { c++ } END { print c + 0 }' lcov.info)
+            TOTAL=${TOTAL:-0}
+            HIT=${HIT:-0}
+            if [ "$TOTAL" -gt 0 ]; then
+              PCT=$(awk -v h="$HIT" -v t="$TOTAL" 'BEGIN { printf "%.2f", (h / t) * 100 }')
+            else
+              PCT="0.00"
+            fi
+            {
+              echo "## Coverage (informational — not gated)"
+              echo ""
+              echo "Lines covered: **${HIT} / ${TOTAL}** (**${PCT}%**)"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Coverage" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No lcov.info was produced." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload lcov artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: julia-coverage-lcov
+          path: lcov.info
+          if-no-files-found: warn
 
   aspect-safety:
     name: Aspect — Safety + SPDX
