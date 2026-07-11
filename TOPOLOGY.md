@@ -3,7 +3,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
 <!-- TOPOLOGY.md — Statistikles architecture map and completion dashboard -->
-<!-- Last updated: 2026-02-20 -->
+<!-- Last updated: 2026-07-11 -->
 
 # Statistikles — Project Topology
 
@@ -81,8 +81,8 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 COMPONENT                          STATUS              NOTES
 ─────────────────────────────────  ──────────────────  ─────────────────────────────────
 CORE ARCHITECTURE
-  Julia computation engine          ██████████ 100%    17 statistical modules
-  LM Studio integration             ██████████ 100%    25+ tools, function calling
+  Julia computation engine          ██████████ 100%    41 statistical modules
+  LM Studio integration             ██████████ 100%    29 tools, function calling
   Neural-symbolic boundary           ██████████ 100%    executor.jl gate with MOLLOCK rule
   System prompt governance           ██████████ 100%    Hard "never compute" instructions
 
@@ -107,10 +107,12 @@ VERIFICATION (PLANNED)
 
 INFRASTRUCTURE
   RSR template compliance            ██████████ 100%    All RSR files present
-  Tests                              █████████░  90%    632 @test assertions across
+  Tests                              █████████░  90%    693 @test assertions across
                                                         runtests + e2e + property +
-                                                        reference-validation
-  CI/CD                              ████████░░  80%    14 workflows; e2e.yml runs
+                                                        reference-validation (+advanced)
+                                                        + degenerate-input + guardrail
+                                                        + executor-router
+  CI/CD                              ████████░░  80%    19 workflows; e2e.yml runs
                                                         Pkg.test on Julia 1.10
   Neural path (LLM↔executor)         ██░░░░░░░░  20%    executor.jl real; no
                                                         integration test for the loop

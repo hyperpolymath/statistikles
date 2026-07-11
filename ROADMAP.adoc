@@ -4,10 +4,11 @@
 
 == Current Status (2026-07)
 
-The *symbolic library is real and tested*: ~40 statistics modules under
+The *symbolic library is real and tested*: 41 statistics modules under
 `src/stats/`, a single neural/symbolic dispatch chokepoint
-(`src/tools/executor.jl`), and 632 `@test` assertions (runtests + e2e +
-property + reference-validation) running under Julia 1.10 CI (`e2e.yml`).
+(`src/tools/executor.jl`), and 693 `@test` assertions (runtests + e2e +
+property + reference-validation (+advanced) + degenerate-input + guardrail +
+executor-router) running under Julia 1.10 CI (`e2e.yml`).
 
 The *neural path and external verification pipeline are not yet done*: the
 LLM↔executor loop has no automated integration test, and the
@@ -17,13 +18,14 @@ systems (echidna, an adversarial SLM auditor).
 == Milestones
 
 === v0.1.0 — Trustworthy core (in progress)
-* [x] ~40 symbolic statistics modules
+* [x] 41 symbolic statistics modules
 * [x] executor.jl neural/symbolic boundary
-* [x] Test suite over the symbolic layer (632 assertions)
+* [x] Test suite over the symbolic layer (693 assertions)
 * [x] Ground-truth validation of core functions against independently
       derived values (`test/reference_validation_test.jl`)
 * [x] Offline example (`examples/run_examples.jl`)
-* [ ] Extend ground-truth validation to the advanced/exotic modules
+* [x] Extend ground-truth validation to the advanced modules
+      (`test/reference_validation_advanced_test.jl`)
 * [ ] Integration test for the LLM → tool_call → executor loop (mockable HTTP)
 
 === v0.2.0 — Neural interface hardened

@@ -5,7 +5,7 @@
 [metadata]
 project = "Statistikles"
 version = "0.1.0"
-last-updated = "2026-03-29"
+last-updated = "2026-07-11"
 status = "active"
 
 [project-context]
@@ -18,12 +18,14 @@ phase = "cross-verification"
 maturity = "alpha"
 
 [stats]
-source-modules = 65
-stats-domain-modules = 40
-test-count = 632
-test-count-note = "@test assertions across runtests.jl, e2e_test.jl, property_test.jl, reference_validation_test.jl"
+source-modules = 67
+stats-domain-modules = 41
+llm-tools = 29
+executor-dispatched-tools = 55
+test-count = 693
+test-count-note = "static @test assertions across the runtests.jl-wired suite: runtests.jl, e2e_test.jl, property_test.jl, reference_validation_test.jl, reference_validation_advanced_test.jl, degenerate_input_test.jl, guardrail_test.jl, executor_router_test.jl"
 test-failures = 0
-ci-workflows = 14
+ci-workflows = 19
 
 [experimental-surfaces]
 # Machine-readable mirror of README.adoc's "Experimental surfaces" section.
