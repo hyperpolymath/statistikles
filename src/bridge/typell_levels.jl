@@ -3,7 +3,10 @@
 #
 # Type safety hierarchy for statistical computations. Each level adds
 # stronger guarantees. Levels 1-3 are enforced by Julia's type system,
-# 4-8 by runtime validation, 9-12 by external proof systems.
+# 4-8 by runtime validation, 9-12 by external proof systems that are not
+# wired up yet (EXPERIMENTAL scaffolding — see the note above the Level 9-10
+# structs below). No value in this codebase currently carries a Level 9-12
+# guarantee; the struct definitions exist for a pipeline that isn't connected.
 #
 # Level  1: Primitive types (Float64, Int, Bool, String)
 # Level  2: Collection types (Vector, Matrix, DataFrame)
@@ -135,6 +138,12 @@ Base.:*(a::ModularInt, b::ModularInt) = a.modulus == b.modulus ?
 
 # ===========================================================================
 # Level 9-10: Verification provenance types
+#
+# EXPERIMENTAL / scaffolding: these struct definitions exist so callers have
+# somewhere to put verification/proof provenance if it is ever produced, but
+# nothing in this codebase currently constructs a `ProvenResult` from a real
+# Agda/Lean4/Z3 certificate — the ECHIDNA dispatch that would populate one is
+# not wired up (see proofs/README.adoc, "Integration with ECHIDNA").
 # ===========================================================================
 
 """Level 9: Result verified by multiple independent systems."""

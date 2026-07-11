@@ -141,29 +141,86 @@ function one_way_anova(groups::Vector{Vector{Float64}}; alpha::Float64=0.05)
 end
 
 """
-    chi_square_test(observed::Matrix{Int}; alpha=0.05) -> Dict
+    chi_square_test(observed::Matrix{Int}; alpha=0.05, yates_correction=false) -> Dict
 
 CHI-SQUARE TEST OF INDEPENDENCE: Tests whether two categorical variables are
 independent in an r×c contingency table of observed frequencies.
-- EFFECT SIZE: Reports Cramér's V.
-- OUTPUT: chi-squared statistic, df = (r-1)(c-1), and p-value from the
-  chi-squared distribution.
+- EXPECTED COUNTS: `E_ij = row_sum_i * col_sum_j / n`.
+- STATISTIC: Pearson `χ² = Σ (O_ij - E_ij)² / E_ij`, `df = (r-1)(c-1)`.
+- P-VALUE: upper-tail `ccdf(Chisq(df), χ²)` (numerically stable for large χ²,
+  unlike `1 - cdf(...)` which underflows to exactly 0.0 in the far tail).
+- EFFECT SIZE: Reports Cramér's V = `√(χ² / (n·(min(r,c)-1)))`.
+- YATES' CONTINUITY CORRECTION: optional (`yates_correction=true`), valid only
+  for 2×2 tables: `χ² = Σ (max(0, |O-E| - 0.5))² / E`. The `max(0, ...)` clamp
+  matters whenever every cell's `|O-E| < 0.5` (near-independence tables): without
+  it the unclamped formula can *inflate* χ² instead of correcting it downward.
+  Off by default to preserve the standard (uncorrected) Pearson statistic;
+  matches R's `chisq.test(correct=TRUE)` and SciPy's
+  `chi2_contingency(correction=True)`.
+- DEGENERATE GUARDS: throws `ArgumentError` for a malformed table (fewer than
+  2 rows/columns, negative counts, zero total observations — none of these
+  describe a valid r×c contingency table). Returns `nothing`+`"note"` (never
+  NaN/Inf) when the table shape is valid but a row or column sums to zero,
+  since the independence test is statistically undefined there (this is the
+  behaviour R's own `chisq.test` silently leaks as NaN/NA for the same input).
+  Emits a non-fatal `"warning"` when any expected count is below 5 (Cochran's
+  rule of thumb — the χ² approximation may be unreliable, but the statistic
+  is still returned).
 """
-function chi_square_test(observed::Matrix{Int}; alpha::Float64=0.05)
+function chi_square_test(observed::Matrix{Int}; alpha::Float64=0.05,
+                          yates_correction::Bool=false)
     r, c = size(observed)
-    n = sum(observed)
-    row_sums = sum(observed, dims=2)
-    col_sums = sum(observed, dims=1)
+    require_at_least(r, 2, "observed rows")
+    require_at_least(c, 2, "observed columns")
+    require_nonnegative(observed, "observed")
+    if yates_correction && (r != 2 || c != 2)
+        throw(ArgumentError("yates_correction is only defined for 2×2 tables, got $(r)×$(c)"))
+    end
 
-    chi2 = 0.0
-    for i in 1:r, j in 1:c
-        expected = row_sums[i] * col_sums[j] / n
-        if expected > 0
-            chi2 += (observed[i, j] - expected)^2 / expected
-        end
+    n = sum(observed)
+    require_at_least(n, 1, "sum(observed)")
+
+    row_sums = vec(sum(observed, dims=2))
+    col_sums = vec(sum(observed, dims=1))
+
+    # DEGENERATE GUARD: a row or column that sums to zero means that category
+    # was never observed at all. The expected-count formula still evaluates
+    # to a clean 0 for every cell in it (0 * col_sum / n = 0), but the
+    # resulting χ² would silently omit that category's contribution while
+    # still charging its degree of freedom — an undefined comparison, not a
+    # legitimate result. R's `chisq.test` hits the same condition and leaks
+    # `NaN`/`NA`; we return `nothing` + a note instead of fabricating a number.
+    if any(==(0), row_sums) || any(==(0), col_sums)
+        return Dict{String,Any}(
+            "chi_squared" => nothing, "df" => nothing, "p_value" => nothing,
+            "significant" => false, "cramers_v" => nothing,
+            "n" => n, "test_type" => "Chi-square test of independence",
+            "note" => "test undefined: a row or column has zero total observations",
+            "warning" => nothing
+        )
+    end
+
+    expected = [row_sums[i] * col_sums[j] / n for i in 1:r, j in 1:c]
+
+    chi2 = if yates_correction
+        # Clamp each cell's correction to a minimum of 0: without
+        # `max(0.0, ...)`, a cell with |O-E| < 0.5 would square a *negative*
+        # number, inflating χ² instead of correcting it downward (e.g.
+        # observed=[10 10; 10 11] has |O-E|=0.2439 in every cell and must
+        # yield χ²=0.0, not 0.0256 — see test/chi_square_validation_test.jl).
+        sum((max(0.0, abs(observed[i, j] - expected[i, j]) - 0.5))^2 / expected[i, j]
+            for i in 1:r, j in 1:c)
+    else
+        sum((observed[i, j] - expected[i, j])^2 / expected[i, j] for i in 1:r, j in 1:c)
     end
     df = (r - 1) * (c - 1)
-    p_value = 1 - cdf(Chisq(df), chi2)
+    p_value = ccdf(Chisq(df), chi2)
+
+    min_expected = minimum(expected)
+    n_low = count(<(5), expected)
+    warning = min_expected < 5 ?
+        "$n_low of $(r*c) expected cell counts are below 5; the χ² approximation may be unreliable (Cochran's rule of thumb)" :
+        nothing
 
     return Dict{String,Any}(
         "chi_squared" => chi2,
@@ -172,7 +229,11 @@ function chi_square_test(observed::Matrix{Int}; alpha::Float64=0.05)
         "significant" => p_value < alpha,
         "cramers_v" => sqrt(chi2 / (n * (min(r, c) - 1))),
         "n" => n,
-        "test_type" => "Chi-square test of independence"
+        "test_type" => yates_correction ?
+            "Chi-square test of independence (Yates-corrected)" :
+            "Chi-square test of independence",
+        "note" => nothing,
+        "warning" => warning
     )
 end
 
@@ -182,18 +243,60 @@ end
 CHI-SQUARE GOODNESS-OF-FIT: Tests whether observed category counts match an
 expected distribution. Defaults to a uniform distribution across categories
 when `expected_proportions` is not supplied.
+- STATISTIC: `χ² = Σ (O_i - E_i)² / E_i` where `E_i = n * p_i`, `df = k - 1`.
+- P-VALUE: upper-tail `ccdf(Chisq(df), χ²)` (see `chi_square_test` docstring).
+- DEGENERATE GUARDS: throws `ArgumentError` for fewer than 2 categories,
+  negative counts, `expected_proportions` of mismatched length or not
+  summing to 1 (±1e-9), or zero total observations. Returns `nothing`+`"note"`
+  (never NaN/Inf) if any expected count is exactly zero (only reachable via a
+  caller-supplied zero proportion — the default uniform split cannot produce
+  this). Emits a non-fatal `"warning"` when any expected count is below 5.
 """
 function chi_square_goodness_of_fit(observed::Vector{Int},
                                     expected_proportions::Union{Vector{Float64},Nothing}=nothing;
                                     alpha::Float64=0.05)
     k = length(observed)
+    require_at_least(k, 2, "observed categories")
+    require_nonnegative(observed, "observed")
+
+    props = if isnothing(expected_proportions)
+        fill(1.0 / k, k)
+    else
+        require_equal_length(observed, expected_proportions, "observed", "expected_proportions")
+        require_nonnegative(expected_proportions, "expected_proportions")
+        isapprox(sum(expected_proportions), 1.0; atol=1e-9) || throw(ArgumentError(
+            "expected_proportions must sum to 1, got $(sum(expected_proportions))"))
+        expected_proportions
+    end
+
     n = sum(observed)
-    props = isnothing(expected_proportions) ? fill(1.0 / k, k) : expected_proportions
+    require_at_least(n, 1, "sum(observed)")
+
     expected = n .* props
+
+    # DEGENERATE GUARD: only reachable when a caller supplies a 0.0
+    # proportion for some category. (observed - 0)^2 / 0 is Inf (if that
+    # category was nonetheless observed) or NaN (0/0, if it wasn't) —
+    # either way, an undefined comparison, not a legitimate statistic.
+    if any(==(0.0), expected)
+        return Dict{String,Any}(
+            "chi_squared" => nothing, "df" => nothing, "p_value" => nothing,
+            "significant" => false, "expected" => expected,
+            "n" => n, "test_type" => "Chi-square goodness-of-fit",
+            "note" => "test undefined: expected_proportions assigns zero probability to an observed category",
+            "warning" => nothing
+        )
+    end
 
     chi2 = sum((observed .- expected) .^ 2 ./ expected)
     df = k - 1
-    p_value = 1 - cdf(Chisq(df), chi2)
+    p_value = ccdf(Chisq(df), chi2)
+
+    min_expected = minimum(expected)
+    n_low = count(<(5), expected)
+    warning = min_expected < 5 ?
+        "$n_low of $k expected cell counts are below 5; the χ² approximation may be unreliable (Cochran's rule of thumb)" :
+        nothing
 
     return Dict{String,Any}(
         "chi_squared" => chi2,
@@ -202,6 +305,8 @@ function chi_square_goodness_of_fit(observed::Vector{Int},
         "significant" => p_value < alpha,
         "expected" => expected,
         "n" => n,
-        "test_type" => "Chi-square goodness-of-fit"
+        "test_type" => "Chi-square goodness-of-fit",
+        "note" => nothing,
+        "warning" => warning
     )
 end

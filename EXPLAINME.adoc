@@ -64,18 +64,29 @@ checked against independently-derived ground-truth values in
 | **Distributions.jl** | Probability distributions
 | **DataFrames.jl** | Tabular data manipulation
 | **LM Studio** | Local LLM for neural routing (localhost:1234)
-| **Idris2 ABI** | https://www.idris-lang.org (optional formal proofs of statistical invariants)
-| **Zig FFI** | https://ziglang.org (optional high-performance bridges)
+| **Zig FFI** | https://ziglang.org (EXPERIMENTAL — compiles and is CI-tested, but entry points are placeholders not yet backed by the Julia core; see "Experimental surfaces" in README.adoc)
 |===
+
+NOTE: An earlier draft of this table listed an "Idris2 ABI" row. `src/abi/` does
+not exist in this repo — the Idris2 ABI layer is design-only. See
+`ABI-FFI-README.md` for the target design and README.adoc's "Experimental
+surfaces" section for the canonical status.
 
 == Dogfooded Across The Account
 
-Uses the hyperpolymath ABI/FFI standard (Idris2 + Zig) for optional formal verification of statistical properties.
+Uses the hyperpolymath FFI standard (Zig) for the C-ABI boundary. FFI is
+EXPERIMENTAL: it compiles and is CI-tested, but its ops are placeholders, not
+Julia-backed. The Idris2 ABI half of the standard is design-only here.
 
 Statistikles-specific:
 - Neural-symbolic boundary enforcement via execute_tool() (src/tools/executor.jl)
-- Optional Idris2 proofs for invariants like "p-value ∈ [0,1]" and "variance ≥ 0"
-- Formal verification that all numerical computation originates from Julia
+- `proofs/` has 10 Agda lemmas type-checked under `agda --safe` in CI, proven
+  over ℕ as discrete proxies (e.g. for "p-value ∈ [0,1]" and "variance ≥ 0");
+  the ℝ/Float64 statistical theorems themselves remain open targets — see
+  `proofs/README.adoc` and `PROOF-NEEDS.md`
+- Deterministic execution: all numerical computation originates from Julia,
+  enforced by the neural-symbolic boundary above (this is a code-structure
+  guarantee, not an Agda-proven one)
 
 == File Map: Key Modules
 

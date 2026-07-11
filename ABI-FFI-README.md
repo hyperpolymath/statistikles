@@ -4,14 +4,28 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
 # STATISTIKLES ABI/FFI Documentation
 
+> **STATUS — EXPERIMENTAL.** The Zig FFI compiles and is CI-tested
+> (`.github/workflows/zig.yml`), but its exported entry points are placeholders,
+> not yet backed by the Julia statistical core. The Idris2 ABI layer described
+> below is **design-only**: `src/abi/` does not exist in this repo (the template
+> scaffolding that once lived there was removed — see `PROOF-NEEDS.md`, "Template
+> ABI Cleanup"). Everything in this document past this notice describes the
+> *intended* Hyperpolymath RSR design, not the current state of this repository.
+> See the "Experimental surfaces" section of `README.adoc` for the canonical
+> summary.
+
 ## Overview
 
-This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
+This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design
+(target design; not yet fully implemented in this repo):
 
-- **ABI (Application Binary Interface)** defined in **Idris2** with formal proofs
+- **ABI (Application Binary Interface)** *intended* to be defined in **Idris2**
+  with formal proofs — not yet present (`src/abi/` does not exist)
 - **FFI (Foreign Function Interface)** implemented in **Zig** for C compatibility
-- **Generated C headers** bridge Idris2 ABI to Zig FFI
-- **Any language** can call through standard C ABI
+  — compiles and is CI-tested, but operations are placeholders
+- **Generated C headers** *would* bridge Idris2 ABI to Zig FFI — no generation
+  pipeline exists yet
+- **Any language** can call through the standard C ABI once real operations land
 
 ## Architecture
 
@@ -51,10 +65,13 @@ This library follows the **Hyperpolymath RSR Standard** for ABI and FFI design:
 
 ## Directory Structure
 
+The tree below is the *target* layout. `src/abi/`, `generated/abi/`, and
+`bindings/` do not exist in this repo yet — only `ffi/zig/` is real.
+
 ```
 statistikles/
 ├── src/
-│   ├── abi/                    # ABI definitions (Idris2)
+│   ├── abi/                    # NOT PRESENT — ABI definitions (Idris2), design-only
 │   │   ├── Types.idr           # Core type definitions with proofs
 │   │   ├── Layout.idr          # Memory layout verification
 │   │   └── Foreign.idr         # FFI function declarations
@@ -71,11 +88,11 @@ statistikles/
 │       └── include/
 │           └── statistikles.h   # C header (optional, can be generated)
 │
-├── generated/                  # Auto-generated files
+├── generated/                  # NOT PRESENT — auto-generated files
 │   └── abi/
-│       └── statistikles.h       # Generated from Idris2 ABI
+│       └── statistikles.h       # Would be generated from Idris2 ABI
 │
-└── bindings/                   # Language-specific wrappers (optional)
+└── bindings/                   # NOT PRESENT — language-specific wrappers (optional)
     ├── rust/
     ├── rescript/
     └── julia/
@@ -197,7 +214,10 @@ zig build -Doptimize=ReleaseFast  # Build optimized
 zig build test                    # Run tests
 ```
 
-### Generate C Header from Idris2 ABI
+### Generate C Header from Idris2 ABI (target design — not runnable today)
+
+`src/abi/` does not exist in this repo, so the command below has no `Types.idr`
+to compile. It documents the intended pipeline only.
 
 ```bash
 cd src/abi
@@ -332,7 +352,10 @@ cd ffi/zig
 zig build test-integration
 ```
 
-### ABI Verification (Idris2)
+### ABI Verification (Idris2) (target design — not runnable today)
+
+There is no Idris2 ABI in this repo to run `verifyABI`/`verifyLayoutsCorrect`
+against; this block documents the intended verification surface only.
 
 ```idris
 -- Compile-time verification
@@ -350,7 +373,8 @@ main = do
 
 When modifying the ABI/FFI:
 
-1. **Update ABI first** (`src/abi/*.idr`)
+1. **Update ABI first** (`src/abi/*.idr`) — target design; `src/abi/` does not
+   exist yet, so this step is currently a no-op
    - Modify type definitions
    - Update proofs
    - Ensure backward compatibility
