@@ -46,18 +46,35 @@ jobs:
 
       - name: Configure agda-stdlib library
         run: |
-          LIB="$(dpkg -L agda-stdlib | grep -E '/standard-library\.agda-lib$' | head -1)"
-          if [ -z "$LIB" ]; then
-            echo "::error::Could not locate standard-library.agda-lib from the agda-stdlib package"
-            exit 1
+          set -euo pipefail
+          # Some distributions ship a standard-library.agda-lib inside the package;
+          # prefer it when one is present.
+          LIB="$(dpkg -L agda-stdlib | grep -E '/standard-library\.agda-lib$' | head -1 || true)"
+          if [ -z "${LIB:-}" ]; then
+            # The Debian/Ubuntu agda-stdlib package (apt, ubuntu-latest) ships the
+            # library sources but NO .agda-lib file anywhere on the filesystem, so
+            # synthesise one against the installed source root (the directory that
+            # directly contains Data/, Relation/, ...). Detect that root from the
+            # package contents rather than hard-coding a path.
+            SRC="$(dpkg -L agda-stdlib | grep -E '/Data/Nat/Base\.agda$' | head -1 || true)"
+            if [ -z "${SRC:-}" ]; then
+              echo "::error::agda-stdlib is installed but neither a packaged .agda-lib nor Data/Nat/Base.agda was found; cannot configure the standard library"
+              dpkg -L agda-stdlib | sed -n '1,40p'
+              exit 1
+            fi
+            ROOT="${SRC%/Data/Nat/Base.agda}"
+            LIB="$ROOT/standard-library.agda-lib"
+            echo "No packaged .agda-lib; synthesising $LIB (source root: $ROOT)"
+            printf 'name: standard-library\ninclude: .\n' | sudo tee "$LIB" >/dev/null
           fi
-          echo "Found stdlib library file: $LIB"
+          echo "Using stdlib library file: $LIB"
+          # Agda writes .agdai interface files next to the sources; the package tree
+          # is root-owned, so make it writable for the (non-root) runner user before
+          # the first type-check refreshes the interface build cache.
+          sudo chmod -R a+rwX "$(dirname "$LIB")"
           mkdir -p "$HOME/.agda"
           echo "$LIB" > "$HOME/.agda/libraries"
           echo "standard-library" > "$HOME/.agda/defaults"
-          # The Debian/Ubuntu package ships prebuilt interfaces under _build/;
-          # make the tree writable so agda can refresh them if its version differs.
-          sudo chmod -R a+rwX "$(dirname "$LIB")" || true
 
       - name: Reject postulates in proofs/
         run: |
