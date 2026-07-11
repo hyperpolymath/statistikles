@@ -24,21 +24,22 @@ ____
 3. Julia computes: t=2.847, df=38, p=0.007, Cohen's d=0.90 — symbolic only
 4. LLM explains result — neural generation
 
-The MOLLOCK WARNING (lines 40-47) enforces this invariant: no statistical value is ever produced by neural inference. If you see a number in a Statistikles response, it was computed by Julia.
+The MOLLOCK WARNING (lines 40-47) enforces this invariant: no statistical value is ever produced by neural inference. If you see a number in a Statistikles response, it was computed by Julia. This is enforced in code, not merely by prompt: `src/tools/guardrail.jl:validate_numeric_provenance()` audits every numeric literal in the LLM's prose against the recorded tool results, flags any orphan (a number matching no tool result), retries once, then surfaces a warning — the model's text is never silently rewritten (see `test/guardrail_test.jl`).
 
 *Caveat:* The neural component (LLM) does perform parsing of the user question and explanation generation, which are non-statistical tasks. The invariant applies specifically to numerical results, not linguistic processing.
 
 [quote, README section "Features" -> "Statistical Functions"]
 ____
-~40 statistical modules under `src/stats/`, spanning classical (Descriptive,
+41 statistical modules under `src/stats/`, spanning classical (Descriptive,
 Inferential, Correlation & Regression, Non-parametric, Effect Sizes, Power
 Analysis, Bayesian, Causality, Estimation, Reliability, Validity, Measurement,
 Sampling) through to exotic methods (Dempster-Shafer, fuzzy logic, tropical
 algebra, p-adic, quantum/CHSH, rough sets, Choquet integral).
 ____
 
-*Evidence:* `src/stats/` contains 40 `.jl` modules; `src/tools/executor.jl`
-dispatches ~50 named tools to them. Examples:
+*Evidence:* `src/stats/` contains 41 `.jl` modules; `src/tools/executor.jl`
+dispatches 55 named tool names to them, of which 29 are exposed to the LLM as
+function-calling schemas in `src/tools/definitions.jl`. Examples:
 - Descriptive: Mean, median, mode, SD, skewness, kurtosis, quartiles, CI
 - Inferential: Welch t-test, one-way ANOVA, chi-square
 - Correlation & Regression: Pearson, Spearman, simple/multiple regression with VIF
@@ -58,7 +59,7 @@ checked against independently-derived ground-truth values in
 |===
 | Technology | Learn More
 
-| **Julia 1.10+** | https://julialang.org (statistical computation, ~40 modules)
+| **Julia 1.10+** | https://julialang.org (statistical computation, 41 modules)
 | **Statistics.jl** | Distribution calculations, hypothesis testing
 | **StatsBase.jl** | Statistical utilities
 | **Distributions.jl** | Probability distributions
@@ -96,12 +97,12 @@ Statistikles-specific:
 
 | `src/` | Julia source code (Statistikles.jl entry point + subdirectories)
 | `src/tools/executor.jl` | Neural-symbolic boundary enforcement (CRITICAL)
-| `src/stats/` | ~40 statistical domain modules (descriptive, inferential, correlation, non-parametric, etc.)
+| `src/stats/` | 41 statistical domain modules (descriptive, inferential, correlation, non-parametric, etc.)
 | `src/output/` | Output formatters (ASCII tables/graphs, CSV, JSON, text reports)
 | `src/pipeline/` | Canonicalization, dimensional analysis, detection, validation, cleansing, normalization
 | `src/tools/` | LLM function-calling schemas (definitions.jl), LM Studio client (lmstudio.jl), chat loop (chat.jl)
 | `src/bridge/`, `src/integrations/` | Optional cross-verification bridges and inline integrations
-| `test/` | Test suite (632 @test assertions; reference_validation_test.jl checks against ground truth)
+| `test/` | Test suite (693 @test assertions across runtests.jl and the e2e, property, reference-validation (+advanced), degenerate-input, guardrail, and executor-router suites it includes; reference_validation_test.jl checks against ground truth)
 | `examples/` | Offline example run (`run_examples.jl`, no LLM needed)
 |===
 

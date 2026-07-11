@@ -10,8 +10,8 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 | Category | Count | Details |
 |----------|-------|---------|
-| **Source modules** | 65 | Julia: 30+ stats modules (descriptive, inferential, bayesian, SEM, timeseries, survival, etc.), pipeline, output, integrations, bridge (Idris2 template ABI removed 2026-03-29; Zig FFI remains) |
-| **Unit tests** | 478 | All in single runtests.jl -- comprehensive @test/@testset coverage |
+| **Source modules** | 67 | Julia: 41 stats modules (descriptive, inferential, bayesian, SEM, timeseries, survival, etc.), pipeline, output, integrations, bridge (Idris2 template ABI removed 2026-03-29; Zig FFI remains) |
+| **Unit tests** | 693 | @test assertions across runtests.jl + 7 wired suites (e2e, property, reference-validation ×2, degenerate-input, guardrail, executor-router) -- comprehensive @test/@testset coverage (E2E & property also broken out below) |
 | **E2E tests** | yes | test/e2e_test.jl -- full descriptive pipeline, error handling (empty/NaN), combined descriptive+inferential |
 | **Property tests** | yes | test/property_test.jl -- invariants (constant arrays, sort-invariance, power-mean ordering, p-value/correlation bounds) |
 | **Integration tests** | 0 | No dedicated tests for the 8 claimed external integrations |
@@ -47,12 +47,15 @@ Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 - [ ] No self-diagnostic mode
 
 ## FLAGGED ISSUES
-- **478 tests is solid unit coverage** -- best among all scanned repos
-- **Single test file for 65 modules** -- should be split for maintainability
+- **693 @test assertions is solid coverage** -- best among all scanned repos
+- **Single test file for 65 modules** -- RESOLVED 2026-07-11: the suite is split
+  across runtests.jl + 7 wired files (e2e, property, reference-validation ×2,
+  degenerate-input, guardrail, executor-router)
 - **0 integration tests despite 8 claimed integrations** -- integration claims unverified
-- **ffi/zig comments reference deleted src/abi/Foreign.idr** -- the Idris2 template
-  ABI was removed 2026-03-29 but the Zig FFI still cites it; either wire the Zig
-  layer to something real or retire it
+- **ffi/zig comments reference deleted src/abi/Foreign.idr** -- RESOLVED (#38, #48):
+  the Foreign.idr references were removed; the Zig FFI now compiles with a
+  `zig build test` CI job and is documented as an EXPERIMENTAL placeholder surface
+  (entry points are not yet backed by the Julia core)
 
 ## Priority: P2 (MEDIUM) -- unit tests are decent; integration tests are the main gap
 
