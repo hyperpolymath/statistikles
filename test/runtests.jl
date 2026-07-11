@@ -1367,3 +1367,8 @@ include("reference_validation_advanced_test.jl")
 # Observability: correlation ids, structured logging, and the (pluggable,
 # no-op-safe) VeriSimDB audit-trail wiring for the tool-execution runtime path
 include("observability_test.jl")
+
+# Prompt-injection delimiting: untrusted user turns are framed as labelled
+# <user_data> data with fence collisions neutralized (input-side defence-in-depth
+# complementing the numeric-provenance guardrail)
+include("prompt_injection_test.jl")
