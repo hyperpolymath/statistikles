@@ -97,28 +97,106 @@ function statistical_assistant_chat()
         lowercase(input) == "help" && (print_help(); continue)
         lowercase(input) == "offline" && (run_examples(); continue)
 
-        push!(messages, Dict{String,Any}("role" => "user", "content" => input))
+        # One malformed turn must never kill the session — isolate the turn body.
+        try
+            push!(messages, Dict{String,Any}("role" => "user", "content" => input))
 
-        print("\n  Statistikles: ")
-        response = call_lm_studio(messages, tools)
+            print("\n  Statistikles: ")
+            response = call_lm_studio(messages, tools)
 
-        if haskey(response, "error")
-            println("Error: $(response["error"])")
-            pop!(messages)
-            continue
-        end
+            if haskey(response, "error")
+                println("Error: $(response["error"])")
+                pop!(messages)
+                continue
+            end
 
-        final = process_tool_calls(response, messages)
-        isnothing(final) && (final = response)
+            pr = process_tool_calls(response, messages; tools=tools)
+            final = pr.final
 
-        if haskey(final, "choices") && !isempty(final["choices"])
-            content = get(final["choices"][1]["message"], "content", nothing)
+            content = nothing
+            if haskey(final, "choices") && !isempty(final["choices"])
+                content = get(final["choices"][1]["message"], "content", nothing)
+            end
+
             if !isnothing(content)
+                # NEURAL-BOUNDARY GUARDRAIL: every number in the reply must trace
+                # back to a symbolic tool result before we trust (and print) it.
+                user_numbers = extract_numeric_values(input)
+                content = enforce_numeric_boundary!(
+                    content, messages, tools, pr.tool_results,
+                    user_numbers, pr.tool_calls_made)
                 println(content)
                 push!(messages, Dict{String,Any}("role" => "assistant", "content" => content))
             end
+        catch e
+            println("\n  [turn error] $(sprint(showerror, e)) — continuing.")
+            continue
         end
     end
+end
+
+"""
+    enforce_numeric_boundary!(content, messages, tools, tool_results,
+                              user_numbers, tool_calls_made) -> String
+
+Run the numeric-provenance guardrail on an assistant reply. If unverified
+numbers remain, do ONE retry asking the model to restate using only numbers
+from the tool results (or, when no tool ran this turn, to compute them or
+refrain). If orphans still persist, return the reply with a clear warning block
+appended. The model's text is NEVER silently rewritten — orphans are flagged,
+never fabricated.
+"""
+function enforce_numeric_boundary!(content::AbstractString, messages, tools,
+                                   tool_results, user_numbers, tool_calls_made::Bool)
+    ok, orphans = validate_numeric_provenance(content, tool_results, user_numbers)
+    ok && return String(content)
+
+    # ── Single retry ─────────────────────────────────────────────────────────
+    retry_msg = if tool_calls_made
+        "Your previous reply contained numeric value(s) that do not appear in any " *
+        "tool result: " * join(orphans, ", ") * ". Restate your answer using ONLY " *
+        "numbers returned by the tool calls above. Do not introduce any other " *
+        "numeric value; if a needed number is missing, call the appropriate tool."
+    else
+        "Your previous reply asserted numeric value(s) (" * join(orphans, ", ") *
+        ") but NO symbolic computation was performed this turn, so none of them is " *
+        "verified. Call the appropriate statistical tool to compute them, or restate " *
+        "your answer without asserting specific numbers."
+    end
+    push!(messages, Dict{String,Any}("role" => "user", "content" => retry_msg))
+
+    new_content = String(content)
+    retry_resp = call_lm_studio(messages, tools)
+    if !haskey(retry_resp, "error")
+        pr = process_tool_calls(retry_resp, messages; tools=tools)
+        append!(tool_results, pr.tool_results)
+        if haskey(pr.final, "choices") && !isempty(pr.final["choices"])
+            c = get(pr.final["choices"][1]["message"], "content", nothing)
+            isnothing(c) || (new_content = String(c))
+        end
+    end
+
+    ok2, orphans2 = validate_numeric_provenance(new_content, tool_results, user_numbers)
+    ok2 && return new_content
+
+    return new_content * _guardrail_warning_block(orphans2, tool_calls_made)
+end
+
+function _guardrail_warning_block(orphans, tool_calls_made::Bool)
+    io = IOBuffer()
+    println(io)
+    println(io)
+    println(io, "  " * "!"^70)
+    println(io, "  UNVERIFIED NUMBERS — POSSIBLE MOLLOCK")
+    tool_calls_made || println(io, "  (no symbolic computation was performed this turn)")
+    println(io, "  The following number(s) in the reply above did not come from any")
+    println(io, "  symbolic tool result and could not be verified:")
+    for o in orphans
+        println(io, "      - $o")
+    end
+    println(io, "  Trust only numbers produced by [symbolic] tool calls.")
+    print(io,   "  " * "!"^70)
+    return String(take!(io))
 end
 
 function print_help()
@@ -201,7 +279,8 @@ function main()
 
     try
         test_response = HTTP.request("GET", "$BASE_URL/models", HEADERS;
-                                     status_exception=false)
+                                     status_exception=false,
+                                     connect_timeout=10, readtimeout=120, retry=false)
         if test_response.status == 200
             println("\n  Connected to LM Studio ($MODEL)")
         else

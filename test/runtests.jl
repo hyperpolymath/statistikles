@@ -1342,6 +1342,10 @@ include("property_test.jl")
 # hand-derived / independently computed ground-truth values
 include("reference_validation_test.jl")
 
+# Neural-boundary guardrail: enforcement of the no-mollocks guarantee —
+# numeric provenance auditing, malformed-tool-call recovery, executor guards
+include("guardrail_test.jl")
+
 # Executor router coverage: every LLM-facing tool name in definitions.jl
 # is exercised through execute_tool (or explicitly skipped with a reason)
 include("executor_router_test.jl")
