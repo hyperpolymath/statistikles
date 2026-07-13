@@ -48,12 +48,12 @@ LLM explains: "Yes, there is a statistically significant difference
 
 [IMPORTANT]
 ====
-*HARD NOTICE — MOLLOCK WARNING*
+*HARD NOTICE — "OUTPUTS AS MOLLOCKS" WARNING*
 
 This software enforces a strict neural-symbolic boundary. No statistical value
 is ever produced by neural inference. If you see a number in a Statistikles
-response, it was computed by Julia. This is not a preference — it is a
-hard architectural invariant.
+response, it was computed by Julia (scientific analysis language, comparable to 
+R in this sense. This is not a preference — it is ahard architectural invariant.
 ====
 
 == Features
