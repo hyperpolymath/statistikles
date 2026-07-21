@@ -106,7 +106,7 @@
   (home-page "https://github.com/hyperpolymath/statistikles")
   (synopsis "Neurosymbolic statistical analysis assistant (Julia computes, LLM routes)")
   (description
-   "Statistikles is a Kautz Type 1 neurosymbolic statistical analysis
+   "Statistikles is a Kautz Type 3 neurosymbolic statistical analysis
 assistant.  A neural component (an LLM) understands a question posed in natural
 language, routes it to the correct statistical function, and explains the
 result in plain English; a symbolic component (Julia) performs @emph{all}
