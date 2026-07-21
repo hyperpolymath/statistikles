@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MPL-2.0
+# // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+#
+# CodeQL scan configuration for statistikles.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# statistikles is a Julia package with Agda proofs and a Zig FFI shim. CodeQL
+# supports none of those three languages, so the only thing here it *can*
+# analyse is JavaScript. The repository contains exactly one JavaScript file:
+#
+#     .claude/workflows/prod-readiness.js   (agent harness, ~100 lines)
+#
+# The CodeQL JavaScript extractor skips dot-directories by default, so with no
+# configuration it extracted zero files and the run died with
+#
+#     "CodeQL detected code written in JavaScript/TypeScript but could not
+#      process any of it"  (exit 32, configuration error)
+#
+# — i.e. the scan was failing *because it had nothing to look at*, not because
+# it found a problem. Naming the directory explicitly below gives the extractor
+# a real file, so the job either passes having actually analysed something or
+# fails on a genuine finding.
+#
+# HONEST SCOPE
+# ------------
+# This covers the agent harness, NOT the statistical code that is the point of
+# this project. A green CodeQL badge here means "the one JS file is clean"; it
+# says nothing about src/**/*.jl. The real correctness gates are the Julia test
+# suite (.github/workflows/e2e.yml) and `agda --safe` (.github/workflows/agda.yml).
+
+name: "statistikles CodeQL config"
+
+# Explicit include — required to reach a dot-directory the extractor would
+# otherwise skip. Extend this list if shipped JavaScript is ever added.
+paths:
+  - .claude/workflows
+
+paths-ignore:
+  # Build/interface artefacts that carry no reviewable source.
+  - "**/_build"
+  - "**/*.agdai"
