@@ -12,7 +12,7 @@ The README makes claims. This file backs them up with evidence.
 
 [quote, README section "The Solution"]
 ____
-Statistikles is a *Kautz Type 1 neurosymbolic* statistical analysis assistant:
+Statistikles is a *Kautz Type 3 neurosymbolic* statistical analysis assistant:
 
 * **Neural (LLM):** Understands your question in natural language. Routes it to the correct statistical function. Explains the result in plain English.
 * **Symbolic (Julia):** Performs ALL mathematical computation. Every number comes from a verified, deterministic Julia function. Zero neural inference in the computation path.

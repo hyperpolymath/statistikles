@@ -15,7 +15,7 @@ role = "application"
 [position-in-ecosystem]
 tier = "1"
 domain = "neurosymbolic-computing"
-classification = "Kautz Type 1 — Neural | Symbolic"
+classification = "Kautz Type 3 — Neuro | Symbolic"
 
 [related-projects]
 projects = [

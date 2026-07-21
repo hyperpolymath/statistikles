@@ -3,16 +3,35 @@
 #
 # NEUROSYM.a2ml — Neurosymbolic integration metadata
 #
-# Statistikles is a TEXTBOOK example of Kautz Type 1 neurosymbolic architecture.
+# Statistikles is a TEXTBOOK example of Kautz Type 3 neurosymbolic architecture.
 # This file documents the neural-symbolic boundary and the MOLLOCK RULE.
+#
+# WHY TYPE 3 (corrected 2026-07-21 — this file previously said Type 1)
+# --------------------------------------------------------------------
+# In Kautz's taxonomy (AAAI 2020 Engelmore lecture):
+#   Type 1  symbolic Neuro symbolic  — a plain neural net; symbols in, symbols out,
+#                                      and the NEURAL NET DOES THE WORK.
+#   Type 3  Neuro | Symbolic         — a neural and a symbolic engine cooperating as
+#                                      co-routines across a defined interface.
+# The `|` pipe notation below is Type 3's, and Type 3 is what is actually built here:
+# the LLM does natural language only, Julia does ALL computation, and the two meet at
+# one auditable gate. Under Type 1 the LLM would be computing — which is precisely the
+# MOLLOCK this project exists to prevent. The old label understated the architecture.
 
 [metadata]
 version = "0.1.0"
 last-updated = "2026-07-11"
 
 [architecture]
-kautz-type = 1
-description = "Neural | Symbolic — strict separation with defined interface"
+kautz-type = 3
+description = "Neuro | Symbolic — strict separation with defined interface"
+
+# TARGET END-STATE (ruled 2026-07-21): Kautz Type 4, `Neuro:Symbolic -> Neuro` —
+# symbolic knowledge compiled back into the neural component. The concrete lever is
+# the `verify` stage of [verification-pipeline] below (adversarial neurosymbolic SLM),
+# which is still `planned`. Type 3 -> Type 4 is the engineering programme; reaching
+# Type 3 was not, since it was already built.
+kautz-target = 4
 neural-role = "Natural language understanding and generation ONLY"
 symbolic-role = "ALL mathematical and statistical computation"
 boundary = "src/tools/executor.jl — the execute_tool() function is the neural→symbolic gate"
