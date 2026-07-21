@@ -10,10 +10,16 @@ on:
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
+# Top-level grant is the floor; the called reusable now requires
+# `security-events: write` to upload its SARIF, so the job below raises it
+# explicitly (same pattern as scorecard.yml).
 permissions:
   contents: read
   security-events: read
 
 jobs:
   scan:
-    uses: hyperpolymath/standards/.github/workflows/hypatia-scan-reusable.yml@d7c22711e830e1f383846472f6e9b99debdb201e
+    uses: hyperpolymath/standards/.github/workflows/hypatia-scan-reusable.yml@8813ecf2a841335c9dc14c75cc46694722cd6d28
+    permissions:
+      contents: read
+      security-events: write
