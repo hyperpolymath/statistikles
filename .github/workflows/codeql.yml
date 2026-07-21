@@ -38,6 +38,10 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
+          # Without this the extractor skips .claude/ (dot-directory), finds no
+          # JavaScript at all, and the run fails with exit 32 "could not process
+          # any of it". See .github/codeql/codeql-config.yml for the full why.
+          config-file: ./.github/codeql/codeql-config.yml
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a # v3
         with:
