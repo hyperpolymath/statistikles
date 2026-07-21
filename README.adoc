@@ -23,7 +23,7 @@ Statistikles exists to stop this.
 
 == The Solution
 
-Statistikles is a *Kautz Type 1 neurosymbolic* statistical analysis assistant:
+Statistikles is a *Kautz Type 3 neurosymbolic* statistical analysis assistant:
 
 * **Neural (LLM):** Understands your question in natural language. Routes it to the
   correct statistical function. Explains the result in plain English.
@@ -126,7 +126,7 @@ julia --project=. -e 'using Statistikles; run_examples()'
 
 == Architecture
 
-This is a **Kautz Type 1** neurosymbolic system — neural and symbolic components
+This is a **Kautz Type 3** neurosymbolic system — neural and symbolic components
 operate side-by-side with a defined, auditable interface boundary.
 
 The boundary is `src/tools/executor.jl:execute_tool()`. Everything above it is neural

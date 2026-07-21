@@ -17,7 +17,7 @@ Every number returned to the user MUST originate from a verified Julia function.
 If an LLM produces a number, it is a **mollock** — a plausible-sounding
 fabrication. This project exists to prevent mollocks.
 
-The architecture is Kautz Type 1 neurosymbolic:
+The architecture is Kautz Type 3 neurosymbolic:
 - Neural (LLM): Natural language understanding and generation ONLY
 - Symbolic (Julia): ALL mathematical and statistical computation
 
