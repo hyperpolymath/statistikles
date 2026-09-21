@@ -1,0 +1,7 @@
+name: ZZ M1 plain push
+on: push
+jobs:
+  m1:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "M1 with on:push ran"
