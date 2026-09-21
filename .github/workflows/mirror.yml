@@ -16,3 +16,7 @@ jobs:
   mirror:
     uses: hyperpolymath/standards/.github/workflows/mirror-reusable.yml@092dedada188f56c5915f74a5fd40aac093742c3
     secrets: inherit
+      permissions:
+        actions: read
+        contents: read
+        security-events: write
