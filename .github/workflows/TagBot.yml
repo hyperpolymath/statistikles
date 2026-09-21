@@ -1,3 +1,4 @@
+# This workflow is managed by gh actions-lock.
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
@@ -49,6 +50,6 @@ jobs:
       statuses: read
     steps:
       - name: Cut GitHub release from the registered version
-        uses: JuliaRegistries/TagBot@cded32665b34ca0496d3ac10a67d08ddfc726963 # v1.25.11
+        uses: JuliaRegistries/TagBot@v1.25.11
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
