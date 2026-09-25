@@ -24,6 +24,9 @@ on:
 # states the deploying job "must at minimum have" `pages: write` and
 # `id-token: write`, and which shows them at job level).
 #
+# Rollback: if the deploy job ever fails to mint its token, restore the previous
+# union grant at workflow level. The job-level block can be deleted without
+# touching anything else.
 permissions:
   contents: read
 concurrency:

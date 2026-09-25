@@ -12,17 +12,8 @@
 #      the grant is a replacement, not an addition.
 #
 # The negative controls are read-only API calls: no mutation, no state.
-#
-# MEASURED 2026-09-25: this file's runs, and every other workflow's runs, on a
-# branch pushed by the Arena agent (actor arena-ai-coding-agent[bot]) come back
-# `startup_failure` with ZERO jobs. The identical, unmodified zz-m1-plain-push.yml
-# succeeds on main under actor=hyperpolymath and startup-fails on that branch, so
-# the discriminator is the actor, not the diff. Until this runs under a permitted
-# actor the two claims below are UNVERIFIED here — see PR #107.
 name: ZZ Pages perms probe
-on:
-  push:
-  workflow_dispatch:
+on: push
 permissions:
   contents: read
 jobs:
