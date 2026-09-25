@@ -25,7 +25,6 @@ workflows:
         - 'julia-actions/julia-processcoverage@v1.2.2'
         - 'julia-actions/setup-julia@v3.0.2'
     '.github/workflows/governance.yml': []
-    '.github/workflows/hypatia-scan.yml': []
     '.github/workflows/install-smoke.yml':
         - 'actions/checkout@v7.0.1'
         - 'extractions/setup-just@v4.0.0'
