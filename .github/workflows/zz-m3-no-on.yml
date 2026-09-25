@@ -1,0 +1,6 @@
+name: ZZ M3 no on key
+jobs:
+  m3:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "M3 without on: ran"
