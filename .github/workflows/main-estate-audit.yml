@@ -1,4 +1,19 @@
 # This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Central Estate CI/CD Audit — runs the cicd-suite gates listed below.
+#
+# The header and the permissions block are required by the estate's
+# `governance / Workflow security linter` ("Check SPDX headers + permissions"):
+# every workflow must declare a licence in its leading comment block and a
+# top-level `permissions:` map. Both were missing here, which is why that job
+# failed while every other gate in it passed.
+#
+# The block is read-only because the gates below are: each is a composite
+# action that inspects the checked-out tree and reports. If one is ever given a
+# scope it needs, grant it at JOB level — a workflow-wide grant hands it to all
+# thirty gates at once.
 
 name: Central Estate CI/CD Audit
 
@@ -7,6 +22,10 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
+permissions:
+  actions: read
+  contents: read
 
 jobs:
   estate-audit:

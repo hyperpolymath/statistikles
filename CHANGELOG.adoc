@@ -26,6 +26,15 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
   the run. That is why "CodeQL Security Analysis" had been a `startup_failure`
   with zero jobs on every push since 2026-09-25T08:33Z. The same rule is why the
   probe below could not start: refs with no lockfile entry are refused too.
+* `.github/workflows/main-estate-audit.yml` now declares an SPDX licence in its
+  header comment block and a top-level `permissions:` map (`actions: read`,
+  `contents: read`). Both are required by the estate's
+  `governance / Workflow security linter` step "Check SPDX headers +
+  permissions", which was the single failing step in that job while every other
+  gate in it passed. The block is read-only because the gates it runs are: all
+  thirty are composite actions that inspect the checkout and report, none reads
+  a token. If one ever needs a scope, grant it at JOB level — a workflow-wide
+  grant hands it to all thirty at once.
 * `.github/workflows/secret-scanner.yml` re-pinned to the
   `secret-scanner-reusable.yml` revision the estate's own template carries
   (`210f14e7…`, from `rhodium-standard-repositories`), and a new minimal
