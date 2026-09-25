@@ -1,3 +1,4 @@
+# This workflow is managed by gh actions-lock.
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
@@ -44,21 +45,21 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        uses: actions/checkout@v7.0.1
 
       - name: Setup Julia
-        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32  # v2
+        uses: julia-actions/setup-julia@v3.0.2
         with:
           version: '1.10'
 
       - name: Julia cache
-        uses: julia-actions/cache@a7bed9df697e5d7309d68afe7542a87621a8b6c8  # v3.3.0
+        uses: julia-actions/cache@v3.3.0
 
       - name: Run Julia tests (with coverage)
         run: julia --project=. -e 'using Pkg; Pkg.test(coverage=true)'
 
       - name: Process coverage → lcov
-        uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38  # v1.2.2
+        uses: julia-actions/julia-processcoverage@v1.2.2
 
       - name: Coverage summary
         if: always()
@@ -86,7 +87,7 @@ jobs:
 
       - name: Upload lcov artifact
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: julia-coverage-lcov
           path: lcov.info
@@ -99,7 +100,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        uses: actions/checkout@v7.0.1
 
       - name: No dangerous patterns
         run: |
