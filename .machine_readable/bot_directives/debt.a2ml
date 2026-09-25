@@ -78,7 +78,7 @@ discovered = "2026-09-25"
 
 [[debt.could]]
 component = "cicd/workflows"
-issue = "zz-m1-plain-push.yml, zz-m3-no-on.yml and zz-m5-wrapper-shape.yml are the actor-gate diagnostic probes merged in #104. Their matrix has run; they are not part of the shipped CI surface and zz-m3 is a workflow with no `on:` key by design. Retire them once the actor-gate question is closed (and drop them from the STATE.a2ml ci-workflows note)."
+issue = "HALF CONSUMED 2026-09-25. zz-m3-no-on.yml and zz-pages-perms-probe.yml are retired (both were refused by GitHub at startup: 'No event triggers defined in `on`' and 'The actions ... are not allowed', the latter because the probe has no actions.lock section). The actor-gate leg is CONFIRMED, not closed: the run annotation is literally 'Actor is not allowed to trigger Actions workflows' and every one of the 12 runs ever triggered by arena-ai-coding-agent[bot] is a startup_failure, while runs by hyperpolymath and coderabbitai[bot] start normally. So the agent's own pushes can never produce CI, and a PR opened from an agent branch shows almost no checks; the maintainer has to push a commit (or dispatch) to get runs. The OTHER two startup failures on main were not actor-related: stale actions.lock (CodeQL) and a workflow absent from the lock (the pages probe). zz-m1-plain-push.yml and zz-m5-wrapper-shape.yml stay as canaries for the default branch."
 effort = "easy"
 impact = "low"
 priority = "could"
@@ -86,7 +86,51 @@ discovered = "2026-09-25"
 
 [[debt.could]]
 component = "docs/state"
-issue = "STATE.a2ml [stats] was last measured 2026-07-11. test-count (693) disagrees with the measurement recorded in #64 (1129 @test occurrences) - the note scopes it to the runtests.jl-wired suites, which nobody has re-counted since. Needs a Julia toolchain to re-measure; ci-workflows was re-measured 2026-09-25 and corrected 19 -> 23."
+issue = "STATE.a2ml [stats] was last measured 2026-07-11. test-count (693) disagrees with the measurement recorded in #64 (1129 @test occurrences) - the note scopes it to the runtests.jl-wired suites, which nobody has re-counted since. Needs a Julia toolchain to re-measure; ci-workflows was re-measured 2026-09-25 and corrected 19 -> 22 after the probe retirement."
+effort = "medium"
+impact = "low"
+priority = "could"
+discovered = "2026-09-25"
+
+# ---------------------------------------------------------------- 2026-09-25
+# Found while diagnosing the #108/#110 empty-merge and the remaining red on
+# `main`. None of these are fixable from a sandbox with no admin rights.
+
+[[debt.should]]
+component = "cicd/actions-lock"
+issue = "actions.lock cannot be regenerated here: `gh extension install github/gh-actions-lock` fails with EOF downloading the release asset, so the v4.38.1 entry was hand-derived in the tool's own format (peeled commit of the tag, sha1- prefix, owner_id/repo_id). Any future `uses:` change must run the real `gh actions-lock` where it installs, because GitHub validates the lock itself and refuses the RUN ('Invalid lockfile: The lockfile could not be validated') - which is also the first thing to check when a workflow reports startup_failure."
+effort = "easy"
+impact = "high"
+priority = "should"
+discovered = "2026-09-25"
+
+[[debt.should]]
+component = "cicd/secret-scanner"
+issue = "`scan / gitleaks` fails on every push to main and every PR ('Process completed with exit code 1' from the gitleaks detect step). The run log is not retrievable via the API, so the finding is unknown; a local reproduction is `gitleaks detect --source . --no-git --redact --no-banner --exit-code 1` with gitleaks 8.18.4 (the binary download is blocked in the agent sandbox, so nobody has read the actual finding yet). A secret scanner that has been red for days without anyone reading why is the same failure mode as #32."
+effort = "easy"
+impact = "high"
+priority = "should"
+discovered = "2026-09-25"
+
+[[debt.should]]
+component = "cicd/mirror"
+issue = "mirror.yml is red for 4 of 7 forges: bitbucket, codeberg and disroot exit 128 (SSH key rejected) and gitea exits 1. All four read `secrets.<FORGE>_SSH_KEY` (gitea also `vars.GITEA_HOST`); gitlab, sourcehut and radicle are green. This needs the forge credentials in the org/repo settings, not a code change - the reusable prints a ::notice and skips cleanly when a key is absent, so a red job means the key is present but unauthorised."
+effort = "medium"
+impact = "medium"
+priority = "should"
+discovered = "2026-09-25"
+
+[[debt.could]]
+component = "cicd/workflows"
+issue = "A workflow that GitHub refuses at startup is legible only on the run's HTML page ('Annotations'): `gh api` shows no check run, the annotations endpoint is empty, and `gh run view --log-failed` answers 'log not found'. The three causes measured here (duplicate key, missing `on:`, unvalidated lockfile) are now in .githooks/validate-workflow-yaml.sh, but the next new cause will be just as opaque. Consider a check that fails when a workflow appears in `gh run list` with a path instead of a name."
+effort = "medium"
+impact = "medium"
+priority = "could"
+discovered = "2026-09-25"
+
+[[debt.could]]
+component = "cicd/gates"
+issue = ".githooks/validate-workflow-yaml.sh parses with a python3 + PyYAML heredoc while the estate language policy bans Python with no exceptions (the canonical shell duplicate-key checker lives in standards@092deda scripts/check-workflow-duplicate-keys.sh). The heredoc predates this session; porting the parse step to a bash/awk shape or calling the estate scripts would remove the last Python in the repo's own gates."
 effort = "medium"
 impact = "low"
 priority = "could"
