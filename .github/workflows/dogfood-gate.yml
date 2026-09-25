@@ -35,6 +35,12 @@ jobs:
         uses: actions/checkout@v7.0.1
       - name: Validate every workflow parses and declares jobs
         run: ./.githooks/validate-workflow-yaml.sh
+      # Same failure mode, one file over: a lock that disagrees with the
+      # workflows is refused by GitHub at RUN time ("Invalid lockfile"), which
+      # is again zero jobs and no check run. This is the drift that killed
+      # CodeQL for four days after a dependabot bump.
+      - name: Validate actions.lock matches the workflows it locks
+        run: ./.githooks/validate-actions-lock.sh
 
   # ---------------------------------------------------------------------------
   # Job 0b: deploy/OIDC credentials must be job-scoped, never workflow-wide

@@ -78,7 +78,7 @@ discovered = "2026-09-25"
 
 [[debt.could]]
 component = "cicd/workflows"
-issue = "HALF CONSUMED 2026-09-25. zz-m3-no-on.yml and zz-pages-perms-probe.yml are retired (both were refused by GitHub at startup: 'No event triggers defined in `on`' and 'The actions ... are not allowed', the latter because the probe has no actions.lock section). The actor-gate leg is CONFIRMED, not closed: the run annotation is literally 'Actor is not allowed to trigger Actions workflows' and every one of the 12 runs ever triggered by arena-ai-coding-agent[bot] is a startup_failure, while runs by hyperpolymath and coderabbitai[bot] start normally. So the agent's own pushes can never produce CI, and a PR opened from an agent branch shows almost no checks; the maintainer has to push a commit (or dispatch) to get runs. The OTHER two startup failures on main were not actor-related: stale actions.lock (CodeQL) and a workflow absent from the lock (the pages probe). zz-m1-plain-push.yml and zz-m5-wrapper-shape.yml stay as canaries for the default branch."
+issue = "CONSUMED 2026-09-25. All four diagnostic probes are retired: zz-m3-no-on.yml and zz-pages-perms-probe.yml were refused by GitHub at startup ('No event triggers defined in `on`', and 'The actions ... are not allowed' for the probe that had no actions.lock section), and zz-m1-plain-push.yml / zz-m5-wrapper-shape.yml were retired with them once the actor-gate question closed -- the answer is recorded in the item below, and neither probe measured anything the shipped workflows do not already cover (m1 was `on: push` + echo, m5 called the same standards reusable as hypatia-scan.yml). The shapes remain one `git show` away if a canary is ever needed."
 effort = "easy"
 impact = "low"
 priority = "could"
@@ -106,8 +106,8 @@ discovered = "2026-09-25"
 
 [[debt.should]]
 component = "cicd/secret-scanner"
-issue = "`scan / gitleaks` fails on every push to main and every PR ('Process completed with exit code 1' from the gitleaks detect step). The run log is not retrievable via the API, so the finding is unknown; a local reproduction is `gitleaks detect --source . --no-git --redact --no-banner --exit-code 1` with gitleaks 8.18.4 (the binary download is blocked in the agent sandbox, so nobody has read the actual finding yet). A secret scanner that has been red for days without anyone reading why is the same failure mode as #32."
-effort = "easy"
+issue = "DIAGNOSED AND ADDRESSED 2026-09-25; verify on the next run. `scan / gitleaks` had been red on every push for as long as the run history goes (back past 2026-09-21). From the job's step conclusions: step 4 'Gitleaks secret scan (gating)' failed, which SKIPPED the AsciiDoc mirror step, so the finding is in a non-.adoc file. Two causes were found, both in the workflow rather than in the tree: (1) the pin (bd0df9ea) predates the estate's shared allowlist, so config/gitleaks/estate-baseline.toml could not be inherited -- and this is a Julia repo, whose Project.toml package UUIDs and Manifest.toml git-tree-sha1 integrity hashes are the baseline's headline false-positive class; (2) that revision ran gitleaks without --verbose, so the log named neither rule, file nor line, which is why days of red produced no triage. Fixed by re-pinning to 210f14e7 (the revision rhodium-standard-repositories' template carries) and adding a minimal .gitleaks.toml that extends the staged baseline. The new revision also adds a gating full-history pass and the AsciiDoc pass is past its grace window, so the scan is now strictly wider: if any finding survives, read the log (it names rule/file/line), remove the value, or -- for a documented false positive only -- add an anchored regexes entry here rather than a paths entry."
+effort = "medium"
 impact = "high"
 priority = "should"
 discovered = "2026-09-25"
@@ -133,5 +133,25 @@ component = "cicd/gates"
 issue = ".githooks/validate-workflow-yaml.sh parses with a python3 + PyYAML heredoc while the estate language policy bans Python with no exceptions (the canonical shell duplicate-key checker lives in standards@092deda scripts/check-workflow-duplicate-keys.sh). The heredoc predates this session; porting the parse step to a bash/awk shape or calling the estate scripts would remove the last Python in the repo's own gates."
 effort = "medium"
 impact = "low"
+priority = "could"
+discovered = "2026-09-25"
+
+
+# ---------------------------------------------------------------- 2026-09-25
+# CI access, measured while landing the fix.
+
+[[debt.should]]
+component = "cicd/actors"
+issue = "GitHub refuses EVERY workflow run triggered by arena-ai-coding-agent[bot] with 'Actor is not allowed to trigger Actions workflows' -- 12 of the 12 runs this account has triggered in this repo are startup_failure, while hyperpolymath's and coderabbitai[bot]'s runs start normally. Consequence for anyone reviewing agent work: a branch pushed by that account shows almost no checks, and none of the repo's Dogfood Gate, Governance or CodeQL jobs can validate an agent's commit. A maintainer has to push an empty commit or dispatch the workflow (or merge and watch main) to get a run. Not repo-fixable: the setting is org-level, and this token (an App installation) cannot read the Actions policy (403) to confirm the allowlist it is checked against."
+effort = "easy"
+impact = "high"
+priority = "should"
+discovered = "2026-09-25"
+
+[[debt.could]]
+component = "cicd/actions-lock"
+issue = "actions.lock is now drift-checked locally (.githooks/validate-actions-lock.sh, offline, bash), but it still cannot be REGENERATED here: the gh-actions-lock release asset will not download (EOF), and there is no Go toolchain to build it. Any change to a 'uses: ref' needs someone with a working `gh actions-lock` to run it, or the same hand-derivation this session did for v4.38.1 (peeled tag commit + owner_id/repo_id, both verifiable through the API)."
+effort = "easy"
+impact = "medium"
 priority = "could"
 discovered = "2026-09-25"
