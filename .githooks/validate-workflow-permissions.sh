@@ -70,8 +70,8 @@ except ImportError:
 DEPLOY_SCOPES = ("pages", "id-token")
 
 def expand(path):
-    """Files as given; directories expand to the workflows inside them (so this
-    script can be pointed at a fixture directory in a test)."""
+    """Return a non-directory path in a one-item list, or sorted paths matching
+    .yml and .yaml directly inside a directory. No matches yield an empty list."""
     if os.path.isdir(path):
         return sorted(glob.glob(os.path.join(path, "*.yml")) +
                       glob.glob(os.path.join(path, "*.yaml")))
