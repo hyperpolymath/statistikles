@@ -78,7 +78,7 @@ discovered = "2026-09-25"
 
 [[debt.could]]
 component = "cicd/workflows"
-issue = "HALF CONSUMED 2026-09-25. zz-m3-no-on.yml and zz-pages-perms-probe.yml are retired (both were refused by GitHub at startup: 'No event triggers defined in `on`' and 'The actions ... are not allowed', the latter because the probe has no actions.lock section). The actor-gate question they were built for is closed: the startup failures blamed on the Arena bot were lockfile/allowlist refusals, and zz-m1 ran fine under the same actor. zz-m1-plain-push.yml and zz-m5-wrapper-shape.yml remain as live canaries for 'plain push' and 'wrapper shape'; retire them when those shapes have real coverage elsewhere."
+issue = "HALF CONSUMED 2026-09-25. zz-m3-no-on.yml and zz-pages-perms-probe.yml are retired (both were refused by GitHub at startup: 'No event triggers defined in `on`' and 'The actions ... are not allowed', the latter because the probe has no actions.lock section). The actor-gate leg is CONFIRMED, not closed: the run annotation is literally 'Actor is not allowed to trigger Actions workflows' and every one of the 12 runs ever triggered by arena-ai-coding-agent[bot] is a startup_failure, while runs by hyperpolymath and coderabbitai[bot] start normally. So the agent's own pushes can never produce CI, and a PR opened from an agent branch shows almost no checks; the maintainer has to push a commit (or dispatch) to get runs. The OTHER two startup failures on main were not actor-related: stale actions.lock (CodeQL) and a workflow absent from the lock (the pages probe). zz-m1-plain-push.yml and zz-m5-wrapper-shape.yml stay as canaries for the default branch."
 effort = "easy"
 impact = "low"
 priority = "could"
