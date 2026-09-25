@@ -25,8 +25,8 @@ executor-dispatched-tools = 55
 test-count = 693
 test-count-note = "static @test assertions across the runtests.jl-wired suite: runtests.jl, e2e_test.jl, property_test.jl, reference_validation_test.jl, reference_validation_advanced_test.jl, degenerate_input_test.jl, guardrail_test.jl, executor_router_test.jl"
 test-failures = 0
-ci-workflows = 22
-ci-workflows-note = "measured 2026-09-25: workflow FILES under .github/workflows/ (excludes actions.lock). Recount: ls .github/workflows/*.yml | wc -l. Movement that day: instant-sync.yml removed (#32, -1); zz-m3-no-on.yml and zz-pages-perms-probe.yml retired (+1 then -2: the probe had been added by #107 and never started once, and zz-m3 has no `on:` key by design, so GitHub refused both — see CHANGELOG). The zz-m1-plain-push.yml and zz-m5-wrapper-shape.yml diagnostic probes from #104 remain. The previous value (19, recorded 2026-07-11) had gone stale"
+ci-workflows = 20
+ci-workflows-note = "measured 2026-09-25: workflow FILES under .github/workflows/ (excludes actions.lock). Recount: ls .github/workflows/*.yml | wc -l. Movement that day: instant-sync.yml removed (#32, -1); the four diagnostic probes from #104/#107 (zz-m1-plain-push, zz-m3-no-on, zz-m5-wrapper-shape, zz-pages-perms-probe) retired once their matrix had run (-4); two of the four were refused by GitHub at startup and CHANGELOG names the annotation that refused them. The previous value (19, recorded 2026-07-11) had gone stale"
 
 [experimental-surfaces]
 # Machine-readable mirror of README.adoc's "Experimental surfaces" section.

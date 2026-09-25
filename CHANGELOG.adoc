@@ -26,6 +26,19 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
   the run. That is why "CodeQL Security Analysis" had been a `startup_failure`
   with zero jobs on every push since 2026-09-25T08:33Z. The same rule is why the
   probe below could not start: refs with no lockfile entry are refused too.
+* `.github/workflows/secret-scanner.yml` re-pinned to the
+  `secret-scanner-reusable.yml` revision the estate's own template carries
+  (`210f14e7…`, from `rhodium-standard-repositories`), and a new minimal
+  `.gitleaks.toml` extends the estate baseline it stages. The old pin predated
+  the shared allowlist (`config/gitleaks/estate-baseline.toml`), so this Julia
+  repo's public package UUIDs (`Project.toml`) and `git-tree-sha1` integrity
+  hashes (`Manifest.toml`) — exactly the false-positive class the baseline
+  documents — were reported as candidate secrets on every run, and the pin's
+  scan had no `--verbose`, so the log named neither the rule nor the file. The
+  scanner has been red on every push for as long as the visible history goes.
+  The new revision inherits the baseline, names its findings, and adds a gating
+  full-history pass; if the job is still red after this, its log now says
+  exactly which rule, file and line, which is what it could not do before.
 * `.githooks/validate-workflow-permissions.sh`: the `expand()` docstring now says
   what the function does — a file path is returned as a one-item list, a
   directory expands to the sorted `.yml`/`.yaml` entries directly inside it, and
@@ -60,6 +73,19 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
   it was written to measure are now demonstrated by the real workflow on `main`:
   run 36177413215 built the site with `contents: read` only and deployed with
   exactly `pages: write` + `id-token: write`, at job level.
+* `.github/workflows/zz-m1-plain-push.yml` and
+  `.github/workflows/zz-m5-wrapper-shape.yml`, the remaining two legs of the
+  #104 diagnostic matrix, retired in the same commit as their answers. The
+  question they were built for is closed: GitHub refuses every run triggered by
+  `arena-ai-coding-agent[bot]` with `Actor is not allowed to trigger Actions
+  workflows` (12 of the 12 it triggered in this repo), while the maintainer's
+  and CodeRabbit's runs start normally — so an agent-authored branch can never
+  show CI, and the failure mode blamed on the matrix was really the lockfile
+  and allowlist refusals above. Neither probe measured anything the real
+  workflows do not already cover: `m1` was `on: push` plus one `echo`, and
+  `m5` called the same standards `hypatia-scan-reusable.yml` that the shipped
+  `hypatia-scan.yml` calls. The shapes are one `gh workflow run` away in git
+  history if a canary is ever needed again.
 * `.github/workflows/instant-sync.yml` and its `actions.lock` entry. Its only
   effect was a cross-repo `repository_dispatch` to
   `hyperpolymath/.git-private-farm`, which was retired with the Nix mirrors
@@ -69,6 +95,24 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 
 ==== Added
 
+* `.gitleaks.toml` at the repo root: `[extend] path = ".gitleaks-estate.toml"`,
+  which is the documented way a repository opts into the estate
+  gitleaks baseline. The reusable stages that file only when a repo-local
+  config references it by exactly that path, and stages the copy pinned to the
+  reusable's own revision, so the config and the scanner consuming it are the
+  same commit. No repo-local suppressions: the baseline covers the
+  false-positive classes, and anything it does not cover is real until shown
+  otherwise.
+* `.githooks/validate-actions-lock.sh`, run in the "Workflows parse (no
+  silent-dead gates)" Dogfood Gate job: fails when a workflow and
+  `actions.lock` disagree, when the lock keeps a section for a deleted
+  workflow, or when a locked ref has no valid `dependencies:` entry. It is
+  bash-only and offline — `gh actions-lock` cannot be installed in the
+  environment that wrote it (release-asset download EOFs), and a gate that
+  needs a working third-party download to notice a stale lock is not a
+  backstop. Verified against seven fixtures, including the real pre-fix lock
+  from `0b45d60`, which it flags as `github/codeql-action@v4.38.0` in the lock
+  vs `@v4.38.1` in `codeql.yml` (the `startup_failure` above).
 * `.githooks/validate-workflow-permissions.sh`, run as a Dogfood Gate job: fails
   when `pages: write` / `id-token: write` are granted workflow-wide, or when any
   `permissions:` block is `write-all`. This is the regression guard for #66 —

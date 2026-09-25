@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Gitleaks configuration — this repository's own.
+#
+# WHY IT EXISTS
+# -------------
+# The estate keeps ONE shared allowlist at
+# hyperpolymath/standards:config/gitleaks/estate-baseline.toml (documented in
+# docs/GITLEAKS-ESTATE-BASELINE.adoc). It exists because turning the scanner on
+# for real (`gitleaks detect --exit-code 1`, standards#500 — until then the step
+# carried `continue-on-error: true`, so the estate's primary secret scanner could
+# not fail a PR) surfaced a wall of findings that were all false positives:
+# module integrity hashes, package UUIDs, public GPG fingerprints, cryptographic
+# type NAMES and synthetic `.example` fixtures.
+#
+# This repository is a Julia project, so that class is unavoidable here: every
+# `[deps]` entry in Project.toml and Manifest.toml carries a public package UUID
+# from the General registry and a `git-tree-sha1` integrity hash, and
+# `generic-api-key` sees both as credential-shaped. The baseline allowlists those
+# two paths by name; a repository that does not extend it cannot see that entry.
+#
+# `secret-scanner-reusable.yml` stages the baseline into the workspace root as
+# `.gitleaks-estate.toml` ONLY when a repo-local config references it by exactly
+# that path (the reference is grepped, not assumed), and it stages the copy taken
+# at `job.workflow_sha` — the pin in `.github/workflows/secret-scanner.yml` — so
+# the baseline and the reusable that consumes it are always the same revision.
+# A repo with no `.gitleaks.toml` is served the unpinned copy from standards'
+# default branch instead; extending it here is what makes the config reproducible.
+#
+# `[extend] path` resolves against the PROCESS WORKING DIRECTORY, not against
+# this file's directory. The scan runs from the repo root, which is why the
+# baseline is staged there and why the relative path below is correct.
+#
+# WHAT GOES BELOW, IF ANYTHING
+# ----------------------------
+# Repo-local suppressions ONLY, and prefer a `regexes` entry (anchored to the
+# whole value) over a `paths` entry: a regex suppresses one exact string, so a
+# credential planted in the same file is still caught, while a path entry blinds
+# that file to every rule. There is nothing to add here yet — with the baseline
+# in place this scan is expected to be clean, and if it is not, the finding is
+# real until proven otherwise.
+#
+# Do NOT copy the baseline into this file. It is live config shared across the
+# estate; a copy freezes it and stops taking the estate's updates.
+
+[extend]
+path = ".gitleaks-estate.toml"
