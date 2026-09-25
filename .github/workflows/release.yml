@@ -191,8 +191,15 @@ jobs:
   provenance:
     name: SLSA Provenance
     needs: [build, release]
+    # ONE `contents:` KEY ONLY. `contents: read` was added here on top of an
+    # existing `contents: write` by the permissions sweep in #98. A duplicate
+    # key is not an override — GitHub rejects the whole file at parse time
+    # ("Invalid workflow file: (Line: 199, Col: 7): 'contents' is already
+    # defined"), which is a `failure` with NO jobs, NO log and NO check run, so
+    # this workflow was silently dead from 2026-09-21 until the fix. The grant
+    # below is the union the SLSA generator declares (`contents` write covers
+    # its `contents: read` jobs).
     permissions:
-      contents: read
       security-events: write
       actions: read
       id-token: write

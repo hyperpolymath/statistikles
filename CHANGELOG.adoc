@@ -10,18 +10,56 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 
 ==== Fixed
 
-* `.github/workflows/pages.yml` now grants `pages: write` and `id-token: write`
-  to the `deploy` job only. The workflow-level floor is `contents: read`, so the
-  `build` job — the one that compiles checked-out source inside a container —
-  no longer inherits Pages publish rights or the ability to mint an OIDC token
-  (SonarCloud MAJOR, #66).
-* `.github/workflows/zz-m3-no-on.yml` quotes the probe's echo string. Unquoted,
-  it was a YAML plain scalar containing `on: `, so the file did not parse at
-  all: the probe could not tell "no `on:` key" apart from "not valid YAML", and
-  it held the Dogfood Gate's "Workflows parse" job red on `main` since #104.
+* `.github/workflows/release.yml` no longer declares `contents:` twice in the
+  `provenance` job's `permissions:` map. The duplicate was appended by the #98
+  permissions sweep on top of an existing `contents: write`, and a duplicate key
+  is not an override — it is a parse error. GitHub answered `Invalid workflow
+  file: (Line: 199, Col: 7): 'contents' is already defined`, which is a `failure`
+  run with zero jobs, no log and no check run, so the release pipeline was
+  silently dead from 2026-09-21 until now. `contents: write` is the line kept:
+  the SLSA generator this job calls uploads the release assets.
+* `.github/workflows/actions.lock` records `github/codeql-action@v4.38.1`, which
+  `codeql.yml` has pinned since the Dependabot bump in #102 while the lock still
+  said `v4.38.0`. An unvalidatable lockfile is not a warning: GitHub answers
+  `Invalid lockfile: .github/workflows/actions.lock#L1 — The lockfile could not
+  be validated. Regenerate it by running `gh actions-lock`` and refuses to start
+  the run. That is why "CodeQL Security Analysis" had been a `startup_failure`
+  with zero jobs on every push since 2026-09-25T08:33Z. The same rule is why the
+  probe below could not start: refs with no lockfile entry are refused too.
+* `.githooks/validate-workflow-permissions.sh`: the `expand()` docstring now says
+  what the function does — a file path is returned as a one-item list, a
+  directory expands to the sorted `.yml`/`.yaml` entries directly inside it, and
+  no matches yield an empty list. Documentation only; no behaviour change. This
+  is the clarification PR #110 was opened to land and did not: its merge commit
+  had a single parent, so it changed nothing on `main`.
+
+==== Changed
+
+* `.githooks/validate-workflow-yaml.sh` (Dogfood Gate job "Workflows parse (no
+  silent-dead gates)") now reads for the three ways a workflow file "parses" and
+  is still refused by GitHub: duplicate keys (measured here: `release.yml`, see
+  above), a missing `on:` trigger (measured here: the m3 probe), and
+  `timeout-minutes` on a reusable-workflow call job (from the estate's canonical
+  parser, standards@092deda). All three are 0-job failures with no check run, so
+  a parse-only check cannot see them; the new checks fire on planted fixtures and
+  agree with the estate's `check-workflow-duplicate-keys.sh`.
 
 ==== Removed
 
+* `.github/workflows/zz-m3-no-on.yml`, the m3 leg of the #104 diagnostic matrix.
+  Its question is answered: a workflow with no `on:` key is refused by GitHub
+  with `No event triggers defined in `on``, which is a red 0-job run named by
+  file path on every push, with no check run and no log. The matrix has run and a
+  probe that can only ever fail is permanent noise on the board — the answer is
+  recorded here instead (git history keeps the file).
+* `.github/workflows/zz-pages-perms-probe.yml`, self-described as "TEMPORARY
+  probe — delete before merge". It never started once: it carries no
+  `actions.lock` section, and its `actions/checkout@v7.0.1` and
+  `actions/upload-pages-artifact@v5.0.0` refs were therefore refused at startup
+  ("The actions ... are not allowed in hyperpolymath/statistikles"). Both claims
+  it was written to measure are now demonstrated by the real workflow on `main`:
+  run 36177413215 built the site with `contents: read` only and deployed with
+  exactly `pages: write` + `id-token: write`, at job level.
 * `.github/workflows/instant-sync.yml` and its `actions.lock` entry. Its only
   effect was a cross-repo `repository_dispatch` to
   `hyperpolymath/.git-private-farm`, which was retired with the Nix mirrors
