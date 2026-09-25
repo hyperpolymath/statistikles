@@ -37,6 +37,26 @@ jobs:
         run: ./.githooks/validate-workflow-yaml.sh
 
   # ---------------------------------------------------------------------------
+  # Job 0b: deploy/OIDC credentials must be job-scoped, never workflow-wide
+  #
+  # The same argument as Job 0, one level down: a workflow-level `pages: write`
+  # or `id-token: write` is not a red check, it is an OVER-GRANT — every job in
+  # the file inherits the ability to publish the site or mint an OIDC token,
+  # including the jobs that only compile checked-out source. It stayed invisible
+  # here for months (`pages.yml`, issue #66) because nothing read the grant.
+  # This reads it.
+  # ---------------------------------------------------------------------------
+  workflow-permissions:
+    name: Deploy/OIDC scopes are job-level
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+      - name: Validate no workflow-wide pages/id-token grant
+        run: ./.githooks/validate-workflow-permissions.sh
+
+  # ---------------------------------------------------------------------------
   # Job 1: A2ML manifest validation
   # ---------------------------------------------------------------------------
   a2ml-validate:
