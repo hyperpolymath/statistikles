@@ -192,6 +192,8 @@ jobs:
     name: SLSA Provenance
     needs: [build, release]
     permissions:
+      contents: read
+      security-events: write
       actions: read
       id-token: write
       contents: write
