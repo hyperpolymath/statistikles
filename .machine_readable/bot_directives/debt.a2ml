@@ -9,7 +9,7 @@
 
 [metadata]
 version = "1.0.0"
-last-updated = "2026-03-24"
+last-updated = "2026-09-25"
 
 # ============================================================================
 # DEBT ITEMS
@@ -47,3 +47,47 @@ last-updated = "2026-03-24"
 # effort = "easy"
 # impact = "low"
 # discovered = "2026-03-23"
+
+# ---------------------------------------------------------------- 2026-09-25
+# Found while closing #66 (pages.yml least privilege) and #32 (retire
+# instant-sync). None of these were in the blast radius of those two fixes.
+
+[[debt.should]]
+component = "cicd/workflows"
+issue = "Four workflows still grant a write scope at WORKFLOW level: dependabot-automerge.yml (pull-requests), hypatia-scan.yml (security-events), label-triage.yml and labels.yml (issues). validate-workflow-permissions.sh deliberately does not gate these yet - a gate that fires on accepted practice gets muted. Move each grant to its job, then widen the gate to every write scope."
+effort = "easy"
+impact = "medium"
+priority = "should"
+discovered = "2026-09-25"
+
+[[debt.could]]
+component = "labels"
+issue = ".github/labels.json and .github/label-classifier.json each carry _generated_from = \".github/labels.yml in hyperpolymath/.git-private-farm\", and that repo was retired (standards#106; it 404s). Provenance is now a dangling pointer - the generated artefacts have no reachable source. Re-point at wherever the taxonomy lives now (hyperpolymath/standards carries labels.json + label-classifier.json)."
+effort = "medium"
+impact = "medium"
+priority = "could"
+discovered = "2026-09-25"
+
+[[debt.could]]
+component = "cicd/justfile"
+issue = "Justfile validate-rsr / validate-state / state-touch look for .machine_readable/STATE.a2ml, but the state files live in .machine_readable/6a2/. `just validate` therefore fails closed on files that do not exist and cannot pass as written - a validation target that can never go green."
+effort = "easy"
+impact = "medium"
+priority = "could"
+discovered = "2026-09-25"
+
+[[debt.could]]
+component = "cicd/workflows"
+issue = "zz-m1-plain-push.yml, zz-m3-no-on.yml and zz-m5-wrapper-shape.yml are the actor-gate diagnostic probes merged in #104. Their matrix has run; they are not part of the shipped CI surface and zz-m3 is a workflow with no `on:` key by design. Retire them once the actor-gate question is closed (and drop them from the STATE.a2ml ci-workflows note)."
+effort = "easy"
+impact = "low"
+priority = "could"
+discovered = "2026-09-25"
+
+[[debt.could]]
+component = "docs/state"
+issue = "STATE.a2ml [stats] was last measured 2026-07-11. test-count (693) disagrees with the measurement recorded in #64 (1129 @test occurrences) - the note scopes it to the runtests.jl-wired suites, which nobody has re-counted since. Needs a Julia toolchain to re-measure; ci-workflows was re-measured 2026-09-25 and corrected 19 -> 23."
+effort = "medium"
+impact = "low"
+priority = "could"
+discovered = "2026-09-25"

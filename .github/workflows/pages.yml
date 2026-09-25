@@ -6,11 +6,29 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+
+# The workflow-level grant is the FLOOR, and the floor is read-only.
+#
+# A job-level `permissions:` block does not ADD to this map — it REPLACES it for
+# that job, which is why each job below restates exactly what it needs instead
+# of inheriting a union nobody chose. That distinction is the whole point of the
+# restructure in issue #66 (SonarCloud MAJOR): this file used to grant
+# `pages: write` and `id-token: write` at workflow level, so the `build` job —
+# the one that runs a compiler over checked-out source inside a container — also
+# held Pages deploy credentials and the right to mint OIDC tokens. Neither has
+# any use in a build step.
+#
+# OIDC is the highest-blast-radius scope in this file: an id-token is exchanged
+# for short-lived credentials in OTHER systems, so it is only ever correct on
+# the single job that actually needs it (actions/deploy-pages, whose README
+# states the deploying job "must at minimum have" `pages: write` and
+# `id-token: write`, and which shows them at job level).
+#
+# Rollback: if the deploy job ever fails to mint its token, restore the previous
+# union grant at workflow level. The job-level block can be deleted without
+# touching anything else.
 permissions:
-  actions: read
   contents: read
-  pages: write
-  id-token: write
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -18,6 +36,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # `contents: read` is the whole requirement: check out two repositories,
+    # compile Ddraig, build the site, upload one artifact. No Pages credential,
+    # no OIDC.
+    permissions:
+      contents: read
     container:
       image: ghcr.io/stefan-hoeck/idris2-pack@sha256:f0758996a931fb35d9ecb1de273c4d59dabe2a09b433afc7e357f65a08b7e1ff
     steps:
@@ -41,11 +64,12 @@ jobs:
           fi
           ./.ddraig-ssg/build/exec/ddraig build src _site https://hyperpolymath.github.io/${GITHUB_REPOSITORY#*/}
       - name: Upload artifact
-        # Pinned at exactly what `@v3` resolved to, NOT bumped to v5. v5 swaps its
-        # internal actions/upload-artifact v4 -> v7, changing the artifact format fed
-        # to deploy-pages below — and deploy-pages cannot be exercised at all until
-        # Pages is enabled on this repo (it 404s), so that upgrade is untestable here.
-        # Upgrade both halves of the pair together once Pages is on. See issue #32 area.
+        # CAREFUL: upload-pages-artifact and deploy-pages are a MATCHED PAIR —
+        # the action's internal upload-artifact version decides the artifact
+        # format the deploy action parses. Bump both together, never one.
+        # Currently paired at upload-pages-artifact v5.0.0 / deploy-pages
+        # v5.0.1 (the v3 -> v5 pairing). The older note here about not bumping
+        # until Pages was enabled is superseded: Pages is on and deploying.
         uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: '_site'
@@ -56,10 +80,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: build
+    # Exactly what actions/deploy-pages documents as the minimum for the
+    # DEPLOYING job: `pages: write` to publish, `id-token: write` to request the
+    # OIDC token that proves this run is allowed to deploy. No `contents:` —
+    # this job never checks anything out.
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        # Matched pair with upload-pages-artifact v3 above; pinned at the current `@v4`
-        # resolution. v5 exists (node20 -> node24) but this step cannot run until Pages
-        # is enabled, so bumping it would be an unverifiable change.
+        # Matched pair with upload-pages-artifact v5.0.0 above.
         uses: actions/deploy-pages@v5.0.1

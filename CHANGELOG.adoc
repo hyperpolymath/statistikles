@@ -7,3 +7,31 @@ Changelog], and this project adheres to
 https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 
 === [Unreleased]
+
+==== Fixed
+
+* `.github/workflows/pages.yml` now grants `pages: write` and `id-token: write`
+  to the `deploy` job only. The workflow-level floor is `contents: read`, so the
+  `build` job — the one that compiles checked-out source inside a container —
+  no longer inherits Pages publish rights or the ability to mint an OIDC token
+  (SonarCloud MAJOR, #66).
+* `.github/workflows/zz-m3-no-on.yml` quotes the probe's echo string. Unquoted,
+  it was a YAML plain scalar containing `on: `, so the file did not parse at
+  all: the probe could not tell "no `on:` key" apart from "not valid YAML", and
+  it held the Dogfood Gate's "Workflows parse" job red on `main` since #104.
+
+==== Removed
+
+* `.github/workflows/instant-sync.yml` and its `actions.lock` entry. Its only
+  effect was a cross-repo `repository_dispatch` to
+  `hyperpolymath/.git-private-farm`, which was retired with the Nix mirrors
+  (standards#106) and no longer resolves; the secret-presence gate cannot detect
+  a *revoked* token, so every push to `main` was red (#32). Estate CI/CD
+  regularisation lists `instant-sync` under "never re-add".
+
+==== Added
+
+* `.githooks/validate-workflow-permissions.sh`, run as a Dogfood Gate job: fails
+  when `pages: write` / `id-token: write` are granted workflow-wide, or when any
+  `permissions:` block is `write-all`. This is the regression guard for #66 —
+  the over-grant was invisible for months because nothing read the grant.
