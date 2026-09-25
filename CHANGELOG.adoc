@@ -66,10 +66,16 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
   probe that can only ever fail is permanent noise on the board — the answer is
   recorded here instead (git history keeps the file).
 * `.github/workflows/zz-pages-perms-probe.yml`, self-described as "TEMPORARY
-  probe — delete before merge". It never started once: it carries no
-  `actions.lock` section, and its `actions/checkout@v7.0.1` and
-  `actions/upload-pages-artifact@v5.0.0` refs were therefore refused at startup
-  ("The actions ... are not allowed in hyperpolymath/statistikles"). Both claims
+  probe — delete before merge". It never started once: ten runs, ten
+  `startup_failure`, every one refused with an allowlist message ("The actions
+  actions/checkout@v7.0.1 and actions/upload-pages-artifact@v5.0.0 are not
+  allowed in hyperpolymath/statistikles because all actions must be from a
+  repository owned by hyperpolymath, created by GitHub, verified in the GitHub
+  Marketplace, or match one of the patterns ..." — run 36177415819). The only
+  measurable difference from the real `pages.yml`, which uses those same two
+  refs and starts fine, is that the probe has no `actions.lock` section; both
+  readings of that message end at the same conclusion, that the probe cannot
+  be made to run from here. Both claims
   it was written to measure are now demonstrated by the real workflow on `main`:
   run 36177413215 built the site with `contents: read` only and deployed with
   exactly `pages: write` + `id-token: write`, at job level.
