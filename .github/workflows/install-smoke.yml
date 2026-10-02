@@ -50,7 +50,7 @@ jobs:
           version: '1.10'
 
       - name: Julia cache
-        uses: julia-actions/cache@v3.3.0
+        uses: julia-actions/cache@v3.4.0
 
       - name: Setup just
         uses: extractions/setup-just@v4.0.0
