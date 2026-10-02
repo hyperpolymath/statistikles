@@ -53,7 +53,7 @@ jobs:
           version: '1.10'
 
       - name: Julia cache
-        uses: julia-actions/cache@v3.3.0
+        uses: julia-actions/cache@v3.4.0
 
       - name: Run Julia tests (with coverage)
         run: julia --project=. -e 'using Pkg; Pkg.test(coverage=true)'
