@@ -18,7 +18,14 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
+[weakdeps]
+ContrastFamilies = "10e923c4-f9ab-4da5-a18f-8d9875514f27"
+
+[extensions]
+StatistiklesContrastFamiliesExt = "ContrastFamilies"
+
 [compat]
+ContrastFamilies = "0.1"
 CSV = "0.10.16"
 DataFrames = "1.8.1"
 Dates = "1"
@@ -35,7 +42,8 @@ UUIDs = "1"
 julia = "1.10"
 
 [extras]
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Pkg", "Test"]

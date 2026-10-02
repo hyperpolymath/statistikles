@@ -1372,3 +1372,7 @@ include("observability_test.jl")
 # <user_data> data with fence collisions neutralized (input-side defence-in-depth
 # complementing the numeric-provenance guardrail)
 include("prompt_injection_test.jl")
+
+# BHFamily overload from the ContrastFamilies.jl package extension: the BH
+# family size is derived from the formula and checked, never taken on trust
+include("bhfamily_ext_test.jl")
