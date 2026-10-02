@@ -8,6 +8,21 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 
 === [Unreleased]
 
+==== Added
+
+* `adjust_p_values(p_values, fam::BHFamily; method = "fdr")`, a package
+  extension (`ext/StatistiklesContrastFamiliesExt.jl`) that loads when
+  https://github.com/hyperpolymath/ContrastFamilies.jl[ContrastFamilies.jl] is
+  in the environment. The family comes from the model formula and its
+  contrasts: m = n_features × n_contrasts. Passing anything other than exactly
+  m p-values throws `ContrastFamilies.FamilyMismatch`, so a single contrast's
+  slice cannot be corrected with too small an m, which would be
+  anti-conservative. The result is the plain `adjust_p_values` result plus a
+  `"family"` entry recording m, how it was derived, and the formula's
+  provenance hash and equivalence key. ContrastFamilies is a weak dependency,
+  so nothing changes for anyone who does not load it. It is not registered yet,
+  so the tests add it by URL, pinned to commit `82262db`.
+
 ==== Fixed
 
 * `.github/workflows/release.yml` no longer declares `contents:` twice in the
