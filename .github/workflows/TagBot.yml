@@ -50,6 +50,6 @@ jobs:
       statuses: read
     steps:
       - name: Cut GitHub release from the registered version
-        uses: JuliaRegistries/TagBot@v1.25.14
+        uses: JuliaRegistries/TagBot@v1.25.15
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

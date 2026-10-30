@@ -4,14 +4,14 @@
 version: 'v0.0.3'
 workflows:
     '.github/workflows/TagBot.yml':
-        - 'juliaregistries/tagbot@v1.25.14'
+        - 'juliaregistries/tagbot@v1.25.15'
     '.github/workflows/agda.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/boj-build.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@v7.0.1'
-        - 'github/codeql-action@v4.39.0'
+        - 'github/codeql-action@v4.39.1'
     '.github/workflows/container-build.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/dependabot-automerge.yml':
@@ -106,9 +106,9 @@ dependencies:
         repo_id: 258510356
         uses:
             - 'extractions/setup-crate@0551596312d4008a6dfbc4d3c38fa20eaef46d2d'
-    'github/codeql-action@v4.39.0':
-        ref: 'v4.39.0'
-        commit: 'sha1-6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee'
+    'github/codeql-action@v4.39.1':
+        ref: 'v4.39.1'
+        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         owner_id: 9919
         repo_id: 259445878
     'hyperpolymath/cicd-suite@main':
@@ -144,9 +144,9 @@ dependencies:
         commit: 'sha1-da908477b5db94c10ffce8cfea9f2b3b9d5db687'
         owner_id: 53965732
         repo_id: 202020219
-    'juliaregistries/tagbot@v1.25.14':
-        ref: 'v1.25.14'
-        commit: 'sha1-a3a48fad3c1d6c2abbb874970a3f9032493a7473'
+    'juliaregistries/tagbot@v1.25.15':
+        ref: 'v1.25.15'
+        commit: 'sha1-87cc4cc2b4639f6c743f5772f376a32914060732'
         owner_id: 31455341
         repo_id: 180715061
     'mlugg/setup-zig@v2.2.1':
