@@ -25,6 +25,7 @@ workflows:
         - 'julia-actions/julia-processcoverage@v1.2.2'
         - 'julia-actions/setup-julia@v3.0.3'
     '.github/workflows/governance.yml': []
+    '.github/workflows/hypatia-scan.yml': []
     '.github/workflows/install-smoke.yml':
         - 'actions/checkout@v7.0.1'
         - 'extractions/setup-just@v4.0.0'
@@ -34,7 +35,7 @@ workflows:
     '.github/workflows/labels.yml': []
     '.github/workflows/main-estate-audit.yml':
         - 'actions/checkout@v7.0.1'
-        - 'hyperpolymath/cicd-suite@main'
+        - 'hyperpolymath/proven-cicd-and-workflows@main'
     '.github/workflows/mirror.yml': []
     '.github/workflows/pages.yml':
         - 'actions/checkout@v7.0.1'
@@ -111,24 +112,24 @@ dependencies:
         commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
         owner_id: 9919
         repo_id: 259445878
-    'hyperpolymath/cicd-suite@main':
+    'hyperpolymath/deed-ecosystem@f9d999b60cb5f383679ea19912bcdc49c944973a':
+        ref: 'v0.1.0'
+        commit: 'sha1-f9d999b60cb5f383679ea19912bcdc49c944973a'
+        owner_id: 6759885
+        repo_id: 1275649586
+    'hyperpolymath/k9-ecosystem@2155aa26a21758f2ba119f61bc7e0e1981c106fb':
+        ref: 'v0.1.0'
+        commit: 'sha1-2155aa26a21758f2ba119f61bc7e0e1981c106fb'
+        owner_id: 6759885
+        repo_id: 1275650185
+    'hyperpolymath/proven-cicd-and-workflows@main':
         ref: 'main'
-        commit: 'sha1-5a10b72e574ef63855fafd4568a4c178657f3294'
+        commit: 'sha1-6a35e510a41037adfd422b7f449c3503c5e26a98'
         owner_id: 6759885
         repo_id: 1326697643
         uses:
             - 'hyperpolymath/deed-ecosystem@f9d999b60cb5f383679ea19912bcdc49c944973a'
             - 'hyperpolymath/k9-ecosystem@2155aa26a21758f2ba119f61bc7e0e1981c106fb'
-    'hyperpolymath/deed-ecosystem@f9d999b60cb5f383679ea19912bcdc49c944973a':
-        ref: 'main'
-        commit: 'sha1-f9d999b60cb5f383679ea19912bcdc49c944973a'
-        owner_id: 6759885
-        repo_id: 1275649586
-    'hyperpolymath/k9-ecosystem@2155aa26a21758f2ba119f61bc7e0e1981c106fb':
-        ref: 'main'
-        commit: 'sha1-2155aa26a21758f2ba119f61bc7e0e1981c106fb'
-        owner_id: 6759885
-        repo_id: 1275650185
     'julia-actions/cache@v3.5.0':
         ref: 'v3.5.0'
         commit: 'sha1-9353db09a0f2bbbdec6f41791918c75d37391b36'
